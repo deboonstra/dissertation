@@ -9,11 +9,6 @@ gosh0_2011.pdf
 - *Authors:* Masahiko Gosho, Chikuma Hamada, Isao Yoshimura
 - *DOI:* https://doi.org/10.5691/jjb.32.1
 
-wang_2012.pdf
-- *Title:* Penalized Generalized Estimating Equations for High-dimensional Longitudinal Data Analysis
-- *Authors:* Lan Wang, Jianhui Zhou, Annie Qu
-- *DOI:* https://doi.org/10.1111/j.1541-0420.2011.01678.x
-
 inatsu_2018.pdf
 - *Title:* Model select criterion based on the prediction squared error in generalized estimating equations
 - *Authors:* Yu Inatsu, Shinpei Imori
@@ -42,6 +37,11 @@ pan_2001a.pdf
 - *Title:* Akaike's Information Criterion in Generalized Estimating Equations
 - *Authors:* Wei Pan
 - *DOI:* https://doi.org/10.1111/j.0006-341X.2001.00120.x
+
+wang_2012.pdf
+- *Title:* Penalized Generalized Estimating Equations for High-dimensional Longitudinal Data Analysis
+- *Authors:* Lan Wang, Jianhui Zhou, Annie Qu
+- *DOI:* https://doi.org/10.1111/j.1541-0420.2011.01678.x
 
 ## Maybe
 
