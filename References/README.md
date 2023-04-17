@@ -1,10 +1,11 @@
+# List of references to explore
 This document will contain a detailed list of the references examined by their
 file names within the ./References/ folder and papers not able to obtain
 currently but seem to have some promise for review.
 
 # Papers to review
 
-gosh0_2011.pdf
+gosho_2011.pdf
 - *Title:* Modifications of QIC and CIC for selecting a Working Correlation structure in the Generalized Estimating Equation Method
 - *Authors:* Masahiko Gosho, Chikuma Hamada, Isao Yoshimura
 - *DOI:* https://doi.org/10.5691/jjb.32.1
@@ -29,6 +30,48 @@ sato_2020jul.pdf
 - *Authors:* Tomoharu Sato
 - *DOI:* https://doi.org/10.32917/hmj/1595901629
 
+Mijin_Jang_Thesis.pdf
+- *Title:* Working-correlation-structure identification in generalized estimating equations
+- *Authors:* Lin-Yee Hin, You-Gan Wang
+- *DOI:* https://doi.org/10.1002/sim.3489
+
+Shults_et_al_2009.pdf
+- *Title:* A comparison of several approaches for choosing between working
+correlation structures in generalized estimating equation analysis
+of longitudinal binary data
+- *Authors:* Justine Shults, Wenguang Sun, Xin Tu, Hanjoo Kim, Jay Amsterdam, Joseph M. Hilbe, and Thomas Ten-Have
+- *DOI:* https://doi.org/10.1002/sim.3622
+
+jaman_2015.pdf
+- *Title:* A determinant-based criterion for working correlation structure selection in generalized estimating equations
+- *Authors:* Ajmery Jaman, Mahbub A.H.M. Latif, Wasimul Bari,and Abdus S. Wahed
+- *DOI:* https://doi.org/10.1002/sim.6821
+
+westgate_2013.pdf
+- *Title:* Criterion for the simultaneous selection of a working correlation structure and either generalized estimating equations or the quadratic inference function approach
+- *Authors:* Philip Westgate
+- *DOI:* https://doi.org/10.1002/bimj.201300098
+
+yeehin_wang_2008.pdf
+- *Title:* Working-correlation-structure identification in generalized estimating equations
+- *Authors:* Lin-Yee Hin, You-Gan Wang
+- *DOI:* https://doi.org/10.1002/sim.3489
+
+pan_2004.pdf
+- *Title:* Model Selection in Estimating Equations
+- *Authors:* Wei Pan
+- *DOI:* https://doi.org/10.1111/j.0006-341X.2001.00529.x
+
+ge_2022.pdf
+- *Title:* Bootstrap-adjusted quasi-likelihood information criteria for mixed model selection
+- *Authors:* Wentao Ge, Junfeng Shang
+- *DOI:* https://doi.org/10.1080/02664763.2022.2143484
+
+babu_2011.pdf
+- *Title:* Resampling Methods for Model Fitting and Model Selection
+- *Authors:* G. Jogesh Babu
+- *DOI:* https://doi.org/10.1080/10543406.2011.607749
+
 # Papers reviewed
 
 ## Keep
@@ -48,18 +91,4 @@ wang_2012.pdf
 ## Trash
 
 # Papers trying to obtain
-
-*Title:* Working correlation selection in generalized estimating equations
-- *Authors:* Mi Jin Jang
-- *DOI:* 10.17077/etd.kj4igo6k
-
-*Title:* Working-correlation-structure identification in generalized estimating equations
-- *Authors:* Lin-Yee Hin, You-Gan Wang
-- *DOI:* https://doi.org/10.1002/sim.3489
-
-*Title:* Criterion for the simultaneous selection of a working correlation structure and either generalized estimating equations or the quadratic inference function approach
-- *Authors:* Philip Westgate
-- *DOI:* https://doi.org/10.1002/bimj.201300098
-
-https://doi.org/10.1002/sim.6821
 
