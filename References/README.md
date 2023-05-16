@@ -72,6 +72,46 @@ babu_2011.pdf
 - *Authors:* G. Jogesh Babu
 - *DOI:* https://doi.org/10.1080/10543406.2011.607749
 
+wang_2014.pdf
+- *Title:* Generalized Estimating Equations in Longitudinal Data Analysis: A Review and Recent Developments
+- *Authors:* Ming Wang
+- *DOI:* http://dx.doi.org/10.1155/2014/303728
+
+wang_2015.pdf
+- *Title:* Covariance estimators for generalized estimating equations (GEE) in longitudinal analysis with small samples
+- *Authors:* Ming Wang, Lan Kong, Zheng Li, Lijun Zhang
+- *DOI:* https://doi.org/10.1002/sim.6817
+
+li_2015.pdf
+- *Title:* On oracle property and asymptotic validity of Bayesian generalized method of moments
+- *Authors:* Cheng Li, Wenxin Jiang
+- *DOI:* https://doi.org/10.1016/j.jmva.2015.12.009
+
+fu_2021.pdf
+- *Title:* Robust approach for variable selection with high dimensional longitudinal data analysis
+- *Authors:* Liya Fu, Jiaqi Li, You-Gan Wang
+- *DOI:* https://doi.org/10.1002/sim.9213
+
+yin_2023.pdf
+- *Title:* Empirical Likelihood for Generalized Linear Models with Longitudinal Data
+- *Authors:* Changming Yin, Mingyao Ai, Xia Chen, Xiangshun Kong
+- *DOI:* https://doi.org/10.1007/s11424-023-2022-2
+
+qin_2022.pdf
+- *Title:* Visualization and assessment of model selection uncertainity
+- *Authors:* Yichen Qin, Linna Wang, Yang Li, Rong Li
+- *DOI:* https://doi.org/10.1016/j.csda.2022.107598
+
+green_2023.pdf
+- *Title:* Semiparametric penalized quadratic inference functions for longitudinal data in ultra-high dimensions
+- *Authors:* Brittany Green, Heng Lian, Yan Yu, Tianhai Zu
+- *DOI:* https://doi.org/10.1016/j.jmva.2023.105175
+
+king_2015.pdf
+- *Title:* How robust standard errors expose methodological problems they do not fix, and what to do about it
+- *Authors:* Gary King, Margaret E. Roberts
+- *DOI:* https://doi.org/10.1093/pan/mpu015
+
 # Papers reviewed
 
 ## Keep
