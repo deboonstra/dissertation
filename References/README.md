@@ -1,6 +1,6 @@
 # List of references to explore
 This document will contain a detailed list of the references examined by their
-file names within the ./References/ folder and papers not able to obtain
+file names within the `./references/` folder and papers not able to obtain
 currently but seem to have some promise for review.
 
 # Papers to review
@@ -72,11 +72,6 @@ babu_2011.pdf
 - *Authors:* G. Jogesh Babu
 - *DOI:* https://doi.org/10.1080/10543406.2011.607749
 
-wang_2014.pdf
-- *Title:* Generalized Estimating Equations in Longitudinal Data Analysis: A Review and Recent Developments
-- *Authors:* Ming Wang
-- *DOI:* http://dx.doi.org/10.1155/2014/303728
-
 wang_2015.pdf
 - *Title:* Covariance estimators for generalized estimating equations (GEE) in longitudinal analysis with small samples
 - *Authors:* Ming Wang, Lan Kong, Zheng Li, Lijun Zhang
@@ -125,6 +120,11 @@ wang_2012.pdf
 - *Title:* Penalized Generalized Estimating Equations for High-dimensional Longitudinal Data Analysis
 - *Authors:* Lan Wang, Jianhui Zhou, Annie Qu
 - *DOI:* https://doi.org/10.1111/j.1541-0420.2011.01678.x
+
+wang_2014.pdf
+- *Title:* Generalized Estimating Equations in Longitudinal Data Analysis: A Review and Recent Developments
+- *Authors:* Ming Wang
+- *DOI:* http://dx.doi.org/10.1155/2014/303728
 
 ## Maybe
 
