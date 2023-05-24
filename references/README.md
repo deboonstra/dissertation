@@ -126,6 +126,11 @@ wang_2014.pdf
 - *Authors:* Ming Wang
 - *DOI:* http://dx.doi.org/10.1155/2014/303728
 
+Ten_Eyck_Cavanaugh_2018a.pdf
+- *Title:* An alternative approach to psedu-likelihood model selection in the generalized linear mixed modeling framework
+- *Authors:* Patrick Ten Eyck, Joseph E. Cavanaugh
+- *DOI:* https://doi.org/10.1007/s13571-017-0130-5
+
 ## Maybe
 
 ## Trash

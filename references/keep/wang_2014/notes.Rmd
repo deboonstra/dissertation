@@ -1,13 +1,11 @@
 ---
-output:
-    pdf_document:
-        keep_md: yes
+output: pdf_document
 ---
 
 # Document information
 - *Title:* Generalized estimating equations in longitudinal data analysis: a review and recent developments
 - *Author(s):* Ming Wang 
-- *DOI:* http://dx.doi.org/10.1155/2014/303728
+- *DOI:* [`http://dx.doi.org/10.1155/2014/303728`](http://dx.doi.org/10.1155/2014/303728)
 - *File name:* `wang_2014.pdf`
 
 # Introduction

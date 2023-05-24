@@ -1,5 +1,6 @@
 # Compiled source #
 references/**/*.pdf
+!references/keep/**/*.pdf
 
 # OS generated files #
 .DS_Store
