@@ -1,4 +1,8 @@
-# Disseration meeting notes for March 30, 2023
+---
+title: "Dissertation meeting"
+date: "March 30, 2023"
+output: pdf_document
+---
 
 # Talking points
 - Ideas

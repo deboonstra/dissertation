@@ -1,0 +1,26 @@
+---
+title: "Dissertation meeting"
+date: "May 18, 2023"
+output: pdf_document
+---
+
+Paper discussing transformed responses: Pat Ten Eyck and Joe.
+
+- Transform response to make it normal then use pseudo-likelihood to make model selection comparisons, based on `PROC GLIMMIX`
+- Issue making tranformation on bernoulli outcome.
+- Pat Ten Eyck's idea: Transform data based on full model, then use pseduo-data for all of the comparisons. After finding the mean structure go back and use Laplace approximation to approximate the likelihood based on the mean structure. 
+    - Read Pat's paper by next meeting.
+
+Joe's idea for GEEs
+
+1. Fit full model pull $\mathbf{V}$-maxtrix based on full model; $\mathbf{V} = \mathbf{V}^{1/2}\mathbf{V}^{1/2}$
+2. Transform response to $\mathbf{y}^{*} = \mathbf{V}^{-1}\mathbf{y}$
+3. Make model selection comparisons based on $\mathbf{y}^{*}$ to get us to the quasi-likelihood setting (i.e., independence).
+    - Joe worked out the math for the normal setting. 
+    - He saw that the quasi-likelihood is almost the same as the normal likelihood under independence. This gives him hope that it could work.
+
+Write-up a simulation based on normal.
+
+- Fit full model with unstructured correlation structure, which subsumes all predictors and correlation structures. The issue with this approach is that in the large cluster setting, it is almost impossible to estimate the parameters of the unstructured "working" correlation matrix.
+- In the large cluster setting, you might have an idea of what the correlation structure is approximately. So, any transformation to similar to the true correlation structure should work.
+

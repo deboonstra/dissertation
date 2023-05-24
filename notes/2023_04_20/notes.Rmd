@@ -1,14 +1,21 @@
-# Dissertation meeting notes for April 20, 2023
+---
+title: "Dissertation meeting"
+date: "April 20, 2023"
+output: pdf_document
+---
 
 # Talking points
+
 - Joe's idea
 - Discuss Ryan reaching out again to work
 
 # Problem areas to explore
+
 - Create an information criteria that is better than QIC by accounting for the within-cluster correlation in the goodness-of-fit term.
 - Data drive method to determine the variance estimator to use for inference of $\hat{\boldsymbol{\beta}}$ for GEEs.
 
 # Ryan's involvement
+
 - Ryan reached out to me about a model selection problem that he believe would be a good disssertation topic. Below is his email. 
 
 >>> *I have an interesting project and it requires to use model (or variable) selection for binary and survival outcome. In the project, longitudinal covariates are included and thus, both longitudinal and model selection procedures will be considered in the analysis of binary outcome and survival outcome. In my opinion, it would be a good topic for doctoral dissertation. Would you like to hear more about the project?*
@@ -17,16 +24,16 @@
 
 # Vague description of Joe's idea to adjust QIC
 Suppose 
-```math
+$$
 \mathbf{y} \sim N(\mathbf{X}\boldsymbol{\beta}, \mathbf{V}), \mathbf{V}^{-1} = \mathbf{V}^{-1/2}\mathbf{V}^{-1/2}.
-```
+$$
 Then, using the *generalized least squares* approach to transforming $\mathbf{y}$, we have the following
-```math
-\begin{align*}
+$$
+\begin{aligned}
     \mathbf{V}^{-1/2}\mathbf{y} &\sim N(\mathbf{V}^{-1/2}\mathbf{X}\boldsymbol{\beta}, \mathbf{I}) \\
     \mathbf{y}^{*} &\sim N(\mathbf{X}^{*}\boldsymbol{\beta}, \mathbf{I}), 
-\end{align*}
-```
+\end{aligned}
+$$
 
 which transforms the data back to the independence structure. Thus, the goodness-of-fit term in QIC is valid. 
 
@@ -34,7 +41,7 @@ which transforms the data back to the independence structure. Thus, the goodness
 - Also, what about the link function for non-normal responses? The above result assumes an identity link. 
 
 # Action items
+
 - Continue literature review
 - Setup meeting with Ryan if he would still like to.
 - Setup P: drive
-
