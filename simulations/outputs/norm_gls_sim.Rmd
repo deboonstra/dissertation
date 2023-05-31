@@ -1,0 +1,85 @@
+---
+output: html_document
+---
+
+# Simulations
+```{r loading packages, include = FALSE}
+R <- list.files(path = "./simulations/R", pattern = "*.R", full.names = TRUE)
+sapply(R, source, .GlobalEnv)
+library(knitr)
+library(kableExtra)
+```
+
+## Setting
+
+### Data
+Following Wang *et al.* (2012) with one-hundred replications, the correlated normal responses are generated from the model $$y_{ij} = \mathbf{X}_{ij}^{\top}\boldsymbol{\beta} + \varepsilon_{ij},$$ where $i = 1, \ldots, 200,$ $j = 1, \ldots, 4,$ $\mathbf{X}_{ij} = (x_{ij, 1}, \ldots, x_{ij, 6})^{\top},$ and $\boldsymbol{\beta} = (2.0, 3.0, 0.5, 0.0, 0.0, 0.0)^{\top}.$
+
+- For the covariates,
+    - $x_{ij,1}$ was generated from the Bernoulli(0.5) distribution, and 
+    - $x_{ij,2}$ to $x_{ij,6}$ from the multivariate normal distribution with mean 0 and an AR(1) covariance matrix with marginal variance 1 and auto-correlation coefficient 0.5.
+- The random errors $(\varepsilon_{i1}, \ldots, \varepsilon_{i4})^{\top}$ are generated from the multivariate normal distribution with marginal mena o, marginal variance 1, and an exchange correlation matrix with $\rho = 0.5$.
+
+### Transformation of the response
+After the data was simulated, the response, $\mathbf{y},$ was transformed by:
+
+1. fitting a fully saturated model with an unstructured working correlation matrix,
+2. calculating $\mathbf{V}_{i} = \phi \mathbf{A}_{i}^{1/2}\mathbf{R}_{i}(\boldsymbol{\alpha})\mathbf{A}_{i}^{1/2}$ and finding $\mathbf{V}_{i}^{-1/2}$, and
+3. obtaining $\mathbf{y}^{*} = \mathbf{V}_{i}^{-1/2}\mathbf{y}$.
+
+### Best subsets
+Using the transformed response, the all $2^6 - 1 = 63$ subsets of the full saturated model were fit using either an independence, exchangeable, or AR(1) working correlation structure. Then, the model resulting in the minimum QIC value was selected as the best fitting model.
+
+```{r, echo = FALSE}
+nsims <- 100L
+beta <- c(2.0, 3.0, 0.5, 0.0, 0.0, 0.0)
+w <- which(beta != 0)
+l <- length(w)
+```
+
+
+## Results
+The simulations results are stored in:
+```{r loading sim res}
+load("./simulations/outputs/norm_gls_sim.RData")
+```
+
+To look at the results for each working correlation structure, a function will be created called `look` that reports 
+
+- the number of under selected features (`under`), 
+- the number of properly selected features (`exact`), 
+- the number of incorrectly selected features with a length matching the number of non-zero effects (i.e., `mis`),
+- the number of over selected features (`over`), and
+- the number over selected features that includes the non-zero effects (`over_inc`).
+```{r, echo = FALSE}
+# creating a function to generate a look at the simulation results
+look <- function(x) {
+    under <- 0
+    exact <- 0
+    mis <- 0
+    over <- 0
+    over_inc <- 0
+    for (k in seq_len(nsims)) {
+        under <- under + (length(x[[k]]$vars) < l)
+        exact <- exact + identical(x[[k]]$vars, w)
+        mis <- mis + (!identical(x[[k]]$vars, w) & (length(x[[k]]$vars) == l))
+        over <- over + (length(x[[k]]$vars) > l)
+        over_inc <- over_inc + ((length(x[[k]]$vars) > l) & all(w %in% x[[k]]$vars))
+    }
+    return(
+        data.frame(
+            under = under, exact = exact,
+            mis = mis, over = over,
+            over_inc = over_inc
+        )
+    )
+}
+```
+
+Using the `look` function, we have the following summary measures from the simulation set, where the model resulting in the minimum QIC value was selected as the best fitting model for each working correlation structure.
+```{r, echo = FALSE}
+data.frame(
+    work_corr = c("Independence", "Exchangeable", "AR(1)"),
+    dplyr::bind_rows(look(res_indp), look(res_cs), look(res_ar1))
+)
+```
