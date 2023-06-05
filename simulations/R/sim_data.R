@@ -3,7 +3,21 @@
 # response based on the wang_2012 paper (PGEEs). For other reponse types,
 # a `dist` parameter and if-then(s) may easily be added.
 
-sim_data <- function(N, n, beta, rho) {
+sim_data <- function(N, n, beta, rho = 0.5, corstr = "exchangeable") {
+    # checking parameter types
+    if (!(N %% 1 == 0) | !(n %% 1 == 0)) {
+        stop("N and n must be of integer type.")
+    }
+    if (length(beta) == 0) {
+        stop("beta must be at least a length of 1.")
+    }
+    if ((rho < -1) | (rho > 1)) {
+        stop("rho must be between -1 and 1.")
+    }
+    if (corstr %notin% c("exchangeable", "ar1", "independence")) {
+        stop("corstr must be one of the following: exchangeable, ar1, independence")
+    }
+
     p <- length(beta)
     # initializing covariate matrix
     X <- matrix(NA, nrow = N * n, ncol = p)
@@ -19,9 +33,19 @@ sim_data <- function(N, n, beta, rho) {
     X[, 1] <- rbinom(N * n, 1, 0.5)
     X[, 2:p] <- mat
     # generating within-subject effect
-    epsilon <- mvtnorm::rmvnorm(
-        n = N, mean = rep(0, n), sigma = cs(n = n, rho = rho)
-    )
+    if (corstr == "exchangeable") {
+        epsilon <- mvtnorm::rmvnorm(
+            n = N, mean = rep(0, n), sigma = cs(n = n, rho = rho)
+        )
+    } else if (corstr == "ar1") {
+        epsilon <- mvtnorm::rmvnorm(
+            n = N, mean = rep(0, n), sigma = ar1(n = n, rho = rho)
+        )
+    } else if (corstr == "independence") {
+        epsilon <- mvtnorm::rmvnorm(
+            n = N, mean = rep(0, n), sigma = indp(n = n)
+        )
+    }
     epsilon <- c(t(epsilon))
     # creating id vector
     id <- rep(seq_len(N), each = n)
