@@ -23,21 +23,28 @@ for (j in seq_len(nsims)) {
     ## Simulating data ####
     dat <- sim_data(N = N, n = n, beta = beta, rho = rho)
     ## Transform y ####
-    yy <- transform_y(dat)
+    transform_data <- transform_y(dat)
+    yy <- transform_data$y
     ## Produce best subsets
     best_sub <- expand_cols(dat$X)
     # Fitting independence model
-    qic1 <- rep(NA, length(best_sub))
-    qic2 <- rep(NA, length(best_sub))
-    qic3 <- rep(NA, length(best_sub))
+    qic1 <- gof1 <- penalty1 <- rep(NA, length(best_sub))
+    qic2 <- gof2 <- penalty2 <- rep(NA, length(best_sub))
+    qic3 <- gof3 <- penalty3 <- rep(NA, length(best_sub))
     for (i in seq_along(best_sub)) {
         XX <- dat$X[, best_sub[[i]]]
         f1 <- geepack::geeglm(yy ~ XX, id = dat$id, corstr = "independence")
         f2 <- geepack::geeglm(yy ~ XX, id = dat$id, corstr = "exchangeable")
         f3 <- geepack::geeglm(yy ~ XX, id = dat$id, corstr = "ar1")
-        qic1[i] <- unname(geepack::QIC(f1)[1])
-        qic2[i] <- unname(geepack::QIC(f2)[1])
-        qic3[i] <- unname(geepack::QIC(f3)[1])
+        qic1[i] <- qic(f1)
+        gof1[i] <- gof(f1)
+        penalty1[i] <- cic(f1)
+        qic2[i] <- qic(f2)
+        gof2[i] <- gof(f2)
+        penalty2[i] <- cic(f2)
+        qic3[i] <- qic(f3)
+        gof3[i] <- gof(f3)
+        penalty3[i] <- cic(f3)
     }
     # Determining the best_sub index ####
     # that resulted in the minimum QIC value
@@ -46,17 +53,22 @@ for (j in seq_len(nsims)) {
     w3 <- which.min(qic3)
     # Updating res object ####
     res_indp[[j]] <- list(
-        qic = qic1, min = w1, qic_min = qic1[w1], vars = best_sub[[w1]]
+        qic = qic1, gof = gof1, penalty = penalty1,
+        min = w1, qic_min = qic1[w1], vars = best_sub[[w1]]
     )
     res_cs[[j]] <- list(
-        qic = qic2, min = w2, qic_min = qic2[w2], vars = best_sub[[w2]]
+        qic = qic2, gof = gof2, penalty = penalty2,
+        min = w2, qic_min = qic2[w2], vars = best_sub[[w2]]
     )
     res_ar1[[j]] <- list(
-        qic = qic3, min = w3, qic_min = qic3[w3], vars = best_sub[[w3]]
+        qic = qic3, gof = gof3, penalty = penalty3,
+        min = w3, qic_min = qic3[w3], vars = best_sub[[w3]]
     )
     setTxtProgressBar(pb, j)
+    if (j == nsims) {
+        close(pb)
+    }
 }
-close(pb)
 
 # Save simulations ####
 save(res_indp, res_cs, res_ar1, file = "./simulations/outputs/norm_gls_sim.RData")
