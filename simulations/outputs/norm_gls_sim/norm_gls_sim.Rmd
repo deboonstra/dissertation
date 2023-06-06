@@ -41,7 +41,7 @@ l <- length(w)
 ## Results
 The simulations results are stored in:
 ```{r loading sim res}
-load("./simulations/outputs/norm_gls_sim.RData")
+load("./simulations/outputs/norm_gls_sim/norm_gls_sim.RData")
 ```
 
 ### Feature selection based on QIC

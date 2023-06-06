@@ -71,4 +71,7 @@ for (j in seq_len(nsims)) {
 }
 
 # Save simulations ####
-save(res_indp, res_cs, res_ar1, file = "./simulations/outputs/norm_gls_sim.RData")
+save(
+    res_indp, res_cs, res_ar1,
+    file = "./simulations/outputs/norm_gls_sim/norm_gls_sim.RData"
+)

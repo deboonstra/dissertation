@@ -57,4 +57,7 @@ for (j in seq_len(nsims)) {
 }
 
 # Save simulations ####
-save(res_qic, res_aic, file = "./simulations/outputs/norm_aic_sim.RData")
+save(
+    res_qic, res_aic,
+    file = "./simulations/outputs/norm_aic_sim/norm_aic_sim.RData"
+)

@@ -33,7 +33,7 @@ l <- length(w)
 ## Results
 The simulations results are stored in:
 ```{r loading sim res}
-load("./simulations/outputs/norm_aic_sim.RData")
+load("./simulations/outputs/norm_aic_sim/norm_aic_sim.RData")
 ```
 
 ### Feature selection based on AIC and QIC
