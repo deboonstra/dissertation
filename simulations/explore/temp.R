@@ -10,22 +10,31 @@ rho <- 0.5
 
 # Simulating data ####
 set.seed(1997)
-dat <- sim_data(N = N, n = n, beta = beta, rho = rho)
+dat <- sim_data(N = N, n = n, beta = beta, rho = rho, corstr = "independence")
 
 # Transform y ####
-yy <- transform_y(dat)
+transform_dat <- transform_y(dat)
+yy <- transform_dat$y
+XX <- transform_dat$X
 
 # Produce best subsets
 best_sub <- expand_cols(dat$X)
 
 # Fitting independence model
 qic <- rep(NA, length(best_sub))
+gof <- rep(NA, length(best_sub))
+penalty <- rep(NA, length(best_sub))
 pb <- txtProgressBar(0, length(best_sub), style = 3)
 for (i in seq_along(best_sub)) {
-    XX <- dat$X[, best_sub[[i]]]
-    f1 <- geepack::geeglm(yy ~ XX, id = dat$id, corstr = "independence")
+    xx <- dat$X[, best_sub[[i]]]
+    f1 <- geepack::geeglm(yy ~ xx, id = dat$id, corstr = "independence")
     qic[i] <- unname(geepack::QIC(f1)[1])
+    gof[i] <- -2 * unname(geepack::QIC(f1)[3])
+    penalty[i] <- 2 * unname(geepack::QIC(f1)[4])
     setTxtProgressBar(pb, i)
+    if (i == length(best_sub)) {
+        close(pb)
+    }
 }
 
 which.min(qic)
