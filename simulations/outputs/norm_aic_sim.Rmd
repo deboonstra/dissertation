@@ -1,0 +1,79 @@
+---
+output: html_document
+---
+
+# Simulations for `norm_aic_sim.R`
+```{r loading packages, include = FALSE}
+R <- list.files(path = "./simulations/R", pattern = "*.R", full.names = TRUE)
+sapply(R, source, .GlobalEnv)
+library(knitr)
+library(kableExtra)
+```
+
+## Setting
+
+### Data
+Following Wang *et al.* (2012) with one-hundred replications, the correlated normal responses are generated from the model $$y_{ij} = \mathbf{X}_{ij}^{\top}\boldsymbol{\beta} + \varepsilon_{ij},$$ where $i = 1, \ldots, 200,$ $j = 1, \ldots, 4,$ $\mathbf{X}_{ij} = (x_{ij, 1}, \ldots, x_{ij, 6})^{\top},$ and $\boldsymbol{\beta} = (2.0, 3.0, 0.5, 0.0, 0.0, 0.0)^{\top}.$
+
+- For the covariates,
+    - $x_{ij,1}$ was generated from the Bernoulli(0.5) distribution, and 
+    - $x_{ij,2}$ to $x_{ij,6}$ from the multivariate normal distribution with mean 0 and an AR(1) covariance matrix with marginal variance 1 and auto-correlation coefficient 0.5.
+- The random errors $(\varepsilon_{i1}, \ldots, \varepsilon_{i4})^{\top}$ are generated from the multivariate normal distribution with marginal mean 0, marginal variance 1, and a correlation coefficient of 0. Thus, the observations are independent of each other.
+
+### Best subsets
+All $2^6 - 1 = 63$ subsets of the full saturated model were fit. Then, the model resulting in the minimum AIC and QIC values were selected as the best fitting models.
+
+```{r, echo = FALSE}
+nsims <- 100L
+beta <- c(2.0, 3.0, 0.5, 0.0, 0.0, 0.0)
+w <- which(beta != 0)
+l <- length(w)
+```
+
+## Results
+The simulations results are stored in:
+```{r loading sim res}
+load("./simulations/outputs/norm_aic_sim.RData")
+```
+
+### Feature selection based on AIC and QIC
+For measuring the overall performance based on each information criterion, a function will be created called `look` that reports the number of models, where
+
+- the number of features selected is less than the number of non-zero coefficients in the generating model (`under`), 
+- only the non-zero features from the generating model were selected (`exact`), 
+- the number of features selected matches the number of non-zero coefficients in the generating model; however, at least one of the selected features is NOT one of the non-zero effects in the generating model (i.e., `mis`),
+- the number of features selected is greated than the number of non-zero coefficients in the generating model (`over`), and
+- the number of features selected is greated than the number of non-zero coefficients in the generating model and include all the non-zero effects (`over_inc`).
+
+```{r, echo = FALSE}
+# creating a function to generate a look at the simulation results
+look <- function(x) {
+    under <- 0
+    exact <- 0
+    mis <- 0
+    over <- 0
+    over_inc <- 0
+    for (k in seq_len(nsims)) {
+        under <- under + (length(x[[k]]$vars) < l)
+        exact <- exact + identical(x[[k]]$vars, w)
+        mis <- mis + (!identical(x[[k]]$vars, w) & (length(x[[k]]$vars) == l))
+        over <- over + (length(x[[k]]$vars) > l)
+        over_inc <- over_inc + ((length(x[[k]]$vars) > l) & all(w %in% x[[k]]$vars))
+    }
+    return(
+        data.frame(
+            under = under, exact = exact,
+            mis = mis, over = over,
+            over_inc = over_inc
+        )
+    )
+}
+```
+
+Using the `look` function, we have the following summary measures from the simulation set, where the model resulting in the minimum AIC and QIC values were selected as the best fitting models for each information criterion.
+```{r, echo = FALSE}
+data.frame(
+    work_corr = c("AIC", "QIC"),
+    dplyr::bind_rows(look(res_aic), look(res_qic))
+)
+```
