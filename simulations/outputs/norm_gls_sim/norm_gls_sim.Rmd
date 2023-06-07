@@ -44,48 +44,6 @@ The simulations results are stored in:
 load("./simulations/outputs/norm_gls_sim/norm_gls_sim.RData")
 ```
 
-### Feature selection based on QIC
-For measuring the overall performance based on each working correlation structure, a function will be created called `look` that reports the number of models, where
-
-- the number of features selected is less than the number of non-zero coefficients in the generating model (`under`), 
-- only the non-zero features from the generating model were selected (`exact`), 
-- the number of features selected matches the number of non-zero coefficients in the generating model; however, at least one of the selected features is NOT one of the non-zero effects in the generating model (i.e., `mis`),
-- the number of features selected is greated than the number of non-zero coefficients in the generating model (`over`), and
-- the number of features selected is greated than the number of non-zero coefficients in the generating model and include all the non-zero effects (`over_inc`).
-
-```{r, echo = FALSE}
-# creating a function to generate a look at the simulation results
-look <- function(x) {
-    under <- 0
-    exact <- 0
-    mis <- 0
-    over <- 0
-    over_inc <- 0
-    for (k in seq_len(nsims)) {
-        under <- under + (length(x[[k]]$vars) < l)
-        exact <- exact + identical(x[[k]]$vars, w)
-        mis <- mis + (!identical(x[[k]]$vars, w) & (length(x[[k]]$vars) == l))
-        over <- over + (length(x[[k]]$vars) > l)
-        over_inc <- over_inc + ((length(x[[k]]$vars) > l) & all(w %in% x[[k]]$vars))
-    }
-    return(
-        data.frame(
-            under = under, exact = exact,
-            mis = mis, over = over,
-            over_inc = over_inc
-        )
-    )
-}
-```
-
-Using the `look` function, we have the following summary measures from the simulation set, where the model resulting in the minimum QIC value was selected as the best fitting model for each working correlation structure.
-```{r, echo = FALSE}
-data.frame(
-    work_corr = c("Independence", "Exchangeable", "AR(1)"),
-    dplyr::bind_rows(look(res_indp), look(res_cs), look(res_ar1))
-)
-```
-
 ### QIC across the simulations
 Now for each of the models with the minimum QIC, the information criterion value will be broken into its parts to see what is impacting the selection process. Additionally, this provides a look at the stability of the information criterion across the simulations. QIC was devised by Pan (2001a), which assumed independence among the response to allow the use of the quasi-likelihood framework. Thus,
 $$
@@ -189,5 +147,47 @@ legend_top(
     legend = c("Independence", "Exchangeable", "AR(1)"),
     col = c("gray", "steelblue4", "firebrick"),
     lwd = 2, lty = 1, title = "Working correlation structure"
+)
+```
+
+### Feature selection based on QIC
+For measuring the overall performance based on each working correlation structure, a function will be created called `look` that reports the number of models, where
+
+- the number of features selected is less than the number of non-zero coefficients in the generating model (`under`), 
+- only the non-zero features from the generating model were selected (`exact`), 
+- the number of features selected matches the number of non-zero coefficients in the generating model; however, at least one of the selected features is NOT one of the non-zero effects in the generating model (i.e., `mis`),
+- the number of features selected is greated than the number of non-zero coefficients in the generating model (`over`), and
+- the number of features selected is greated than the number of non-zero coefficients in the generating model and include all the non-zero effects (`over_inc`).
+
+```{r, echo = FALSE}
+# creating a function to generate a look at the simulation results
+look <- function(x) {
+    under <- 0
+    exact <- 0
+    mis <- 0
+    over <- 0
+    over_inc <- 0
+    for (k in seq_len(nsims)) {
+        under <- under + (length(x[[k]]$vars) < l)
+        exact <- exact + identical(x[[k]]$vars, w)
+        mis <- mis + (!identical(x[[k]]$vars, w) & (length(x[[k]]$vars) == l))
+        over <- over + (length(x[[k]]$vars) > l)
+        over_inc <- over_inc + ((length(x[[k]]$vars) > l) & all(w %in% x[[k]]$vars))
+    }
+    return(
+        data.frame(
+            under = under, exact = exact,
+            mis = mis, over = over,
+            over_inc = over_inc
+        )
+    )
+}
+```
+
+Using the `look` function, we have the following summary measures from the simulation set, where the model resulting in the minimum QIC value was selected as the best fitting model for each working correlation structure.
+```{r, echo = FALSE}
+data.frame(
+    work_corr = c("Independence", "Exchangeable", "AR(1)"),
+    dplyr::bind_rows(look(res_indp), look(res_cs), look(res_ar1))
 )
 ```
