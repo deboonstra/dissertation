@@ -38,13 +38,13 @@ for (j in seq_len(nsims)) {
         f3 <- geepack::geeglm(yy ~ XX, id = dat$id, corstr = "ar1")
         qic1[i] <- qic(f1)
         gof1[i] <- gof(f1)
-        penalty1[i] <- cic(f1)
+        penalty1[i] <- 2 * cic(f1)
         qic2[i] <- qic(f2)
         gof2[i] <- gof(f2)
-        penalty2[i] <- cic(f2)
+        penalty2[i] <- 2 * cic(f2)
         qic3[i] <- qic(f3)
         gof3[i] <- gof(f3)
-        penalty3[i] <- cic(f3)
+        penalty3[i] <- 2 * cic(f3)
     }
     # Determining the best_sub index ####
     # that resulted in the minimum QIC value

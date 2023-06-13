@@ -130,7 +130,7 @@ for (k in seq_len(nsims)) {
 
 plot(
     x = seq_len(nsims), y = penalty_indp,
-    ylim = c(0, 15),
+    ylim = c(5, 25),
     xlab = "Index", ylab = "Penalty",
     type = "l", lwd = 2, col = "gray",
     bty = "n"

@@ -15,7 +15,7 @@ transform_y <- function(data) {
     id <- data$id
     # initial fit
     # full model with unstructured working correlation structure
-    f0 <- geeglm(y ~ X, id = id, corstr = "unstructured")
+    f0 <- geepack::geeglm(y ~ X, id = id, corstr = "unstructured")
     geese <- f0$geese
     # obtaining scaled parameter
     phi <- geese$gamma

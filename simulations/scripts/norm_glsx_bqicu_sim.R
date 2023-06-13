@@ -55,21 +55,21 @@ for (j in seq_len(nsims)) {
         qicu1[i] <- qicu(f1)
         bqicu1[i] <- bqicu(f1)
         gof1[i] <- gof(f1)
-        penalty1[i] <- cic(f1)
+        penalty1[i] <- 2 * cic(f1)
         penaltyu1[i] <- qicu1[i] - gof1[i]
         penaltyb1[i] <- bqicu1[i] - gof1[i]
         qic2[i] <- qic(f2)
         qicu2[i] <- qicu(f2)
         bqicu2[i] <- bqicu(f2)
         gof2[i] <- gof(f2)
-        penalty2[i] <- cic(f2)
+        penalty2[i] <- 2 * cic(f2)
         penaltyu2[i] <- qicu2[i] - gof2[i]
         penaltyb2[i] <- bqicu2[i] - gof2[i]
         qic3[i] <- qic(f3)
         qicu3[i] <- qicu(f3)
         bqicu3[i] <- bqicu(f3)
         gof3[i] <- gof(f3)
-        penalty3[i] <- cic(f3)
+        penalty3[i] <- 2 * cic(f3)
         penaltyu3[i] <- qicu3[i] - gof3[i]
         penaltyb3[i] <- bqicu3[i] - gof3[i]
     }
