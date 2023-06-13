@@ -1,7 +1,7 @@
 ---
 title: "Dissertation meeting"
 date: "April 6, 2023"
-output: pdf_document
+output: html_document
 ---
 
 Discussed Ryan's involvement in my dissertation and next steps.

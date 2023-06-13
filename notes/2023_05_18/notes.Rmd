@@ -1,7 +1,7 @@
 ---
 title: "Dissertation meeting"
 date: "May 18, 2023"
-output: pdf_document
+output: html_document
 ---
 
 Paper discussing transformed responses: Pat Ten Eyck and Joe.

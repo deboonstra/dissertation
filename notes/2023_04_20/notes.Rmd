@@ -1,7 +1,7 @@
 ---
 title: "Dissertation meeting"
 date: "April 20, 2023"
-output: pdf_document
+output: html_document
 ---
 
 # Talking points
