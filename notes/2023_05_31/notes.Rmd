@@ -1,0 +1,38 @@
+---
+title: "Dissertation meeting"
+date: "May 31, 2023"
+output: html_document
+---
+
+<body style = "background-color:black; color:white;">
+
+# Talking points
+
+- Review `norm_gls_sim` results, which is based on the `2023_04_20` and `2023_05_18` meeting notes.
+    - See all files within the `simulations` directory that has file names of `norm_gls_sim`.
+
+# Notes
+
+- For the results going forward, we need to examine averages of the goodness-of-fit and penalty terms.
+
+- Based on these simulation results, new simulations sets need to be examined. These simulation sets are outline below.
+
+    1. We got ahead of ourselves by running simulations exploring the properties of adjusting the goodness-of-fit term in QIC without providing a baseline set of properties. So, these simulations need to set a baseline that examines the selection properties for AIC and QIC. Thus, run a new simulation, where
+        - $\mathbf{y} \sim N(\mathbf{X}\boldsymbol{\beta}, \sigma^{2}\mathbf{I})$
+        - Fit GLMs and GLMS via GEEs with an independence working correlation structure.
+        - Obtain AIC and QIC.
+        - Compare AIC and QIC on the basis of selection properties.
+    2. When the GLS approach is applied using an unstructure working correlation structure we have already accounted for all correlation between the observations. So, the penalty term of QIC is not really providing any information about the correlation structure. Thus, examine the selection properties of QICu and BQICu, which have penalty terms of $2p$ and $log(n)p$, respectively. Thus, run anew simulation, where
+        - Everything is the same as `norm_gls_sim`, but QICu and BQICu are used.
+    3. We also need to set a baseline properties for QICu and BQICu. So, run simulations, where
+        - No transformation is applied.
+        - $\mathbf{y} \sim N(\mathbf{X}\boldsymbol{\beta}, \mathbf{V})$ and $\mathbf{V} \ne \sigma^{2}\mathbf{I}$
+        - Obtain QIC, QICu, and BQICu properties.
+    4. When the GLS approach is applied and we obtain $\mathbf{y}^{*}$ techinally $\mathbf{V}^{-1/2}\mathbf{X}\boldsymbol{\beta}$ is what generates $\mathbf{y}^{*}$ not $\mathbf{X}\boldsymbol{\beta}$. So, the selection properties obtained in `norm_gls_sim` could be biased because $\mathbf{y}^{*}$ is being regressed by $\mathbf{X}$ not $\mathbf{V}^{-1/2}\mathbf{X}$. Thus,
+    run a new simulation, where
+        - Everything is the same as `norm_gls_sim`, but $\mathbf{y}^{*}$ is being regressed by $\mathbf{V}^{-1/2}\mathbf{X}$
+        - Obtain QIC, QICu, and BQICu selection properties.
+
+# Action items
+
+- Run all the simulations above.
