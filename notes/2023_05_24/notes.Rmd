@@ -1,0 +1,31 @@
+---
+title: "Dissertation meeting"
+date: "May 24, 2023"
+output: html_document
+---
+
+# Talking points
+
+- Discuss Pat Ten Eyck's paper (`references/keep/ten_eyck_cavanaugh_2018a`) for GLMMs.
+- Discuss Joe's idea in more detail (GLS applied to GEEs)
+- Next steps: Simulations?
+
+# Paper by Pat Ten Eyck
+
+- Joe believes FMC would not perform as well as Guassian Quadrature or Laplace
+- The FMC method should be an intermediate step to find the model. Then, use GQ or Laplace to obtain parameter estimates.
+
+# Another approach base on residuals
+
+- Guassian criterion (GC)
+    - Same penalty with GOF term of $2\mathbf{r}^{\top}\mathbf{r}$.
+- Idea adjust $2\mathbf{r}^{\top}\mathbf{r} \to 2\left(\mathbf{y} - \mathbf{X}\hat{\boldsymbol{\beta}}\right)^{\top}\mathbf{V}_{i}\left(\mathbf{y} - \mathbf{X}\hat{\boldsymbol{\beta}}\right)$ with $2p$ and $log(n)p$ as the penalty terms.
+
+# Action items
+
+- Write-up simulation set for normal outcome that will explore using GLS approach with GEEs.
+    - Need to find a package that has the $\mathbf{V}$ matrix.
+    - Can use $\mathbf{V}_{i} = \phi\mathbf{A}_{i}^{1/2}\mathbf{R}_{i}\mathbf{A}_{i}^{1/2}$
+    - Use up to 6 covariates with two or three non-zero coefficients and use the `references/keep/wang_2012` simulation setting.
+- Read `references/sato_2020` that is related to GC.
+- Ask Pat for SAS macro.
