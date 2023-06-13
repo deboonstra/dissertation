@@ -1,0 +1,39 @@
+---
+title: "Dissertation meeting"
+date: "June 08, 2023"
+output: html_document
+---
+
+# Talking points
+
+- Discuss the simulation results produced by:
+    - `norm_aic_sim`
+    - `norm_bqicu_sim`
+    - `norm_gls_sim`
+    - `norm_gls_bqicu_sim`
+    - `norm_glsx_bquicu_sim`
+- Does BQICu exits? Because it performs really well.
+
+# Notes
+
+- **Messed up the penalty term of QIC: I used CIC as the penalty when it should be 2CIC.**
+    - The plots for penlaty terms of QIC and QICu should be basically the same in `norm_glsx_bquicu_sim` because we have account for the correlation in the transformation. So, $2tr(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{R}) \approx 2p$ and it does not in the plots.
+- Compared `norm_gls_bqicu_sim` to  `norm_gls_sim`
+- Compared `norm_bqicu_sim` to `norm_glsx_bquicu_sim`
+- Compared `norm_glsx_bquicu_sim` to `norm_gls_bqicu_sim`
+- Becuase BQICu is performing so well, we need to determine if it is even possible to derive BQICu. So, an examination of how BIC was derived will provide context of how the posterior probabilities of BIC are used. The model selection course notes has this derivation.
+- A plus to the GLS transformation approach is that the working correlation structure really does NOT effect the selection process oas seen in `norm_glsx_bquicu_sim`. 
+- A downside to the GLS transform approach is that in its current state the correlation structure can not be determined with the criterion.
+- After going the through the transformation, we should have the true likelihood of the transformed response. So, could we calculate BQICu based on the transformed response?
+    - Additionally, if the transformed response is truly has independence among the observations, could be calculate AIC and BIC?
+
+# Action items
+
+- Read up on the derivation of BIC.
+- Try a simulation where the GLS approach is applied then use AIC and BIC wil GLM in the second fitting of the data.
+- Run a simulation where best subsets include the working correlation structure as an option.
+    - The goal would be to choose more exchangeable correlation structures because the generating mechanism use a exchangeable correlation structure.
+- Run a simulation where the focus is on the penalty term.
+    - Simulation data
+    - Transform data
+    - Select model from best subsets, where GOF is from the transformed data and the penalty term is from the original data where the correlation structure matters.
