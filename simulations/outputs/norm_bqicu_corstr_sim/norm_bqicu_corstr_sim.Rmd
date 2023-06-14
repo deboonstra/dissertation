@@ -1,0 +1,249 @@
+---
+title: "Simulations for `norm_bqicu_corstr_sim.R`"
+output:
+    html_document:
+        code_folding: show
+---
+
+# System setup
+```{r loading packages, results = FALSE, message = FALSE}
+R <- list.files(path = "./simulations/R", pattern = "*.R", full.names = TRUE)
+sapply(R, source, .GlobalEnv)
+library(knitr)
+library(kableExtra)
+```
+
+# Setting
+
+## Data
+Following Wang *et al.* (2012) with one-hundred replications, the correlated normal responses are generated from the model $$y_{ij} = \mathbf{X}_{ij}^{\top}\boldsymbol{\beta} + \varepsilon_{ij},$$ where $i = 1, \ldots, 200,$ $j = 1, \ldots, 4,$ $\mathbf{X}_{ij} = (x_{ij, 1}, \ldots, x_{ij, 6})^{\top},$ and $\boldsymbol{\beta} = (2.0, 3.0, 0.5, 0.0, 0.0, 0.0)^{\top}.$
+
+- For the covariates,
+    - $x_{ij,1}$ was generated from the Bernoulli(0.5) distribution, and 
+    - $x_{ij,2}$ to $x_{ij,6}$ from the multivariate normal distribution with mean 0 and an AR(1) covariance matrix with marginal variance 1 and auto-correlation coefficient 0.5.
+- The random errors $(\varepsilon_{i1}, \ldots, \varepsilon_{i4})^{\top}$ are generated from the multivariate normal distribution with marginal mean 0, marginal variance 1, and an exchangeable correlation matrix with $\rho = 0.5$.
+
+## Best subsets
+All of the $(2^6 - 1) \times 3 = 189$ subsets of the fully saturated model with the three correlation structures being investigate were fit using generalized estimating questions. Then, the mean and correlation structure pairing that resulted in the minimum QIC, QICu, and BQICu were selected as the best fitting models. These results are different from `norm_bqicu_sim` because with those simulations the correlation structure was **not** selected.
+
+```{r}
+nsims <- 100L
+beta <- c(2.0, 3.0, 0.5, 0.0, 0.0, 0.0)
+w <- which(beta != 0)
+l <- length(w)
+```
+
+# Results
+The simulations results are stored in:
+```{r loading sim res}
+load("./simulations/outputs/norm_bqicu_corstr_sim/norm_bqicu_corstr_sim.RData")
+```
+
+## Information criterions across the simulations {.tabset .tabset-fade .tabset-pills}
+Now for each of the models with the minimum QIC, QICu, and BQICU, the information criterions will be broken into their parts to see what is impacting the selection process. Additionally, this provides a look at the stability of the information criterions across the simulations. Considering there was **no** transformation of the data, the goodness-of-fit (GOF) for each of the correlation structure will be improve because the data is not truly independent and the GOF is based on the quasi-likelihood.
+```{r}
+qic <- sapply(res_qic, function(x) {x$qic_min}, simplify = TRUE)
+qicu <- sapply(res_qicu, function(x) {x$qicu_min}, simplify = TRUE)
+bqicu <- sapply(res_bqicu, function(x) {x$bqicu_min}, simplify = TRUE)
+
+plot(
+    x = seq_len(nsims), y = qic,
+    ylim = c(600, 1000),
+    xlab = "Index", ylab = "IC",
+    type = "l", lwd = 2, col = "gray",
+    bty = "n"
+)
+lines(
+    x = seq_len(nsims), y = qicu,
+    col = "firebrick", lwd = 2
+)
+lines(
+    x = seq_len(nsims), y = bqicu,
+    col = "steelblue4", lwd = 2
+)
+
+legend_top(
+    legend = c("QIC", "QICu", "BQICu"),
+    col = c("gray", "firebrick", "steelblue4"),
+    lwd = 2, lty = 1, title = "Information criteria"
+)
+```
+
+### Goodness-of-fit
+```{r}
+gof_qic <- gof_qicu <- gof_bqicu <- rep(NA, nsims)
+for (k in seq_len(nsims)) {
+    wQ <- res_qic[[k]]$min
+    wu <- res_qicu[[k]]$min
+    wb <- res_bqicu[[k]]$min
+    gof_qic[k] <- res_qic[[k]]$gof[wQ]
+    gof_qicu[k] <- res_qicu[[k]]$gof[wu]
+    gof_bqicu[k] <- res_bqicu[[k]]$gof[wb]
+}
+
+plot(
+    x = seq_len(nsims), y = gof_qic,
+    ylim = c(600, 1000),
+    xlab = "Index", ylab = "GOF",
+    type = "l", lwd = 2, col = "gray",
+    bty = "n"
+)
+lines(
+    x = seq_len(nsims), y = gof_qicu,
+    col = "firebrick", lwd = 2
+)
+lines(
+    x = seq_len(nsims), y = gof_bqicu,
+    col = "steelblue4", lwd = 2
+)
+
+legend_top(
+    legend = c("QIC", "QICu", "BQICu"),
+    col = c("gray", "firebrick", "steelblue4"),
+    lwd = 2, lty = 1, title = "Information criteria"
+)
+```
+
+### Penalty
+```{r}
+penalty_qic <- penalty_qicu <- penalty_bqicu <- rep(NA, nsims)
+for (k in seq_len(nsims)) {
+    wQ <- res_qic[[k]]$min
+    wu <- res_qicu[[k]]$min
+    wb <- res_bqicu[[k]]$min
+    penalty_qic[k] <- res_qic[[k]]$penalty[wQ]
+    penalty_qicu[k] <- res_qicu[[k]]$penalty[wu]
+    penalty_bqicu[k] <- res_bqicu[[k]]$penalty[wb]
+}
+
+plot(
+    x = seq_len(nsims), y = penalty_qic,
+    ylim = c(5, 35),
+    xlab = "Index", ylab = "Penalty",
+    type = "l", lwd = 2, col = "gray",
+    bty = "n"
+)
+lines(
+    x = seq_len(nsims), y = penalty_qicu,
+    col = "firebrick", lwd = 2
+)
+lines(
+    x = seq_len(nsims), y = penalty_bqicu,
+    col = "steelblue4", lwd = 2
+)
+
+legend_top(
+    legend = c("QIC", "QICu", "BQICu"),
+    col = c("gray", "firebrick", "steelblue4"),
+    lwd = 2, lty = 1, title = "Information criteria"
+)
+```
+
+## Structure selection based on QIC, QICu, and BQICu {.tabset .tabset-fade .tabset-pills}
+
+### Mean
+For measuring the overall performance of selecting the mean structure, a function will be created called `look` that reports the number of models, where
+
+- the number of features selected is less than the number of non-zero coefficients in the generating model (`under`), 
+- only the non-zero features from the generating model were selected (`exact`), 
+- the number of features selected matches the number of non-zero coefficients in the generating model; however, at least one of the selected features is NOT one of the non-zero effects in the generating model (i.e., `mis`),
+- the number of features selected is greated than the number of non-zero coefficients in the generating model (`over`), and
+- the number of features selected is greated than the number of non-zero coefficients in the generating model and include all the non-zero effects (`over_inc`).
+
+```{r}
+# creating a function to generate a look at the simulation results
+look <- function(x) {
+    under <- 0
+    exact <- 0
+    mis <- 0
+    over <- 0
+    over_inc <- 0
+    for (k in seq_len(nsims)) {
+        under <- under + (length(x[[k]]$vars) < l)
+        exact <- exact + identical(x[[k]]$vars, w)
+        mis <- mis + (!identical(x[[k]]$vars, w) & (length(x[[k]]$vars) == l))
+        over <- over + (length(x[[k]]$vars) > l)
+        over_inc <- over_inc + ((length(x[[k]]$vars) > l) & all(w %in% x[[k]]$vars))
+    }
+    return(
+        data.frame(
+            under = under, exact = exact,
+            mis = mis, over = over,
+            over_inc = over_inc
+        )
+    )
+}
+```
+
+Using the `look` function, we have the following summary measures from the simulation set, where the models resulting in the minimum QIC, QICu, and BQICu values were selected as the best fitting model.
+
+```{r}
+data.frame(
+    IC = c("QIC", "QICu", "BQICu"),
+    dplyr::bind_rows(look(res_qic), look(res_qicu), look(res_bqicu))
+)
+```
+
+### Correlation
+Now for measuring the overall performance of selecting the correlation structure, the table below presents the number of models, where the correlation structure selected from the best subsets was AR(1) (`ar1`), exchangeable (`exchangeable`), and independence (`independence`). Note that proper selection of the mean structure is not needed to select the correlation structure correctly.
+```{r}
+corstr_qic <- sapply(res_qic, function(x) {x$corstr_min}, simplify = TRUE)
+corstr_qicu <- sapply(res_qicu, function(x) {x$corstr_min}, simplify = TRUE)
+corstr_bqicu <- sapply(res_bqicu, function(x) {x$corstr_min}, simplify = TRUE)
+tab_qic <- c(data.frame(table(corstr_qic))$Freq)
+names(tab_qic) <- c("ar1", "exchangeable", "independence")
+tab_qicu <- c(0, 0, c(data.frame(table(corstr_qicu))$Freq))
+names(tab_qicu) <- c("ar1", "exchangeable", "independence")
+tab_bqicu <- c(0, 0, c(data.frame(table(corstr_bqicu))$Freq))
+names(tab_bqicu) <- c("ar1", "exchangeable", "independence")
+data.frame(
+    IC = c("QIC", "QICu", "BQICu"),
+    dplyr::bind_rows(tab_qic, tab_qicu, tab_bqicu)
+)
+```
+
+With the GOF for QIC, QICu, and BQICu all assuming independence among the observations, the only difference is in the penalty term. These results for QICu and BQICu make sense because the penalty term for these criterions depends on the number of parameters estimated. The independence correlation structure will **always** result in a smaller penalty due it not requiring additional estimation of a correlation coefficient, which is required for exchangeable and AR(1).
+
+### Both
+Finally, for measuring the overall performance of selecting the mean and correlation structure simulanteously, a function will be created called `both` that reports the number of models, where
+
+- only the non-zero features from the generating model were selected regardless of the correlation structure (`exact`), 
+- the correlation structure selected was exchangeable, which is the true correlation structure, (`exchangeable`),
+- only the non-zero feature from the generating model were selected and the selected working correlation structure was exchangeable (`exact_yes`),
+- only the non-zero feature from the generating model were selected and the selected working correlation structure was **not** exchangeable (`exact_no`),
+- the number of features selected is greated than the number of non-zero coefficients in the generating model and includes all the non-zero effects regardless of the correlation structure (`over_inc`), 
+- the number of features selected is greated than the number of non-zero coefficients in the generating model, includes all the non-zero effects, and the selected working correlation structure was exchangeable (`over_inc_yes`), and
+- the number of features selected is greated than the number of non-zero coefficients in the generating model, includes all the non-zero effects, and the selected working correlation structure was **not** exchangeable (`over_inc_no`).
+```{r}
+both <- function(x) {
+    exact <- 0
+    exact_yes <- 0
+    over_inc <- 0
+    over_inc_yes <- 0
+    for (k in seq_len(nsims)) {
+        vars <- x[[k]]$vars
+        lg <- x[[k]]$corstr_min == "exchangeable"
+        exact <- exact + identical(vars, w)
+        exact_yes <- exact_yes + (identical(vars, w) & lg)
+        over_inc <- over_inc + ((length(vars) > l) & all(w %in% vars))
+        over_inc_yes <- over_inc_yes + ((length(vars) > l) & all(w %in% vars) & lg)
+    }
+    return(
+        data.frame(
+            exact = exact, exchangeable = exact_yes + over_inc_yes,
+            exact_yes = exact_yes, exact_no = exact - exact_yes,
+            over_inc = over_inc, over_inc_yes = over_inc_yes,
+            over_inc_no = over_inc - over_inc_yes
+        )
+    )
+}
+```
+
+Using the `both` function, we have the following summary measures from the simulation set, where the models resulting in the minimum QIC, QICu, and BQICu values were selected as the best fitting model.
+
+```{r}
+data.frame(
+    IC = c("QIC", "QICu", "BQICu"),
+    dplyr::bind_rows(both(res_qic), both(res_qicu), both(res_bqicu))
+)
+```
