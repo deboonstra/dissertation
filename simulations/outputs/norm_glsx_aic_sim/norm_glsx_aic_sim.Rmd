@@ -5,7 +5,8 @@ output:
         code_folding: show
 ---
 
-```{r loading packages, include = FALSE}
+# System setup
+```{r loading packages, results = FALSE, message = FALSE}
 R <- list.files(path = "./simulations/R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
 library(knitr)
@@ -45,7 +46,7 @@ The simulations results are stored in:
 load("./simulations/outputs/norm_glsx_aic_sim/norm_glsx_aic_sim.RData")
 ```
 
-## Information criterions across the simulations
+## Information criterions across the simulations {.tabset .tabset-fade .tabset-pills}
 Now for each of the models with the minimum AIC and BIC, the information criteria values will be broken into their parts to see what is impacting the selection process. Additionally, this provides a look at the stability of the information criterions across the simulations. After the transformation of the response vector and covariate matrix, the observations of the response should be independent. Thus, the goodness-of-fit term will be a product a traditional likelihood unlike QIC, QICu and BQICu. Note that AIC and BIC are the likelihood variants of QICu and BQICu. See `norm_glsx_bqicu_sim` for more information on QICu and BQICu.
 ```{r}
 aic <- sapply(res_aic, function(x) {x$aic_min}, simplify = TRUE)
@@ -124,5 +125,48 @@ legend_top(
     legend = c("AIC", "BIC"),
     col = c("firebrick", "steelblue4"),
     lwd = 2, lty = 1, title = "Information criteria"
+)
+```
+
+## Feature selection based on QIC, QICu, and BQICu
+For measuring the overall performance based on each working correlation structure, a function will be created called `look` that reports the number of models, where
+
+- the number of features selected is less than the number of non-zero coefficients in the generating model (`under`), 
+- only the non-zero features from the generating model were selected (`exact`), 
+- the number of features selected matches the number of non-zero coefficients in the generating model; however, at least one of the selected features is NOT one of the non-zero effects in the generating model (i.e., `mis`),
+- the number of features selected is greated than the number of non-zero coefficients in the generating model (`over`), and
+- the number of features selected is greated than the number of non-zero coefficients in the generating model and include all the non-zero effects (`over_inc`).
+
+```{r}
+# creating a function to generate a look at the simulation results
+look <- function(x) {
+    under <- 0
+    exact <- 0
+    mis <- 0
+    over <- 0
+    over_inc <- 0
+    for (k in seq_len(nsims)) {
+        under <- under + (length(x[[k]]$vars) < l)
+        exact <- exact + identical(x[[k]]$vars, w)
+        mis <- mis + (!identical(x[[k]]$vars, w) & (length(x[[k]]$vars) == l))
+        over <- over + (length(x[[k]]$vars) > l)
+        over_inc <- over_inc + ((length(x[[k]]$vars) > l) & all(w %in% x[[k]]$vars))
+    }
+    return(
+        data.frame(
+            under = under, exact = exact,
+            mis = mis, over = over,
+            over_inc = over_inc
+        )
+    )
+}
+```
+
+Using the `look` function, we have the following summary measures from the simulation set, where the models resulting in the minimum AIC and BIC values were selected as the best fitting model for each working correlation structure.
+
+```{r}
+data.frame(
+    ic = c("AIC", "BIC"),
+    dplyr::bind_rows(look(res_aic), look(res_bic))
 )
 ```
