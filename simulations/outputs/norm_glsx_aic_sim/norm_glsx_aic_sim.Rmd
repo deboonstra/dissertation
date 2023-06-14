@@ -1,0 +1,128 @@
+---
+title: "Simulations for `norm_glsx_aic_sim.R`"
+output:
+    html_document:
+        code_folding: show
+---
+
+```{r loading packages, include = FALSE}
+R <- list.files(path = "./simulations/R", pattern = "*.R", full.names = TRUE)
+sapply(R, source, .GlobalEnv)
+library(knitr)
+library(kableExtra)
+```
+
+# Setting
+
+## Data
+Following Wang *et al.* (2012) with one-hundred replications, the correlated normal responses are generated from the model $$y_{ij} = \mathbf{X}_{ij}^{\top}\boldsymbol{\beta} + \varepsilon_{ij},$$ where $i = 1, \ldots, 200,$ $j = 1, \ldots, 4,$ $\mathbf{X}_{ij} = (x_{ij, 1}, \ldots, x_{ij, 6})^{\top},$ and $\boldsymbol{\beta} = (2.0, 3.0, 0.5, 0.0, 0.0, 0.0)^{\top}.$
+
+- For the covariates,
+    - $x_{ij,1}$ was generated from the Bernoulli(0.5) distribution, and 
+    - $x_{ij,2}$ to $x_{ij,6}$ from the multivariate normal distribution with mean 0 and an AR(1) covariance matrix with marginal variance 1 and auto-correlation coefficient 0.5.
+- The random errors $(\varepsilon_{i1}, \ldots, \varepsilon_{i4})^{\top}$ are generated from the multivariate normal distribution with marginal mean 0, marginal variance 1, and an exchangeable correlation matrix with $\rho = 0.5$.
+
+## Transformation of the response and covariate matrix
+After the data was simulated, the response, $\mathbf{y},$ and the covariate matrix, $\mathbf{X},$ was transformed by:
+
+1. fitting a fully saturated model with an unstructured working correlation matrix,
+2. calculating $\mathbf{V}_{i} = \phi \mathbf{A}_{i}^{1/2}\mathbf{R}_{i}(\boldsymbol{\alpha})\mathbf{A}_{i}^{1/2}$ and finding $\mathbf{V}_{i}^{-1/2}$, and
+3. obtaining $\mathbf{y}^{*} = \mathbf{V}_{i}^{-1/2}\mathbf{y}$ and $\mathbf{X}^{*} = \mathbf{V}_{i}^{-1/2}\mathbf{X}$. 
+
+## Best subsets
+Using the transformed response and covariate matrix, all $2^6 - 1 = 63$ the subsets of the fully saturated model were fit using generlized linear models (GLMs). Then, the model resulting with the minimum AIC and BIC value were selected as the best fitting models.
+
+```{r}
+nsims <- 100L
+beta <- c(2.0, 3.0, 0.5, 0.0, 0.0, 0.0)
+w <- which(beta != 0)
+l <- length(w)
+```
+
+# Results
+The simulations results are stored in:
+```{r loading sim res}
+load("./simulations/outputs/norm_glsx_aic_sim/norm_glsx_aic_sim.RData")
+```
+
+## Information criterions across the simulations
+Now for each of the models with the minimum AIC and BIC, the information criteria values will be broken into their parts to see what is impacting the selection process. Additionally, this provides a look at the stability of the information criterions across the simulations. After the transformation of the response vector and covariate matrix, the observations of the response should be independent. Thus, the goodness-of-fit term will be a product a traditional likelihood unlike QIC, QICu and BQICu. Note that AIC and BIC are the likelihood variants of QICu and BQICu. See `norm_glsx_bqicu_sim` for more information on QICu and BQICu.
+```{r}
+aic <- sapply(res_aic, function(x) {x$aic_min}, simplify = TRUE)
+bic <- sapply(res_bic, function(x) {x$bic_min}, simplify = TRUE)
+
+plot(
+    x = seq_len(nsims), y = aic,
+    ylim = c(2250, 2350),
+    xlab = "Index", ylab = "IC",
+    type = "l", lwd = 2, col = "firebrick",
+    bty = "n",
+)
+lines(
+    x = seq_len(nsims), y = bic,
+    col = "steelblue4", lwd = 2
+)
+legend_top(
+    legend = c("AIC", "BIC"),
+    col = c("firebrick", "steelblue4"),
+    lwd = 2, lty = 1, title = "Information criteria"
+)
+```
+
+### Goodness-of-fit
+```{r}
+gof_aic <- rep(NA, nsims)
+gof_bic <- rep(NA, nsims)
+for (k in seq_len(nsims)) {
+    w1 <- res_aic[[k]]$min
+    w2 <- res_bic[[k]]$min
+    gof_aic[k] <- res_aic[[k]]$gof[w1]
+    gof_bic[k] <- res_bic[[k]]$gof[w2]
+}
+
+plot(
+    x = seq_len(nsims), y = gof_aic,
+    ylim = c(2250, 2350),
+    xlab = "Index", ylab = "GOF",
+    type = "l", lwd = 2, col = "firebrick",
+    bty = "n",
+)
+lines(
+    x = seq_len(nsims), y = gof_bic,
+    col = "steelblue4", lwd = 2
+)
+legend_top(
+    legend = c("AIC", "BIC"),
+    col = c("firebrick", "steelblue4"),
+    lwd = 2, lty = 1, title = "Information criteria"
+)
+```
+
+### Penalty
+```{r}
+penalty_aic <- rep(NA, nsims)
+penalty_bic <- rep(NA, nsims)
+for (k in seq_len(nsims)) {
+    w1 <- res_aic[[k]]$min
+    w2 <- res_bic[[k]]$min
+    penalty_aic[k] <- res_aic[[k]]$penalty[w1]
+    penalty_bic[k] <- res_bic[[k]]$penalty[w2]
+}
+
+plot(
+    x = seq_len(nsims), y = penalty_aic,
+    ylim = c(0, 50),
+    xlab = "Index", ylab = "Penalty",
+    type = "l", lwd = 2, col = "firebrick",
+    bty = "n",
+)
+lines(
+    x = seq_len(nsims), y = penalty_bic,
+    col = "steelblue4", lwd = 2
+)
+legend_top(
+    legend = c("AIC", "BIC"),
+    col = c("firebrick", "steelblue4"),
+    lwd = 2, lty = 1, title = "Information criteria"
+)
+```
