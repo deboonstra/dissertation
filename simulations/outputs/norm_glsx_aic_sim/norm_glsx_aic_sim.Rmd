@@ -128,7 +128,7 @@ legend_top(
 )
 ```
 
-## Feature selection based on QIC, QICu, and BQICu
+## Feature selection based on AIC and BIC
 For measuring the overall performance based on each working correlation structure, a function will be created called `look` that reports the number of models, where
 
 - the number of features selected is less than the number of non-zero coefficients in the generating model (`under`), 
