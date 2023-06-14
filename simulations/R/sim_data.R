@@ -50,7 +50,7 @@ sim_data <- function(N, n, beta, rho = 0.5, corstr = "exchangeable") {
     # creating id vector
     id <- rep(seq_len(N), each = n)
     # generating response vector
-    y <- X %*% beta + epsilon
+    y <- c(X %*% beta + epsilon)
     # returning structued list of class "normal"
     colnames(X) <- paste0("X", seq_len(p))
     names(beta) <- paste0("X", seq_len(p))

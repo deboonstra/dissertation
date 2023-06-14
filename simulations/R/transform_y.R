@@ -49,7 +49,7 @@ transform_y <- function(data) {
     inv_sqrt_V <- lapply(seq_len(N), function(x) inv_sqrt_V)
     inv_sqrt_V <- Matrix::bdiag(inv_sqrt_V)
     # final getting transformed y and X
-    yy <- as.matrix(inv_sqrt_V %*% y)
+    yy <- c(as.matrix(inv_sqrt_V %*% y))
     XX <- as.matrix(inv_sqrt_V %*% X)
     # returning transform.y object
     return(structure(list(y = yy, X = XX), class = "transform.y"))
