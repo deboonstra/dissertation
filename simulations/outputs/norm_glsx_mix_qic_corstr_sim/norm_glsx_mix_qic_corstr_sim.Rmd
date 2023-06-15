@@ -1,0 +1,157 @@
+---
+title: "Simulations for `norm_glsx_mix_qic_corstr_sim.R`"
+output:
+    html_document:
+        code_folding: show
+---
+
+# System setup
+```{r loading packages, results = FALSE, message = FALSE}
+R <- list.files(path = "./simulations/R", pattern = "*.R", full.names = TRUE)
+sapply(R, source, .GlobalEnv)
+library(knitr)
+library(kableExtra)
+```
+
+# Setting
+
+## Data
+Following Wang *et al.* (2012) with one-hundred replications, the correlated normal responses are generated from the model $$y_{ij} = \mathbf{X}_{ij}^{\top}\boldsymbol{\beta} + \varepsilon_{ij},$$ where $i = 1, \ldots, 200,$ $j = 1, \ldots, 4,$ $\mathbf{X}_{ij} = (x_{ij, 1}, \ldots, x_{ij, 6})^{\top},$ and $\boldsymbol{\beta} = (2.0, 3.0, 0.5, 0.0, 0.0, 0.0)^{\top}.$
+
+- For the covariates,
+    - $x_{ij,1}$ was generated from the Bernoulli(0.5) distribution, and 
+    - $x_{ij,2}$ to $x_{ij,6}$ from the multivariate normal distribution with mean 0 and an AR(1) covariance matrix with marginal variance 1 and auto-correlation coefficient 0.5.
+- The random errors $(\varepsilon_{i1}, \ldots, \varepsilon_{i4})^{\top}$ are generated from the multivariate normal distribution with marginal mean 0, marginal variance 1, and an exchangeable correlation matrix with $\rho = 0.5$.
+
+## Transformation of the response and covariate matrix
+After the data was simulated, the response, $\mathbf{y},$ and the covariate matrix, $\mathbf{X},$ was transformed by:
+
+1. fitting a fully saturated model with an unstructured working correlation matrix,
+2. calculating $\mathbf{V}_{i} = \phi \mathbf{A}_{i}^{1/2}\mathbf{R}_{i}(\boldsymbol{\alpha})\mathbf{A}_{i}^{1/2}$ and finding $\mathbf{V}_{i}^{-1/2}$, and
+3. obtaining $\mathbf{y}^{*} = \mathbf{V}_{i}^{-1/2}\mathbf{y}$ and $\mathbf{X}^{*} = \mathbf{V}_{i}^{-1/2}\mathbf{X}$.
+
+## Best subsets
+All of the $(2^6 - 1) \times 3 = 189$ subsets of the fully saturated model with the three correlation structures being investigated were fit using generalized estimating questions. Then, the mean and correlation structure pairing that resulted in the minimum QIC was selected as the best fitting models. These results are different from `norm_glsx_bqicu_sim` because with those simulations the correlation structure was **not** selected. Additionally, the goodness-of-fit (GOF) term of QIC is obtained using the transformed response and covariate matrix while the penalty term is calculated using the original data.
+
+```{r}
+nsims <- 100L
+beta <- c(2.0, 3.0, 0.5, 0.0, 0.0, 0.0)
+w <- which(beta != 0)
+l <- length(w)
+```
+
+# Results
+
+The simulation results are stored in:
+```{r loading sim res}
+res <- readRDS("./simulations/outputs/norm_glsx_mix_qic_corstr_sim/norm_glsx_mix_qic_corstr_sim.rds") 
+```
+
+## QIC across the simulations {.tabset .tabset-fade .tabset-pills}
+Now for each of the models with the minimum QIC, the criterion will be broken into its parts to see what is impacting the selection process. Additionally, this provides a look at the stability of the information criterion across the simulations. Remember that
+$$
+GOF = -2 * \text{quasi-likelihood},
+$$
+which assumes independence among the response to allow the use of the quasi-likelihood framework. With transforming response and covariate matrix, using the quasi-likelihood framework is valid because the transformation should account for all the correlation among the observations of the response. In `norm_bqicu_corstr_sim`, the penalty term of QIC, $2tr\left(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{R}\right)$, provided the best selection of working correlation structure. So, using the original data as to obtain the penalty should result in similar selection properties as seen in `norm_bqicu_corstr_sim` for QIC.
+```{r}
+q <- sapply(res, function(x) {x$qic_min}, simplify = TRUE)
+
+plot(
+    x = seq_len(nsims), y = q,
+    ylim = c(600, 1000),
+    xlab = "Index", ylab = "QIC",
+    type = "l", lwd = 2, col = "gray",
+    bty = "n"
+)
+```
+
+### Goodness-of-fit
+```{r}
+gf <- rep(NA, nsims)
+for (k in seq_len(nsims)) {
+    w <- res[[k]]$min
+    gf[k] <- res[[k]]$gof[w]
+}
+
+plot(
+    x = seq_len(nsims), y = gf,
+    ylim = c(600, 1000),
+    xlab = "Index", ylab = "GOF",
+    type = "l", lwd = 2, col = "gray",
+    bty = "n"
+)
+```
+
+### Penalty
+```{r}
+pen <- rep(NA, nsims)
+for (k in seq_len(nsims)) {
+    w <- res[[k]]$min
+    pen[k] <- res[[k]]$penalty[w]
+}
+
+plot(
+    x = seq_len(nsims), y = pen,
+    ylim = c(0, 15),
+    xlab = "Index", ylab = "Penalty",
+    type = "l", lwd = 2, col = "gray",
+    bty = "n"
+)
+```
+
+## Structure selection based on QIC {.tabset .tabset-fade .tabset-pills}
+
+### Mean
+For measuring the overall performance of selecting the mean structure, a function will be created called `look` that reports the number of models, where
+
+- the number of features selected is less than the number of non-zero coefficients in the generating model (`under`), 
+- only the non-zero features from the generating model were selected (`exact`), 
+- the number of features selected matches the number of non-zero coefficients in the generating model; however, at least one of the selected features is NOT one of the non-zero effects in the generating model (i.e., `mis`),
+- the number of features selected is greated than the number of non-zero coefficients in the generating model (`over`), and
+- the number of features selected is greated than the number of non-zero coefficients in the generating model and include all the non-zero effects (`over_inc`).
+
+```{r}
+# creating a function to generate a look at the simulation results
+look <- function(x) {
+    under <- 0
+    exact <- 0
+    mis <- 0
+    over <- 0
+    over_inc <- 0
+    for (k in seq_len(nsims)) {
+        under <- under + (length(x[[k]]$vars) < l)
+        exact <- exact + identical(x[[k]]$vars, w)
+        mis <- mis + (!identical(x[[k]]$vars, w) & (length(x[[k]]$vars) == l))
+        over <- over + (length(x[[k]]$vars) > l)
+        over_inc <- over_inc + ((length(x[[k]]$vars) > l) & all(w %in% x[[k]]$vars))
+    }
+    return(
+        data.frame(
+            under = under, exact = exact,
+            mis = mis, over = over,
+            over_inc = over_inc
+        )
+    )
+}
+```
+
+Using the `look` function, we have the following summary measures from the simulation set, where the models resulting in the minimum QIC value were selected as the best fitting model.
+
+```{r}
+data.frame(
+    IC = c("QIC"),
+    look(res)
+)
+```
+
+### Correlation
+Now for measuring the overall performance of selecting the correlation structure, the table below presents the number of models, where the correlation structure selected from the best subsets was AR(1) (`ar1`), exchangeable (`exchangeable`), and independence (`independence`). Note that proper selection of the mean structure is not needed to select the correlation structure correctly.
+```{r}
+corstr <- sapply(res, function(x) {x$corstr_min}, simplify = TRUE)
+
+tab <- c(data.frame(table(corstr))$Freq)
+data.frame(
+    IC = c("QIC"),
+    exchangeable = tab
+)
+```
