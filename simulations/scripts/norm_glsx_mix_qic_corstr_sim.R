@@ -16,7 +16,8 @@ rho <- 0.5
 
 # Simulation ####
 set.seed(1997)
-res <- list()
+res_quasi <- list()
+res_lik <- list()
 pb <- txtProgressBar(0, nsims, style = 3)
 for (j in seq_len(nsims)) {
     ## Simulating data ####
@@ -29,31 +30,43 @@ for (j in seq_len(nsims)) {
     yt <- transform_data$y
     Xt <- transform_data$X
     ## Produce best subsets ####
-    best_sub <- expand_cols(X)
+    bs_temp <- expand_cols(dat$X)
+    best_sub <- unlist(list(bs_temp, bs_temp, bs_temp), recursive = FALSE)
+    wc <- rep(c("independence", "exchangeable", "ar1"), each = length(bs_temp))
     ## Fitting models ####
-    ic <- gf <- pen <- corstr <- rep(NA, length(best_sub))
-    wc <- c("independence", "exchangeable", "ar1")
+    ic_quasi <- ic_lik <- gf_quasi <- gf_lik <- pen <- corstr <- rep(NA, length(best_sub))
     for (i in seq_along(best_sub)) {
+        ### Pulling covariate matrices ####
         XX <- X[, best_sub[[i]]]
         XXt <- Xt[, best_sub[[i]]]
-        f1 <- geepack::geeglm(y ~ XX, id = id, corstr = wc[1])
-        f2 <- geepack::geeglm(y ~ XX, id = id, corstr = wc[2])
-        f3 <- geepack::geeglm(y ~ XX, id = id, corstr = wc[3])
-        ft <- geepack::geeglm(yt ~ XXt, id = id, corstr = "independence")
-        ### Selecting best performing corstr ####
-        ww <- which.min(c(cic(f1), cic(f2), cic(f3)))
-        gf[i] <- gof(ft)
-        pen[i] <- 2 * c(cic(f1), cic(f2), cic(f3))[ww]
-        corstr[i] <- wc[ww]
-        ic[i] <- gf[i] + pen[i]
+        ### Fitting original data for penalty ####
+        f <- geepack::geeglm((y ~ XX), id = id, corstr = wc[i])
+        ### Fitting transformed data for GOF ####
+        #### Quasi-likelihood
+        ft_quasi <- geepack::geeglm(yt ~ XXt, id = id, corstr = "independence")
+        #### Likelihood
+        ft_lik <- stats::glm(yt ~ XXt)
+        ### Obtaining information criterion values ####
+        gf_quasi[i] <- gof(ft_quasi)
+        gf_lik[i] <- -2 * stats::logLik(ft_lik)
+        pen[i] <- 2 * cic(f)
+        ic_quasi[i] <- gf_quasi[i] + pen[i]
+        ic_lik[i] <- gf_lik[i] + pen[i]
     }
     ## Determining the best_sub index ####
-    ## that resulted in the minimum QIC
-    w <- which.min(ic)
-    ## Updating res object ####
-    res[[j]] <- list(
-        qic = ic, gof = gf, penalty = pen, corstr = corstr,
-        min = w, qic_min = ic[w], corstr_min = corstr[w], vars = best_sub[[w]]
+    ## that resulted in the minimum IC
+    w_quasi <- which.min(ic_quasi)
+    w_lik <- which.min(ic_lik)
+    ## Updating res object(s) ####
+    res_quasi[[j]] <- list(
+        ic = ic_quasi, gof = gf_quasi, penalty = pen, corstr = wc,
+        min = w_quasi, ic_min = ic_quasi[w_quasi],
+        corstr_min = wc[w_quasi], vars = best_sub[[w_quasi]]
+    )
+    res_lik[[j]] <- list(
+        ic = ic_lik, gof = gf_lik, penalty = pen, corstr = wc,
+        min = w_lik, ic_min = ic_lik[w_lik],
+        corstr_min = wc[w_lik], vars = best_sub[[w_lik]]
     )
     setTxtProgressBar(pb, j)
     if (j == nsims) {
@@ -65,7 +78,7 @@ for (j in seq_len(nsims)) {
 if (!dir.exists("./simulations/outputs/norm_glsx_mix_qic_corstr_sim/")) {
     dir.create("./simulations/outputs/norm_glsx_mix_qic_corstr_sim/")
 }
-saveRDS(
-    res,
-    file = "./simulations/outputs/norm_glsx_mix_qic_corstr_sim/norm_glsx_mix_qic_corstr_sim.rds"
+save(
+    res_quasi, res_lik,
+    file = "./simulations/outputs/norm_glsx_mix_qic_corstr_sim/norm_glsx_mix_qic_corstr_sim.RData"
 )

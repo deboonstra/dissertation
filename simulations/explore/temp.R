@@ -10,7 +10,7 @@ rho <- 0.5
 
 # Simulating data ####
 set.seed(1997)
-dat <- sim_data(N = N, n = n, beta = beta, rho = rho, corstr = "independence")
+dat <- sim_data(N = N, n = n, beta = beta, rho = rho, corstr = "exchangeable")
 
 # Transform y ####
 transform_dat <- transform_y(dat)
@@ -18,7 +18,11 @@ yy <- transform_dat$y
 XX <- transform_dat$X
 
 # Produce best subsets
-best_sub <- expand_cols(dat$X)
+best_sub <- unlist(
+    list(expand_cols(dat$X), expand_cols(dat$X), expand_cols(dat$X)),
+    recursive = FALSE
+)
+wc <- rep(c("independence", "exchangeable", "ar1"), each = 63)
 
 # Fitting independence model
 qic <- rep(NA, length(best_sub))

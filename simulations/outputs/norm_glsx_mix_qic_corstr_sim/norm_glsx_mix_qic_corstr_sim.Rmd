@@ -44,7 +44,7 @@ l <- length(w)
 
 The simulation results are stored in:
 ```{r loading sim res}
-res <- readRDS("./simulations/outputs/norm_glsx_mix_qic_corstr_sim/norm_glsx_mix_qic_corstr_sim.rds") 
+load("./simulations/outputs/norm_glsx_mix_qic_corstr_sim/norm_glsx_mix_qic_corstr_sim.RData") 
 ```
 
 ## QIC across the simulations {.tabset .tabset-fade .tabset-pills}
@@ -54,12 +54,20 @@ GOF = -2 * \text{quasi-likelihood},
 $$
 which assumes independence among the response to allow the use of the quasi-likelihood framework. With transforming response and covariate matrix, using the quasi-likelihood framework is valid because the transformation should account for all the correlation among the observations of the response. In `norm_bqicu_corstr_sim`, the penalty term of QIC, $2tr\left(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{R}\right)$, provided the best selection of working correlation structure. So, using the original data as to obtain the penalty should result in similar selection properties as seen in `norm_bqicu_corstr_sim` for QIC.
 ```{r}
-q <- sapply(res, function(x) {x$qic_min}, simplify = TRUE)
+ic_quasi <- sapply(res_quasi, function(x) {x$ic_min}, simplify = TRUE)
+ic_lik <- sapply(res_lik, function(x) {x$ic_min}, simplify = TRUE)
 
 plot(
-    x = seq_len(nsims), y = q,
+    x = seq_len(nsims), y = ic_quasi,
     ylim = c(600, 1000),
-    xlab = "Index", ylab = "QIC",
+    xlab = "Index", ylab = "IC (quasi-likelihood)",
+    type = "l", lwd = 2, col = "gray",
+    bty = "n"
+)
+plot(
+    x = seq_len(nsims), y = ic_lik,
+    ylim = c(2000, 2400),
+    xlab = "Index", ylab = "IC (likelihood)",
     type = "l", lwd = 2, col = "gray",
     bty = "n"
 )
@@ -67,33 +75,61 @@ plot(
 
 ### Goodness-of-fit
 ```{r}
-gf <- rep(NA, nsims)
+gf_quasi <- gf_lik <- rep(NA, nsims)
 for (k in seq_len(nsims)) {
-    w <- res[[k]]$min
-    gf[k] <- res[[k]]$gof[w]
+    w_quasi <- res_quasi[[k]]$min
+    w_lik <- res_lik[[k]]$min
+    gf_quasi[k] <- res_quasi[[k]]$gof[w_quasi]
+    gf_lik[k] <- res_lik[[k]]$gof[w_lik]
 }
 
 plot(
-    x = seq_len(nsims), y = gf,
+    x = seq_len(nsims), y = gf_quasi,
     ylim = c(600, 1000),
-    xlab = "Index", ylab = "GOF",
+    xlab = "Index", ylab = "GOF (quasi-likelihood)",
     type = "l", lwd = 2, col = "gray",
+    bty = "n"
+)
+
+plot(
+    x = seq_len(nsims), y = gf_lik,
+    ylim = c(2000, 2400),
+    xlab = "Index", ylab = "GOF (likelihood)",
+    type = "l", lwd = 2, col = "gray",
+    bty = "n"
+)
+
+plot(
+    x = seq_len(nsims), y = gf_lik / gf_quasi,
+    ylim = c(2, 3),
+    xlab = "Index", ylab = "Ratio of GOF (likelihood / quasi-likelihood)",
+    type = "l", lwd = 2, col = "firebrick",
     bty = "n"
 )
 ```
 
 ### Penalty
 ```{r}
-pen <- rep(NA, nsims)
+pen_quasi <- pen_lik <-  rep(NA, nsims)
 for (k in seq_len(nsims)) {
-    w <- res[[k]]$min
-    pen[k] <- res[[k]]$penalty[w]
+    w_quasi <- res_quasi[[k]]$min
+    w_lik <- res_lik[[k]]$min
+    pen_quasi[k] <- res_quasi[[k]]$penalty[w_quasi]
+    pen_lik[k] <- res_lik[[k]]$penalty[w_lik]
 }
 
 plot(
-    x = seq_len(nsims), y = pen,
+    x = seq_len(nsims), y = pen_quasi,
     ylim = c(0, 15),
-    xlab = "Index", ylab = "Penalty",
+    xlab = "Index", ylab = "Penalty (quasi-likelihood)",
+    type = "l", lwd = 2, col = "gray",
+    bty = "n"
+)
+
+plot(
+    x = seq_len(nsims), y = pen_lik,
+    ylim = c(0, 15),
+    xlab = "Index", ylab = "Penalty (likelihood)",
     type = "l", lwd = 2, col = "gray",
     bty = "n"
 )
@@ -139,19 +175,34 @@ Using the `look` function, we have the following summary measures from the simul
 
 ```{r}
 data.frame(
-    IC = c("QIC"),
-    look(res)
+    lik = c("Quasi-likelihood", "Likelihood"),
+    dplyr::bind_rows(look(res_quasi), look(res_lik))
 )
 ```
 
 ### Correlation
 Now for measuring the overall performance of selecting the correlation structure, the table below presents the number of models, where the correlation structure selected from the best subsets was AR(1) (`ar1`), exchangeable (`exchangeable`), and independence (`independence`). Note that proper selection of the mean structure is not needed to select the correlation structure correctly.
 ```{r}
-corstr <- sapply(res, function(x) {x$corstr_min}, simplify = TRUE)
+corstr_quasi <- sapply(res_quasi, function(x) {x$corstr_min}, simplify = TRUE)
+corstr_lik <- sapply(res_lik, function(x) {x$corstr_min}, simplify = TRUE)
 
-tab <- c(data.frame(table(corstr))$Freq)
+corstr_count <- function(x) {
+    count_indp <- 0
+    count_cs <- 0
+    count_ar1 <- 0
+    for (i in seq_along(x)) {
+        count_indp <- count_indp + (x[i] == "independence")
+        count_cs <- count_cs + (x[i] == "exchangeable")
+        count_ar1 <- count_ar1 + (x[i] == "ar1") 
+    }
+    temp <- data.frame(
+        indpendenence = count_indp, exchangeable = count_cs, ar1 = count_ar1
+    )
+    return(temp)
+}
+
 data.frame(
-    IC = c("QIC"),
-    exchangeable = tab
+    lik = c("Quasi-likelihood", "Likelihood"),
+    dplyr::bind_rows(corstr_count(corstr_quasi), corstr_count(corstr_lik))
 )
 ```
