@@ -2,7 +2,7 @@
 title: "Simulations for `norm_glsx_mix_qic_corstr_sim.R`"
 output:
     html_document:
-        code_folding: show
+        code_folding: hide
 ---
 
 # System setup
@@ -20,7 +20,7 @@ Following Wang *et al.* (2012) with one-hundred replications, the correlated nor
 
 - For the covariates,
     - $x_{ij,1}$ was generated from the Bernoulli(0.5) distribution, and 
-    - $x_{ij,2}$ to $x_{ij,6}$ from the multivariate normal distribution with mean 0 and an AR(1) covariance matrix with marginal variance 1 and auto-correlation coefficient 0.5.
+    - each $x_{ij,k}$ for $k = 2 \ldots 6$ was generated from the multivariate normal distribution with mean 0 and an AR(1) covariance matrix with marginal variance 1 and auto-correlation coefficient 0.5.
 - The random errors $(\varepsilon_{i1}, \ldots, \varepsilon_{i4})^{\top}$ are generated from the multivariate normal distribution with marginal mean 0, marginal variance 1, and an exchangeable correlation matrix with $\rho = 0.5$.
 
 ## Transformation of the response and covariate matrix
@@ -31,7 +31,7 @@ After the data was simulated, the response, $\mathbf{y},$ and the covariate matr
 3. obtaining $\mathbf{y}^{*} = \mathbf{V}_{i}^{-1/2}\mathbf{y}$ and $\mathbf{X}^{*} = \mathbf{V}_{i}^{-1/2}\mathbf{X}$.
 
 ## Best subsets
-All of the $(2^6 - 1) \times 3 = 189$ subsets of the fully saturated model with the three correlation structures being investigated were fit using generalized estimating questions. Then, the mean and correlation structure pairing that resulted in the minimum QIC was selected as the best fitting models. These results are different from `norm_glsx_bqicu_sim` because with those simulations the correlation structure was **not** selected. Additionally, the goodness-of-fit (GOF) term of QIC is obtained using the transformed response and covariate matrix while the penalty term is calculated using the original data.
+All of the $(2^6 - 1) \times 3 = 189$ subsets of the fully saturated model with the three correlation structures being investigated were fit using either generalized linear models (GLMs) or generalized estimating questions (GEEs). Then, the mean and correlation structure pairing that resulted in the minimum information criterion (IC) value was selected as the best fitting models. These results are different from `norm_glsx_bqicu_sim` because with those simulations the correlation structure was **not** selected. Additionally, the goodness-of-fit (GOF) term of IC is obtained using the transformed response and covariate matrix while the penalty term is calculated using the original data.
 
 ```{r}
 nsims <- 100L
@@ -47,12 +47,8 @@ The simulation results are stored in:
 load("./simulations/outputs/norm_glsx_mix_qic_corstr_sim/norm_glsx_mix_qic_corstr_sim.RData") 
 ```
 
-## QIC across the simulations {.tabset .tabset-fade .tabset-pills}
-Now for each of the models with the minimum QIC, the criterion will be broken into its parts to see what is impacting the selection process. Additionally, this provides a look at the stability of the information criterion across the simulations. Remember that
-$$
-GOF = -2 * \text{quasi-likelihood},
-$$
-which assumes independence among the response to allow the use of the quasi-likelihood framework. With transforming response and covariate matrix, using the quasi-likelihood framework is valid because the transformation should account for all the correlation among the observations of the response. In `norm_bqicu_corstr_sim`, the penalty term of QIC, $2tr\left(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{R}\right)$, provided the best selection of working correlation structure. So, using the original data as to obtain the penalty should result in similar selection properties as seen in `norm_bqicu_corstr_sim` for QIC.
+## IC across the simulations {.tabset .tabset-fade .tabset-pills}
+Now for each of the models with the minimum IC, the criterion will be broken into its parts to see what is impacting the selection process. Additionally, this provides a look at the stability of the information criterion across the simulations. For these simulations, the goodness-of-fit (GOF) term was derived using either the likelihood or quasi-likelihood framework. When GLMs were used to fit the transformed response, the GOF was based on traditional likelihood. While when GEEs were used, the GOF was based on quasi-likelihood that assumes independence among the observations of the response. Unlike the GOF term, the penalty term of each IC was calculated using GEEs. The penalty is $2tr\left(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{R}\right)$, where $\widehat{\boldsymbol{\Omega}}_{I}$ and $\widehat{\mathbf{V}}_{R}$ are estimated using the original data data. Remember that $2tr\left(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{R}\right)$ is the penalty term used in QIC and CIC, and is needed when simulataneous selection of the mean and correlation structure is of interest. If selection of correlation structure is **not** needed, then QICu, AIC, or BIC could be used because the penalty term is focused on the number of parameters estimated.
 ```{r}
 ic_quasi <- sapply(res_quasi, function(x) {x$ic_min}, simplify = TRUE)
 ic_lik <- sapply(res_lik, function(x) {x$ic_min}, simplify = TRUE)
@@ -135,16 +131,16 @@ plot(
 )
 ```
 
-## Structure selection based on QIC {.tabset .tabset-fade .tabset-pills}
+## Structure selection based on IC {.tabset .tabset-fade .tabset-pills}
 
 ### Mean
 For measuring the overall performance of selecting the mean structure, a function will be created called `look` that reports the number of models, where
 
 - the number of features selected is less than the number of non-zero coefficients in the generating model (`under`), 
 - only the non-zero features from the generating model were selected (`exact`), 
-- the number of features selected matches the number of non-zero coefficients in the generating model; however, at least one of the selected features is NOT one of the non-zero effects in the generating model (i.e., `mis`),
+- the number of features selected matches the number of non-zero coefficients in the generating model; however, at least one of the selected features is NOT one of the non-zero effects in the generating model (`mis`),
 - the number of features selected is greated than the number of non-zero coefficients in the generating model (`over`), and
-- the number of features selected is greated than the number of non-zero coefficients in the generating model and include all the non-zero effects (`over_inc`).
+- the number of features selected is greated than the number of non-zero coefficients in the generating model and includes all the non-zero effects (`over_inc`).
 
 ```{r}
 # creating a function to generate a look at the simulation results
@@ -171,7 +167,7 @@ look <- function(x) {
 }
 ```
 
-Using the `look` function, we have the following summary measures from the simulation set, where the models resulting in the minimum QIC value were selected as the best fitting model.
+Using the `look` function, we have the following summary measures from the simulation set, where the models resulting in the minimum IC value were selected as the best fitting model and the counts are based on likelihood framework used to define the GOF term.
 
 ```{r}
 data.frame(
@@ -206,3 +202,5 @@ data.frame(
     dplyr::bind_rows(corstr_count(corstr_quasi), corstr_count(corstr_lik))
 )
 ```
+
+Based on these results, it appears that the correlation structure was selected appropriately every single time regardless of how the likelihood framework used to define the goodness-of-fit term. Thus, on average, the models selected have mean structures that includes all the non-zero coefficients at minimum and the proper correlation structure.
