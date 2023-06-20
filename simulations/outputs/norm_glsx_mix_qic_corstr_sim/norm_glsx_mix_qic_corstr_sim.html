@@ -713,11 +713,46 @@ data.frame(
 ## 1 Quasi-likelihood             0          100   0
 ## 2       Likelihood             0          100   0</code></pre>
 <p>Based on these results, it appears that the correlation structure was
-selected appropriately every single time regardless of how the
-likelihood framework used to define the goodness-of-fit term. Thus, on
-average, the models selected have mean structures that includes all the
-non-zero coefficients at minimum and the proper correlation
-structure.</p>
+selected appropriately every single time regardless of likelihood
+framework used to define the goodness-of-fit term.</p>
+</div>
+<div id="joint" class="section level3">
+<h3>Joint</h3>
+<p>Thus, on average, the models, with the minimum information criteria,
+have mean structures that includes all the non-zero coefficients at
+minimum and the proper correlation structure.</p>
+<pre class="r"><code>joint &lt;- function(x) {
+    p &lt;- function(y) {
+        if (length(y) == 0) {
+            return(data.frame(under = 0, exact = 0, mis = 0, over = 0, over_inc = 0))
+        } else {
+            return(look(x = y))
+        }
+    }
+
+    independence &lt;- x[sapply(x, function(x) {x$corstr_min == &quot;independence&quot;}, simplify = TRUE)]
+    exchangeable &lt;- x[sapply(x, function(x) {x$corstr_min == &quot;exchangeable&quot;}, simplify = TRUE)]
+    ar1 &lt;- x[sapply(x, function(x) {x$corstr_min == &quot;ar1&quot;}, simplify = TRUE)]
+
+    ip &lt;- p(independence)
+    ep &lt;- p(exchangeable)
+    ap &lt;- p(ar1)
+
+    return(dplyr::bind_rows(ip, ep, ap))
+}
+
+data.frame(
+    lik = c(&quot;Quasi-likelihood&quot;, &quot;&quot;, &quot;&quot;, &quot;Likelihood&quot;, &quot;&quot;, &quot;&quot;),
+    corstr = rep(c(&quot;Independence&quot;, &quot;Exchangeable&quot;, &quot;AR(1)&quot;), 2),
+    dplyr::bind_rows(joint(res_quasi), joint(res_lik))
+)</code></pre>
+<pre><code>##                lik       corstr under exact mis over over_inc
+## 1 Quasi-likelihood Independence     0     0   0    0        0
+## 2                  Exchangeable     0    59   0   41       41
+## 3                         AR(1)     0     0   0    0        0
+## 4       Likelihood Independence     0     0   0    0        0
+## 5                  Exchangeable     0    59   0   41       41
+## 6                         AR(1)     0     0   0    0        0</code></pre>
 </div>
 </div>
 </div>

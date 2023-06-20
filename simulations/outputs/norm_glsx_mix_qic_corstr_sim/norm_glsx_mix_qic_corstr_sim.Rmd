@@ -203,4 +203,34 @@ data.frame(
 )
 ```
 
-Based on these results, it appears that the correlation structure was selected appropriately every single time regardless of how the likelihood framework used to define the goodness-of-fit term. Thus, on average, the models selected have mean structures that includes all the non-zero coefficients at minimum and the proper correlation structure.
+Based on these results, it appears that the correlation structure was selected appropriately every single time regardless of likelihood framework used to define the goodness-of-fit term.
+
+### Joint
+Thus, on average, the models, with the minimum information criteria, have mean structures that includes all the non-zero coefficients at minimum and the proper correlation structure.
+```{r}
+joint <- function(x) {
+    p <- function(y) {
+        if (length(y) == 0) {
+            return(data.frame(under = 0, exact = 0, mis = 0, over = 0, over_inc = 0))
+        } else {
+            return(look(x = y))
+        }
+    }
+
+    independence <- x[sapply(x, function(x) {x$corstr_min == "independence"}, simplify = TRUE)]
+    exchangeable <- x[sapply(x, function(x) {x$corstr_min == "exchangeable"}, simplify = TRUE)]
+    ar1 <- x[sapply(x, function(x) {x$corstr_min == "ar1"}, simplify = TRUE)]
+
+    ip <- p(independence)
+    ep <- p(exchangeable)
+    ap <- p(ar1)
+
+    return(dplyr::bind_rows(ip, ep, ap))
+}
+
+data.frame(
+    lik = c("Quasi-likelihood", "", "", "Likelihood", "", ""),
+    corstr = rep(c("Independence", "Exchangeable", "AR(1)"), 2),
+    dplyr::bind_rows(joint(res_quasi), joint(res_lik))
+)
+```
