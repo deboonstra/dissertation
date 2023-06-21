@@ -21,34 +21,37 @@ pb <- txtProgressBar(0, nsims, style = 3)
 for (j in seq_len(nsims)) {
     ## Simulating data ####
     dat <- sim_data(N = N, n = n, beta = beta, rho = rho, corstr = corstr)
+    y <- dat$y
+    X <- dat$X
+    id <- dat$id
     ## Produce best subsets ####
-    best_sub <- expand_cols(dat$X)
+    best_sub <- expand_cols(X)
     # Fitting models ####
-    q <- gof1 <- penalty1 <- rep(NA, length(best_sub))
-    aic <- gof2 <- penalty2 <- rep(NA, length(best_sub))
+    q <- gf_q <- pen_q <- rep(NA, length(best_sub))
+    a <- gf_a <- pen_a <- rep(NA, length(best_sub))
     for (i in seq_along(best_sub)) {
-        XX <- dat$X[, best_sub[[i]]]
-        f1 <- geepack::geeglm(dat$y ~ XX, id = dat$id, corstr = corstr)
-        f2 <- stats::glm(dat$y ~ XX)
-        q[i] <- qic(f1)
-        gof1[i] <- gof(f1)
-        penalty1[i] <- cic(f1)
-        aic[i] <- stats::AIC(f2)
-        gof2[i] <- -2 * logLik(f2)
-        penalty2[i] <- aic[i] - gof2[i]
+        XX <- X[, best_sub[[i]]]
+        f_q <- geepack::geeglm(y ~ XX, id = id, corstr = corstr)
+        f_a <- stats::glm(y ~ XX)
+        q[i] <- qic(f_q)
+        gf_q[i] <- gof(f_q)
+        pen_q[i] <- 2 * cic(f_q)
+        a[i] <- stats::AIC(f_a)
+        gf_a[i] <- -2 * logLik(f_a)
+        pen_a[i] <- a[i] - gf_a[i]
     }
     # Determining the best_sub index ####
     # that resulted in the minimum AIC/QIC values
-    w1 <- which.min(q)
-    w2 <- which.min(aic)
+    w_q <- which.min(q)
+    w_a <- which.min(a)
     # Updating res objects ####
     res_qic[[j]] <- list(
-        qic = q, gof = gof1, penalty = penalty1,
-        min = w1, qic_min = q[w1], vars = best_sub[[w1]]
+        ic = q, gof = gf_q, penalty = pen_q,
+        min = w_q, ic_min = q[w_q], vars = best_sub[[w_q]]
     )
     res_aic[[j]] <- list(
-        aic = aic, gof = gof2, penalty = penalty2,
-        min = w2, qic_min = aic[w2], vars = best_sub[[w2]]
+        ic = a, gof = gf_a, penalty = pen_a,
+        min = w_a, ic_min = a[w_a], vars = best_sub[[w_a]]
     )
     setTxtProgressBar(pb, j)
     if (j == nsims) {

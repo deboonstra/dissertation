@@ -1,18 +1,21 @@
 ---
-output: html_document
+title: "Simulations for `norm_aic_sim.R`"
+output:
+    html_document:
+        code_folding: show
 ---
 
-# Simulations for `norm_aic_sim.R`
-```{r loading packages, include = FALSE}
+# System setup
+```{r loading packages, results = FALSE, message = FALSE}
 R <- list.files(path = "./simulations/R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
 library(knitr)
 library(kableExtra)
 ```
 
-## Setting
+# Setting
 
-### Data
+## Data
 Following Wang *et al.* (2012) with one-hundred replications, the correlated normal responses are generated from the model $$y_{ij} = \mathbf{X}_{ij}^{\top}\boldsymbol{\beta} + \varepsilon_{ij},$$ where $i = 1, \ldots, 200,$ $j = 1, \ldots, 4,$ $\mathbf{X}_{ij} = (x_{ij, 1}, \ldots, x_{ij, 6})^{\top},$ and $\boldsymbol{\beta} = (2.0, 3.0, 0.5, 0.0, 0.0, 0.0)^{\top}.$
 
 - For the covariates,
@@ -20,23 +23,118 @@ Following Wang *et al.* (2012) with one-hundred replications, the correlated nor
     - $x_{ij,2}$ to $x_{ij,6}$ from the multivariate normal distribution with mean 0 and an AR(1) covariance matrix with marginal variance 1 and auto-correlation coefficient 0.5.
 - The random errors $(\varepsilon_{i1}, \ldots, \varepsilon_{i4})^{\top}$ are generated from the multivariate normal distribution with marginal mean 0, marginal variance 1, and a correlation coefficient of 0. Thus, the observations are independent of each other.
 
-### Best subsets
-All $2^6 - 1 = 63$ subsets of the full saturated model were fit. Then, the model resulting in the minimum AIC and QIC values were selected as the best fitting models.
+## Best subsets
+All $2^6 - 1 = 63$ subsets of the full saturated model were fit. Then, the models resulting in the minimum AIC and QIC values were selected as the best fitting models.
 
-```{r, echo = FALSE}
+```{r}
 nsims <- 100L
 beta <- c(2.0, 3.0, 0.5, 0.0, 0.0, 0.0)
 w <- which(beta != 0)
 l <- length(w)
 ```
 
-## Results
+# Results
 The simulations results are stored in:
 ```{r loading sim res}
 load("./simulations/outputs/norm_aic_sim/norm_aic_sim.RData")
 ```
+and provide a baseline comparison between AIC and QIC.
 
-### Feature selection based on AIC and QIC
+## Information criterions across the simulations {.tabset .tabset-fade .tabset-pills}
+Now for each of the models with the minimum AIC and QIC, the information criteria values will be broken into their parts to see what is impacting the selection process. Additionally, this provides a look at the stability of the information criterions across the simulations. These results also examine the relationship between the likelihood and quasi-likelihood framework.
+
+### IC
+```{r}
+a <- sapply(res_aic, function(x) {x$ic_min}, simplify = TRUE)
+q <- sapply(res_qic, function(x) {x$ic_min}, simplify = TRUE)
+
+plot(
+    x = seq_len(nsims), y = q,
+    ylim = c(500, 2500),
+    xlab = "Index", ylab = "IC",
+    lwd = 2, type = "l", col = "firebrick",
+    bty = "n"
+)
+lines(
+    x = seq_len(nsims), y = a,
+    lwd = 2, col = "steelblue4"
+)
+legend_top(
+    legend = c("QIC", "AIC"),
+    col = c("firebrick", "steelblue4"),
+    lwd = 2, lty = 1, title = "Information criteria"
+)
+```
+
+### GOF
+```{r}
+gf_q <- rep(NA, nsims)
+gf_a <- rep(NA, nsims)
+for (k in seq_len(nsims)) {
+    w_q <- res_qic[[k]]$min
+    w_a <- res_aic[[k]]$min
+    gf_q[k] <- res_qic[[k]]$gof[w_q]
+    gf_a[k] <- res_aic[[k]]$gof[w_a]
+}
+
+plot(
+    x = seq_len(nsims), y = gf_q,
+    ylim = c(500, 2500),
+    xlab = "Index", ylab = "GOF",
+    type = "l", lwd = 2, col = "firebrick",
+    bty = "n"
+)
+lines(
+    x = seq_len(nsims), y = gf_a,
+    col = "steelblue4", lwd = 2
+)
+legend_top(
+    legend = c("QIC", "AIC"),
+    col = c("firebrick", "steelblue4"),
+    lwd = 2, lty = 1, title = "Information criteria"
+)
+```
+
+```{r}
+plot(
+    x =  seq_len(nsims), y = gf_a / gf_q,
+    ylim = c(2.5, 3.5),
+    xlab = "Index", ylab = "Ratio of GOF (AIC / QIC)",
+    type = "l", lwd = 2, col = "gray",
+    bty = "n"
+)
+```
+
+### Penalty
+```{r}
+pen_q <- rep(NA, nsims)
+pen_a <- rep(NA, nsims)
+for (k in seq_len(nsims)) {
+    w_q <- res_qic[[k]]$min
+    w_a <- res_aic[[k]]$min
+    pen_q[k] <- res_qic[[k]]$penalty[w_q]
+    pen_a[k] <- res_aic[[k]]$penalty[w_a]
+}
+
+plot(
+    x = seq_len(nsims), y = pen_q,
+    ylim = c(5, 20),
+    xlab = "Index", ylab = "Penalty",
+    type = "l", lwd = 2, col = "firebrick",
+    bty = "n"
+)
+lines(
+    x = seq_len(nsims), y = pen_a,
+    col = "steelblue4", lwd = 2
+)
+legend_top(
+    legend = c("QIC", "AIC"),
+    col = c("firebrick", "steelblue4"),
+    lwd = 2, lty = 1, title = "Information criteria"
+)
+```
+
+## Feature selection based on AIC and QIC
 For measuring the overall performance based on each information criterion, a function will be created called `look` that reports the number of models, where
 
 - the number of features selected is less than the number of non-zero coefficients in the generating model (`under`), 
@@ -45,7 +143,7 @@ For measuring the overall performance based on each information criterion, a fun
 - the number of features selected is greated than the number of non-zero coefficients in the generating model (`over`), and
 - the number of features selected is greated than the number of non-zero coefficients in the generating model and include all the non-zero effects (`over_inc`).
 
-```{r, echo = FALSE}
+```{r}
 # creating a function to generate a look at the simulation results
 look <- function(x) {
     under <- 0
@@ -71,9 +169,9 @@ look <- function(x) {
 ```
 
 Using the `look` function, we have the following summary measures from the simulation set, where the model resulting in the minimum AIC and QIC values were selected as the best fitting models for each information criterion.
-```{r, echo = FALSE}
+```{r}
 data.frame(
-    work_corr = c("AIC", "QIC"),
+    ic = c("AIC", "QIC"),
     dplyr::bind_rows(look(res_aic), look(res_qic))
 )
 ```
