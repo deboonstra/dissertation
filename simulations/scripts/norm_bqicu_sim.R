@@ -2,6 +2,8 @@
 # performance of QIC, QICu, and BQICu will be compared through the traditional
 # application of GEEs and information criterions (i.e., no transformations).
 # See 2023_05_2023 notes for more detail.
+# These simulations were updated to include selection of correlation structures
+# and including unstructured correlation structure as an option.
 
 # Loading libraries and functions ####
 R <- list.files(path = "./simulations/R", pattern = "*.R", full.names = TRUE)
@@ -13,111 +15,70 @@ N <- 200
 n <- 4
 beta <- c(2.0, 3.0, 0.5, 0, 0, 0)
 rho <- 0.5
+corstr <- c("independence", "exchangeable", "ar1", "unstructured")
 
 # Simulation ####
 set.seed(1997)
-res_indp_qic <- list()
-res_cs_qic <- list()
-res_ar1_qic <- list()
-res_indp_qicu <- list()
-res_cs_qicu <- list()
-res_ar1_qicu <- list()
-res_indp_bqicu <- list()
-res_cs_bqicu <- list()
-res_ar1_bqicu <- list()
+res_qic <- list()
+res_qicu <- list()
+res_bqicu <- list()
 pb <- txtProgressBar(0, nsims, style = 3)
 for (j in seq_len(nsims)) {
     ## Simulating data ####
     dat <- sim_data(N = N, n = n, beta = beta, rho = rho)
+    y <- dat$y
+    X <- dat$X
+    id <- dat$id
     ## Produce best subsets
-    best_sub <- expand_cols(dat$X)
-    # Fitting model ####
-    qic1 <- penalty1 <- rep(NA, length(best_sub))
-    qic2 <- penalty2 <- rep(NA, length(best_sub))
-    qic3 <- penalty3 <- rep(NA, length(best_sub))
-    qicu1 <- penaltyu1 <- rep(NA, length(best_sub))
-    qicu2 <- penaltyu2 <- rep(NA, length(best_sub))
-    qicu3 <- penaltyu3 <- rep(NA, length(best_sub))
-    bqicu1 <- penaltyb1 <- rep(NA, length(best_sub))
-    bqicu2 <- penaltyb2 <- rep(NA, length(best_sub))
-    bqicu3 <- penaltyb3 <- rep(NA, length(best_sub))
-    gof1 <- gof2 <- gof3 <-rep(NA, length(best_sub))
+    bs_temp <- expand_cols(X)
+    best_sub <- unlist(
+        list(bs_temp, bs_temp, bs_temp, bs_temp),
+        recursive = FALSE
+    )
+    wc <- rep(corstr, each = length(bs_temp))
+    ## Fitting model ####
+    q <- gf_q <- pen_q <- rep(NA, length(best_sub))
+    qu <- gf_qu <- pen_qu <- rep(NA, length(best_sub))
+    bqu <- gf_bqu <- pen_bqu <- rep(NA, length(best_sub))
     for (i in seq_along(best_sub)) {
-        XX <- dat$X[, best_sub[[i]]]
-        f1 <- geepack::geeglm(dat$y ~ XX, id = dat$id, corstr = "independence")
-        f2 <- geepack::geeglm(dat$y ~ XX, id = dat$id, corstr = "exchangeable")
-        f3 <- geepack::geeglm(dat$y ~ XX, id = dat$id, corstr = "ar1")
-        qic1[i] <- qic(f1)
-        qicu1[i] <- qicu(f1)
-        bqicu1[i] <- bqicu(f1)
-        gof1[i] <- gof(f1)
-        penalty1[i] <- 2 * cic(f1)
-        penaltyu1[i] <- qicu1[i] - gof1[i]
-        penaltyb1[i] <- bqicu1[i] - gof1[i]
-        qic2[i] <- qic(f2)
-        qicu2[i] <- qicu(f2)
-        bqicu2[i] <- bqicu(f2)
-        gof2[i] <- gof(f2)
-        penalty2[i] <- 2 * cic(f2)
-        penaltyu2[i] <- qicu2[i] - gof2[i]
-        penaltyb2[i] <- bqicu2[i] - gof2[i]
-        qic3[i] <- qic(f3)
-        qicu3[i] <- qicu(f3)
-        bqicu3[i] <- bqicu(f3)
-        gof3[i] <- gof(f3)
-        penalty3[i] <- 2 * cic(f3)
-        penaltyu3[i] <- qicu3[i] - gof3[i]
-        penaltyb3[i] <- bqicu3[i] - gof3[i]
+        ### Pulling covariate matrices ####
+        XX <- X[, best_sub[[i]]]
+        ### Fitting each best subset model ####
+        f <- geepack::geeglm(y ~ XX, id = id, corstr = wc[i])
+        ### Obtaining information criterion values ####
+        q[i] <- qic(f)
+        gf_q[i] <- gof(f)
+        pen_q[i] <- 2 * cic(f)
+        qu[i] <- qicu(f)
+        gf_qu[i] <- gof(f)
+        pen_qu[i] <- qu[i] - gf_qu[i]
+        bqu[i] <- bqicu(f)
+        gf_bqu[i] <- gof(f)
+        pen_bqu[i] <- bqu[i] - gf_bqu[i]
     }
-    # Determining the best_sub index ####
-    # that resulted in the minimum QIC,
-    # QICu, and BQICu values
-    w1 <- which.min(qic1)
-    w2 <- which.min(qic2)
-    w3 <- which.min(qic3)
-    wu1 <- which.min(qicu1)
-    wu2 <- which.min(qicu2)
-    wu3 <- which.min(qicu3)
-    wb1 <- which.min(bqicu1)
-    wb2 <- which.min(bqicu2)
-    wb3 <- which.min(bqicu3)
-    # Updating res object ####
-    res_indp_qic[[j]] <- list(
-        qic = qic1, gof = gof1, penalty = penalty1,
-        min = w1, qic_min = qic1[w1], vars = best_sub[[w1]]
+    ## Determining the best_sub index ####
+    ## that resulted in the minimum QIC,
+    ## QICu, and BQICu values
+    w_q <- which.min(q)
+    w_qu <- which.min(qu)
+    w_bqu <- which.min(bqu)
+    ## Updating res object(s) ####
+    res_qic[[j]] <- list(
+        ic = q, gof = gf_q, penalty = pen_q, corstr = wc,
+        min = w_q, ic_min = q[w_q], corstr_min = wc[w_q],
+        vars = best_sub[[w_q]]
     )
-    res_cs_qic[[j]] <- list(
-        qic = qic2, gof = gof2, penalty = penalty2,
-        min = w2, qic_min = qic2[w2], vars = best_sub[[w2]]
+    res_qicu[[j]] <- list(
+        ic = qu, gof = gf_qu, penalty = pen_qu, corstr = wc,
+        min = w_qu, ic_min = q[w_qu], corstr_min = wc[w_qu],
+        vars = best_sub[[w_qu]]
     )
-    res_ar1_qic[[j]] <- list(
-        qic = qic3, gof = gof3, penalty = penalty3,
-        min = w3, qic_min = qic3[w3], vars = best_sub[[w3]]
+    res_bqicu[[j]] <- list(
+        ic = bqu, gof = gf_bqu, penalty = pen_bqu, corstr = wc,
+        min = w_bqu, ic_min = q[w_bqu], corstr_min = wc[w_bqu],
+        vars = best_sub[[w_bqu]]
     )
-    res_indp_qicu[[j]] <- list(
-        qicu = qicu1, gof = gof1, penalty = penaltyu1,
-        min = wu1, qicu_min = qicu1[wu1], vars = best_sub[[wu1]]
-    )
-    res_cs_qicu[[j]] <- list(
-        qicu = qicu2, gof = gof2, penalty = penaltyu2,
-        min = wu2, qicu_min = qicu2[wu2], vars = best_sub[[wu2]]
-    )
-    res_ar1_qicu[[j]] <- list(
-        qicu = qicu3, gof = gof3, penalty = penaltyu3,
-        min = wu3, qicu_min = qicu3[wu3], vars = best_sub[[wu3]]
-    )
-    res_indp_bqicu[[j]] <- list(
-        bqicu = bqicu1, gof = gof1, penalty = penaltyb1,
-        min = wb1, bqicu_min = bqicu1[wb1], vars = best_sub[[wb1]]
-    )
-    res_cs_bqicu[[j]] <- list(
-        bqicu = bqicu2, gof = gof2, penalty = penaltyb2,
-        min = wb2, bqicu_min = bqicu2[wb2], vars = best_sub[[wb2]]
-    )
-    res_ar1_bqicu[[j]] <- list(
-        bqicu = bqicu3, gof = gof3, penalty = penaltyb3,
-        min = wb3, bqicu_min = bqicu3[wb3], vars = best_sub[[wb3]]
-    )
+    ## Updating progress bar ####
     setTxtProgressBar(pb, j)
     if (j == nsims) {
         close(pb)
@@ -126,8 +87,6 @@ for (j in seq_len(nsims)) {
 
 # Save simulations ####
 save(
-    res_indp_qic, res_cs_qic, res_ar1_qic,
-    res_indp_qicu, res_cs_qicu, res_ar1_qicu,
-    res_indp_bqicu, res_cs_bqicu, res_ar1_bqicu,
+    res_qic, res_qicu, res_bqicu,
     file = "./simulations/outputs/norm_bqicu_sim/norm_bqicu_sim.RData"
 )
