@@ -97,9 +97,9 @@ legend_top(
 
 ```{r}
 plot(
-    x =  seq_len(nsims), y = gf_a / gf_q,
-    ylim = c(2.5, 3.5),
-    xlab = "Index", ylab = "Ratio of GOF (AIC / QIC)",
+    x =  seq_len(nsims), y = gf_a - gf_q,
+    ylim = c(1000, 2000),
+    xlab = "Index", ylab = "Difference of GOF (AIC - QIC)",
     type = "l", lwd = 2, col = "gray",
     bty = "n"
 )

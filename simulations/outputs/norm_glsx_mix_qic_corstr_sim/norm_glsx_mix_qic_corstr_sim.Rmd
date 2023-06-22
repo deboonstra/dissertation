@@ -96,9 +96,9 @@ plot(
 )
 
 plot(
-    x = seq_len(nsims), y = gf_lik / gf_quasi,
-    ylim = c(2, 3),
-    xlab = "Index", ylab = "Ratio of GOF (likelihood / quasi-likelihood)",
+    x = seq_len(nsims), y = gf_lik - gf_quasi,
+    ylim = c(1000, 2000),
+    xlab = "Index", ylab = "Difference of GOF (likelihood - quasi-likelihood)",
     type = "l", lwd = 2, col = "firebrick",
     bty = "n"
 )
