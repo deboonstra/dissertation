@@ -50,22 +50,22 @@ load("./simulations/outputs/norm_glsx_mix_qic_corstr_sim/norm_glsx_mix_qic_corst
 ## IC across the simulations {.tabset .tabset-fade .tabset-pills}
 Now for each of the models with the minimum IC, the criterion will be broken into its parts to see what is impacting the selection process. Additionally, this provides a look at the stability of the information criterion across the simulations. For these simulations, the goodness-of-fit (GOF) term was derived using either the likelihood or quasi-likelihood framework. When GLMs were used to fit the transformed response, the GOF was based on traditional likelihood. While when GEEs were used, the GOF was based on quasi-likelihood that assumes independence among the observations of the response. Unlike the GOF term, the penalty term of each IC was calculated using GEEs. The penalty is $2tr\left(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{R}\right)$, where $\widehat{\boldsymbol{\Omega}}_{I}$ and $\widehat{\mathbf{V}}_{R}$ are estimated using the original data data. Remember that $2tr\left(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{R}\right)$ is the penalty term used in QIC and CIC, and is needed when simulataneous selection of the mean and correlation structure is of interest. If selection of correlation structure is **not** needed, then QICu, AIC, or BIC could be used because the penalty term is focused on the number of parameters estimated.
 ```{r}
-ic_quasi <- sapply(res_quasi, function(x) {x$ic_min}, simplify = TRUE)
-ic_lik <- sapply(res_lik, function(x) {x$ic_min}, simplify = TRUE)
+ic_quasi <- sapply(res_quasi, function(x) x$ic_min, simplify = TRUE)
+ic_lik <- sapply(res_lik, function(x) x$ic_min, simplify = TRUE)
 
 plot(
-    x = seq_len(nsims), y = ic_quasi,
-    ylim = c(600, 1000),
-    xlab = "Index", ylab = "IC (quasi-likelihood)",
-    type = "l", lwd = 2, col = "gray",
-    bty = "n"
+  x = seq_len(nsims), y = ic_quasi,
+  ylim = c(600, 1000),
+  xlab = "Index", ylab = "IC (quasi-likelihood)",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
 )
 plot(
-    x = seq_len(nsims), y = ic_lik,
-    ylim = c(2000, 2400),
-    xlab = "Index", ylab = "IC (likelihood)",
-    type = "l", lwd = 2, col = "gray",
-    bty = "n"
+  x = seq_len(nsims), y = ic_lik,
+  ylim = c(2000, 2400),
+  xlab = "Index", ylab = "IC (likelihood)",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
 )
 ```
 
@@ -73,34 +73,34 @@ plot(
 ```{r}
 gf_quasi <- gf_lik <- rep(NA, nsims)
 for (k in seq_len(nsims)) {
-    w_quasi <- res_quasi[[k]]$min
-    w_lik <- res_lik[[k]]$min
-    gf_quasi[k] <- res_quasi[[k]]$gof[w_quasi]
-    gf_lik[k] <- res_lik[[k]]$gof[w_lik]
+  w_quasi <- res_quasi[[k]]$min
+  w_lik <- res_lik[[k]]$min
+  gf_quasi[k] <- res_quasi[[k]]$gof[w_quasi]
+  gf_lik[k] <- res_lik[[k]]$gof[w_lik]
 }
 
 plot(
-    x = seq_len(nsims), y = gf_quasi,
-    ylim = c(600, 1000),
-    xlab = "Index", ylab = "GOF (quasi-likelihood)",
-    type = "l", lwd = 2, col = "gray",
-    bty = "n"
+  x = seq_len(nsims), y = gf_quasi,
+  ylim = c(600, 1000),
+  xlab = "Index", ylab = "GOF (quasi-likelihood)",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
 )
 
 plot(
-    x = seq_len(nsims), y = gf_lik,
-    ylim = c(2000, 2400),
-    xlab = "Index", ylab = "GOF (likelihood)",
-    type = "l", lwd = 2, col = "gray",
-    bty = "n"
+  x = seq_len(nsims), y = gf_lik,
+  ylim = c(2000, 2400),
+  xlab = "Index", ylab = "GOF (likelihood)",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
 )
 
 plot(
-    x = seq_len(nsims), y = gf_lik - gf_quasi,
-    ylim = c(1000, 2000),
-    xlab = "Index", ylab = "Difference of GOF (likelihood - quasi-likelihood)",
-    type = "l", lwd = 2, col = "firebrick",
-    bty = "n"
+  x = seq_len(nsims), y = gf_lik - gf_quasi,
+  ylim = c(1460, 1480),
+  xlab = "Index", ylab = "Difference of GOF (likelihood - quasi-likelihood)",
+  type = "l", lwd = 2, col = "firebrick",
+  bty = "n"
 )
 ```
 
@@ -108,26 +108,26 @@ plot(
 ```{r}
 pen_quasi <- pen_lik <-  rep(NA, nsims)
 for (k in seq_len(nsims)) {
-    w_quasi <- res_quasi[[k]]$min
-    w_lik <- res_lik[[k]]$min
-    pen_quasi[k] <- res_quasi[[k]]$penalty[w_quasi]
-    pen_lik[k] <- res_lik[[k]]$penalty[w_lik]
+  w_quasi <- res_quasi[[k]]$min
+  w_lik <- res_lik[[k]]$min
+  pen_quasi[k] <- res_quasi[[k]]$penalty[w_quasi]
+  pen_lik[k] <- res_lik[[k]]$penalty[w_lik]
 }
 
 plot(
-    x = seq_len(nsims), y = pen_quasi,
-    ylim = c(0, 15),
-    xlab = "Index", ylab = "Penalty (quasi-likelihood)",
-    type = "l", lwd = 2, col = "gray",
-    bty = "n"
+  x = seq_len(nsims), y = pen_quasi,
+  ylim = c(0, 15),
+  xlab = "Index", ylab = "Penalty (quasi-likelihood)",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
 )
 
 plot(
-    x = seq_len(nsims), y = pen_lik,
-    ylim = c(0, 15),
-    xlab = "Index", ylab = "Penalty (likelihood)",
-    type = "l", lwd = 2, col = "gray",
-    bty = "n"
+  x = seq_len(nsims), y = pen_lik,
+  ylim = c(0, 15),
+  xlab = "Index", ylab = "Penalty (likelihood)",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
 )
 ```
 
@@ -145,25 +145,25 @@ For measuring the overall performance of selecting the mean structure, a functio
 ```{r}
 # creating a function to generate a look at the simulation results
 look <- function(x) {
-    under <- 0
-    exact <- 0
-    mis <- 0
-    over <- 0
-    over_inc <- 0
-    for (k in seq_len(nsims)) {
-        under <- under + (length(x[[k]]$vars) < l)
-        exact <- exact + identical(x[[k]]$vars, w)
-        mis <- mis + (!identical(x[[k]]$vars, w) & (length(x[[k]]$vars) == l))
-        over <- over + (length(x[[k]]$vars) > l)
-        over_inc <- over_inc + ((length(x[[k]]$vars) > l) & all(w %in% x[[k]]$vars))
-    }
-    return(
-        data.frame(
-            under = under, exact = exact,
-            mis = mis, over = over,
-            over_inc = over_inc
-        )
+  under <- 0
+  exact <- 0
+  mis <- 0
+  over <- 0
+  over_inc <- 0
+  for (k in seq_along(x)) {
+    under <- under + (length(x[[k]]$vars) < l)
+    exact <- exact + identical(x[[k]]$vars, w)
+    mis <- mis + (!identical(x[[k]]$vars, w) & (length(x[[k]]$vars) == l))
+    over <- over + (length(x[[k]]$vars) > l)
+    over_inc <- over_inc + ((length(x[[k]]$vars) > l) & all(w %in% x[[k]]$vars))
+  }
+  return(
+    data.frame(
+      under = under, exact = exact,
+      mis = mis, over = over,
+      over_inc = over_inc
     )
+  )
 }
 ```
 
@@ -179,27 +179,30 @@ data.frame(
 ### Correlation
 Now for measuring the overall performance of selecting the correlation structure, the table below presents the number of models, where the correlation structure selected from the best subsets was AR(1) (`ar1`), exchangeable (`exchangeable`), and independence (`independence`). Note that proper selection of the mean structure is not needed to select the correlation structure correctly.
 ```{r}
-corstr_quasi <- sapply(res_quasi, function(x) {x$corstr_min}, simplify = TRUE)
-corstr_lik <- sapply(res_lik, function(x) {x$corstr_min}, simplify = TRUE)
+corstr_quasi <- sapply(res_quasi, function(x) x$corstr_min, simplify = TRUE)
+corstr_lik <- sapply(res_lik, function(x) x$corstr_min, simplify = TRUE)
 
 corstr_count <- function(x) {
-    count_indp <- 0
-    count_cs <- 0
-    count_ar1 <- 0
-    for (i in seq_along(x)) {
-        count_indp <- count_indp + (x[i] == "independence")
-        count_cs <- count_cs + (x[i] == "exchangeable")
-        count_ar1 <- count_ar1 + (x[i] == "ar1") 
-    }
-    temp <- data.frame(
-        indpendenence = count_indp, exchangeable = count_cs, ar1 = count_ar1
-    )
-    return(temp)
+  count_indp <- 0
+  count_cs <- 0
+  count_ar1 <- 0
+  count_un <- 0
+  for (i in seq_along(x)) {
+    count_indp <- count_indp + (x[i] == "independence")
+    count_cs <- count_cs + (x[i] == "exchangeable")
+    count_ar1 <- count_ar1 + (x[i] == "ar1")
+    count_un <- count_un + (x[i] == "unstructured")
+  }
+  temp <- data.frame(
+    indpendenence = count_indp, exchangeable = count_cs,
+    ar1 = count_ar1, un = count_un
+  )
+  return(temp)
 }
 
 data.frame(
-    lik = c("Quasi-likelihood", "Likelihood"),
-    dplyr::bind_rows(corstr_count(corstr_quasi), corstr_count(corstr_lik))
+  lik = c("Quasi-likelihood", "Likelihood"),
+  dplyr::bind_rows(corstr_count(corstr_quasi), corstr_count(corstr_lik))
 )
 ```
 
@@ -209,28 +212,30 @@ Based on these results, it appears that the correlation structure was selected a
 Thus, on average, the models, with the minimum information criteria, have mean structures that includes all the non-zero coefficients at minimum and the proper correlation structure.
 ```{r}
 joint <- function(x) {
-    p <- function(y) {
-        if (length(y) == 0) {
-            return(data.frame(under = 0, exact = 0, mis = 0, over = 0, over_inc = 0))
-        } else {
-            return(look(x = y))
-        }
+  p <- function(y) {
+    if (length(y) == 0) {
+      return(data.frame(under = 0, exact = 0, mis = 0, over = 0, over_inc = 0))
+    } else {
+      return(look(x = y))
     }
+  }
 
-    independence <- x[sapply(x, function(x) {x$corstr_min == "independence"}, simplify = TRUE)]
-    exchangeable <- x[sapply(x, function(x) {x$corstr_min == "exchangeable"}, simplify = TRUE)]
-    ar1 <- x[sapply(x, function(x) {x$corstr_min == "ar1"}, simplify = TRUE)]
+  independence <- x[sapply(x, function(x) x$corstr_min == "independence", simplify = TRUE)]
+  exchangeable <- x[sapply(x, function(x) x$corstr_min == "exchangeable", simplify = TRUE)]
+  ar1 <- x[sapply(x, function(x) x$corstr_min == "ar1", simplify = TRUE)]
+  un <- x[sapply(x, function(x) x$corstr_min == "unstructured", simplify = TRUE)]
 
-    ip <- p(independence)
-    ep <- p(exchangeable)
-    ap <- p(ar1)
+  ip <- p(independence)
+  ep <- p(exchangeable)
+  ap <- p(ar1)
+  up <- p(un)
 
-    return(dplyr::bind_rows(ip, ep, ap))
+  return(dplyr::bind_rows(ip, ep, ap, up))
 }
 
 data.frame(
-    lik = c("Quasi-likelihood", "", "", "Likelihood", "", ""),
-    corstr = rep(c("Independence", "Exchangeable", "AR(1)"), 2),
-    dplyr::bind_rows(joint(res_quasi), joint(res_lik))
+  lik = c("Quasi-likelihood", "", "", "", "Likelihood", "", "", ""),
+  corstr = rep(c("Independence", "Exchangeable", "AR(1)", "Unstructured"), 2),
+  dplyr::bind_rows(joint(res_quasi), joint(res_lik))
 )
 ```
