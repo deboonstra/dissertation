@@ -1,0 +1,29 @@
+---
+title: "Dissertation meeting"
+date: "June 15, 2023"
+output: html_document
+---
+
+# Talking points
+
+- Discuss simulation results for
+  - `norm_glsx_aic_sim`
+  - `norm_bqicu_corstr_sim`
+  - `norm_glsx_mix_qic_corstr`
+
+# Notes
+
+- Compare `norm_glsx_aic_sim` to `norm_glsx_bqicu_sim`
+- Compare `norm_bqicu_corstr_sim` to `norm_bqicu_sim`
+  - These have an issue with independence for QICu and BQICu.
+  - Thus, only QIC reported in `norm_glsx_mix_qic_corstr`.
+
+# Action items
+
+- Add unstructured correlation structure to `norm_bqicu_sim`.
+  - Unstructured gives best comparison to AIC and BIC after transformation.
+- Re-run `norm_glsx_mix_qic_corstr`, where
+  - All 189 models are fit based on 63 mean structures and 3 correlation structures.
+  - After fitting all 189 models, select the model with the lowest QIC, QICu, and BQICu.
+  - Report a table where the column are evaluating the mean structure selection and the rows are evaluating the correlation structure selection.
+- Determin the constant that separates the quasi-likelihood from the likelihood after the unstructured transformation is applied.
