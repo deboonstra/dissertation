@@ -494,18 +494,21 @@ and</li>
 </div>
 <div id="best-subsets" class="section level2">
 <h2>Best subsets</h2>
-<p>All of the <span class="math inline">\((2^6 - 1) \times 3 =
-189\)</span> subsets of the fully saturated model with the three
-correlation structures being investigated were fit using either
-generalized linear models (GLMs) or generalized estimating questions
-(GEEs). Then, the mean and correlation structure pairing that resulted
-in the minimum information criterion (IC) value was selected as the best
-fitting models. These results are different from
-<code>norm_glsx_bqicu_sim</code> because with those simulations the
-correlation structure was <strong>not</strong> selected. Additionally,
-the goodness-of-fit (GOF) term of IC is obtained using the transformed
-response and covariate matrix while the penalty term is calculated using
-the original data.</p>
+<p>All of the <span class="math inline">\((2^6 - 1) \times 4 =
+252\)</span> subsets of the fully saturated model with the four
+correlation structures (independence, exchangeable, AR(1), and
+unstructured) being investigated were fit using either generalized
+linear models (GLMs) or generalized estimating questions (GEEs). The
+estimating procedure used depends on the likelihood framework of
+interest. Then, for each simulated data set and likelihood framework,
+the mean and correlation structure pairing that resulted in the minimum
+information criterion (IC) value was selected as the best fitting model.
+The goodness-of-fit (GOF) term of the ICs in these simulations are
+obtained using the transformed response and covariate matrix while the
+penalty term is calculated using the original data. These results are
+different from <code>norm_glsx_bqicu_sim</code> because with those
+simulations the correlation structure was <strong>not</strong>
+selected.</p>
 <pre class="r"><code>nsims &lt;- 100L
 beta &lt;- c(2.0, 3.0, 0.5, 0.0, 0.0, 0.0)
 w &lt;- which(beta != 0)
@@ -516,6 +519,9 @@ l &lt;- length(w)</code></pre>
 <h1>Results</h1>
 <p>The simulation results are stored in:</p>
 <pre class="r"><code>load(&quot;./simulations/outputs/norm_glsx_mix_qic_corstr_sim/norm_glsx_mix_qic_corstr_sim.RData&quot;) </code></pre>
+<p>and should be compared to <code>norm_bqicu_sim</code> to see the
+impact the transformation process has on the selection of the mean and
+correlation structures.</p>
 <div id="ic-across-the-simulations" class="section level2 tabset tabset-fade tabset-pills">
 <h2 class="tabset tabset-fade tabset-pills">IC across the
 simulations</h2>
@@ -683,10 +689,13 @@ are based on likelihood framework used to define the GOF term.</p>
 <p>Now for measuring the overall performance of selecting the
 correlation structure, the table below presents the number of models,
 where the correlation structure selected from the best subsets was AR(1)
-(<code>ar1</code>), exchangeable (<code>exchangeable</code>), and
-independence (<code>independence</code>). Note that proper selection of
-the mean structure is not needed to select the correlation structure
-correctly.</p>
+(<code>ar1</code>), exchangeable (<code>exchangeable</code>),
+independence (<code>independence</code>), and unstructured
+(<code>un</code>). Note that proper selection of the mean structure is
+not needed to select the correlation structure correctly. Considering
+the within-subject random effects are generated using the exchangeable
+correlation structure, we would like to see that the exchangeable
+structured is selected the most.</p>
 <pre class="r"><code>corstr_quasi &lt;- sapply(res_quasi, function(x) x$corstr_min, simplify = TRUE)
 corstr_lik &lt;- sapply(res_lik, function(x) x$corstr_min, simplify = TRUE)
 
@@ -715,15 +724,15 @@ data.frame(
 <pre><code>##                lik indpendenence exchangeable ar1 un
 ## 1 Quasi-likelihood             0           13   0 87
 ## 2       Likelihood             0           13   0 87</code></pre>
-<p>Based on these results, it appears that the correlation structure was
-selected appropriately every single time regardless of likelihood
+<p>Based on these results, it appears that the unstructured correlation
+structure was selected the majority of time regardless of likelihood
 framework used to define the goodness-of-fit term.</p>
 </div>
 <div id="joint" class="section level3">
 <h3>Joint</h3>
 <p>Thus, on average, the models, with the minimum information criteria,
 have mean structures that includes all the non-zero coefficients at
-minimum and the proper correlation structure.</p>
+minimum and an improper correlation structure.</p>
 <pre class="r"><code>joint &lt;- function(x) {
   p &lt;- function(y) {
     if (length(y) == 0) {

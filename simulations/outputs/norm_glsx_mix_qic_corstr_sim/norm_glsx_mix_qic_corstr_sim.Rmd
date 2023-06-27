@@ -31,7 +31,7 @@ After the data was simulated, the response, $\mathbf{y},$ and the covariate matr
 3. obtaining $\mathbf{y}^{*} = \mathbf{V}_{i}^{-1/2}\mathbf{y}$ and $\mathbf{X}^{*} = \mathbf{V}_{i}^{-1/2}\mathbf{X}$.
 
 ## Best subsets
-All of the $(2^6 - 1) \times 3 = 189$ subsets of the fully saturated model with the three correlation structures being investigated were fit using either generalized linear models (GLMs) or generalized estimating questions (GEEs). Then, the mean and correlation structure pairing that resulted in the minimum information criterion (IC) value was selected as the best fitting models. These results are different from `norm_glsx_bqicu_sim` because with those simulations the correlation structure was **not** selected. Additionally, the goodness-of-fit (GOF) term of IC is obtained using the transformed response and covariate matrix while the penalty term is calculated using the original data.
+All of the $(2^6 - 1) \times 4 = 252$ subsets of the fully saturated model with the four correlation structures (independence, exchangeable, AR(1), and unstructured) being investigated were fit using either generalized linear models (GLMs)  or generalized estimating questions (GEEs). The estimating procedure used depends on the likelihood framework of interest. Then, for each simulated data set and likelihood framework, the mean and correlation structure pairing that resulted in the minimum information criterion (IC) value was selected as the best fitting model. The goodness-of-fit (GOF) term of the ICs in these simulations are obtained using the transformed response and covariate matrix while the penalty term is calculated using the original data. These results are different from `norm_glsx_bqicu_sim` because with those simulations the correlation structure was **not** selected. 
 
 ```{r}
 nsims <- 100L
@@ -46,6 +46,7 @@ The simulation results are stored in:
 ```{r loading sim res}
 load("./simulations/outputs/norm_glsx_mix_qic_corstr_sim/norm_glsx_mix_qic_corstr_sim.RData") 
 ```
+and should be compared to `norm_bqicu_sim` to see the impact the transformation process has on the selection of the mean and correlation structures.
 
 ## IC across the simulations {.tabset .tabset-fade .tabset-pills}
 Now for each of the models with the minimum IC, the criterion will be broken into its parts to see what is impacting the selection process. Additionally, this provides a look at the stability of the information criterion across the simulations. For these simulations, the goodness-of-fit (GOF) term was derived using either the likelihood or quasi-likelihood framework. When GLMs were used to fit the transformed response, the GOF was based on traditional likelihood. While when GEEs were used, the GOF was based on quasi-likelihood that assumes independence among the observations of the response. Unlike the GOF term, the penalty term of each IC was calculated using GEEs. The penalty is $2tr\left(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{R}\right)$, where $\widehat{\boldsymbol{\Omega}}_{I}$ and $\widehat{\mathbf{V}}_{R}$ are estimated using the original data data. Remember that $2tr\left(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{R}\right)$ is the penalty term used in QIC and CIC, and is needed when simulataneous selection of the mean and correlation structure is of interest. If selection of correlation structure is **not** needed, then QICu, AIC, or BIC could be used because the penalty term is focused on the number of parameters estimated.
@@ -177,7 +178,7 @@ data.frame(
 ```
 
 ### Correlation
-Now for measuring the overall performance of selecting the correlation structure, the table below presents the number of models, where the correlation structure selected from the best subsets was AR(1) (`ar1`), exchangeable (`exchangeable`), and independence (`independence`). Note that proper selection of the mean structure is not needed to select the correlation structure correctly.
+Now for measuring the overall performance of selecting the correlation structure, the table below presents the number of models, where the correlation structure selected from the best subsets was AR(1) (`ar1`), exchangeable (`exchangeable`), independence (`independence`), and unstructured (`un`). Note that proper selection of the mean structure is not needed to select the correlation structure correctly. Considering the within-subject random effects are generated using the exchangeable correlation structure, we would like to see that the exchangeable structured is selected the most.
 ```{r}
 corstr_quasi <- sapply(res_quasi, function(x) x$corstr_min, simplify = TRUE)
 corstr_lik <- sapply(res_lik, function(x) x$corstr_min, simplify = TRUE)
@@ -206,10 +207,10 @@ data.frame(
 )
 ```
 
-Based on these results, it appears that the correlation structure was selected appropriately every single time regardless of likelihood framework used to define the goodness-of-fit term.
+Based on these results, it appears that the unstructured correlation structure was selected the majority of time regardless of likelihood framework used to define the goodness-of-fit term.
 
 ### Joint
-Thus, on average, the models, with the minimum information criteria, have mean structures that includes all the non-zero coefficients at minimum and the proper correlation structure.
+Thus, on average, the models, with the minimum information criteria, have mean structures that includes all the non-zero coefficients at minimum and an improper correlation structure.
 ```{r}
 joint <- function(x) {
   p <- function(y) {
