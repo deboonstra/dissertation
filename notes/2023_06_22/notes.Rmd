@@ -1,0 +1,32 @@
+---
+title: "Dissertation meeting"
+date: "June 22, 2023"
+output: html_document
+---
+
+# Talking points
+
+- Discuss the selection properties of
+  - AIC and QIC (`norm_aic_sim`),
+  - of QIC, QICu, and BQICu (`norm_bqicu_sim`), and
+  - when GLSX is applied to GOF term and penalty is based on original data (`norm_glsx_mix_qic_corstr`).
+
+# Notes
+
+The results for `norm_glsx_mix_qic_corstr` show that the $GOF_{quasi} + c \approx GOF_{lik}$ after the transformation.
+
+- Next, we should do:
+  - Going forward use only the likelihood after transforming the data because $GOF_{quasi} + c \approx GOF_{lik}$.
+  - Add unstructured correlation structure to `norm_glsx_mix_qic_corstr` results.
+  - Note overfitting as mush is a bonus to this method. This property is similar to AICC in comparison to AIC.
+
+# Action items
+
+- Add unstructured to `norm_glsx_mix_qic_corstr`
+- Add other generated data mechanism for AR(1), independence, and unstructured correlation structures.
+- Run a two-stage selection approach simulation.
+  - Determine the working correlation structure via CIC then use QIC with the selected working correlation to find the mean structure.
+  - Determine the working correlation via CIC with the original data, then transform data based on the working correlation structure. Use the transformed data to determine the mean structure.
+- Try out other distributions with the identity link function.
+  - If time allows. 
+- Ask Joe what he said about comparing AIC and BIC after transformation of data to QICu.
