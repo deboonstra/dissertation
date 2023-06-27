@@ -21,9 +21,7 @@ indp <- function(n) {
 
 # un (unstructured) ####
 un <- function(n) {
-  mat <- matrix(0, n, n)
-  mat[upper.tri(mat)] <- runif(sum((n - 1):1), -1, 1)
-  mat <- mat + t(mat)
-  diag(mat) <- 1
+  mat <- matrix(runif(n^2) * 2 - 1, ncol = n) 
+  mat <- t(mat) %*% mat
   mat
 }
