@@ -85,5 +85,5 @@ sim_data <- function(
   # returning structued list of class "normal"
   colnames(X) <- paste0("X", seq_len(p))
   names(beta) <- paste0("X", seq_len(p))
-  return(structure(list(y = y, X = X, id = id, beta = beta), class = "normal"))
+  return(structure(list(y = y, X = X, id = id, beta = beta), class = "sim.data"))
 }

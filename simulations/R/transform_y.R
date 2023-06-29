@@ -6,51 +6,51 @@
 # of V. See the notes written on 2023_04_20, 2023_05_18, and 2023_05_31.
 
 transform_y <- function(data) {
-    if (class(data) != "normal") {
-        stop("data must be generated from sim_dat.")
+  if (class(data) != "sim.data") {
+    stop("data must be generated from sim_dat.")
+  }
+  # pulling data
+  y <- data$y
+  X <- data$X
+  id <- data$id
+  # initial fit
+  # full model with unstructured working correlation structure
+  f0 <- geepack::geeglm(y ~ X, id = id, corstr = "unstructured")
+  geese <- f0$geese
+  # obtaining scaled parameter
+  phi <- geese$gamma
+  # obtaining correlation estimates
+  alpha <- geese$alpha
+  # creating working correlation matrix
+  ra <- diag(1, n)
+  index <- lapply(
+    gsub("alpha.", "", names(alpha)),
+    function(x) {
+      hold <- unlist(strsplit(x, split = ":"))
+      hold <- as.integer(hold)
+      data.frame(i = hold[1], j = hold[2])
     }
-    # pulling data
-    y <- data$y
-    X <- data$X
-    id <- data$id
-    # initial fit
-    # full model with unstructured working correlation structure
-    f0 <- geepack::geeglm(y ~ X, id = id, corstr = "unstructured")
-    geese <- f0$geese
-    # obtaining scaled parameter
-    phi <- geese$gamma
-    # obtaining correlation estimates
-    alpha <- geese$alpha
-    # creating working correlation matrix
-    ra <- diag(1, n)
-    index <- lapply(
-        gsub("alpha.", "", names(alpha)),
-        function(x) {
-            hold <- unlist(strsplit(x, split = ":"))
-            hold <- as.integer(hold)
-            data.frame(i = hold[1], j = hold[2])
-        }
-    )
-    index <- dplyr::bind_rows(index)
-    index <- dplyr::bind_rows(
-        index,
-        data.frame(i = index$j, j = index$i)
-    )
-    index$corr <- rep(unname(alpha), 2)
-    for (i in 1:nrow(index)) {
-        ii <- index[i, 1]
-        jj <- index[i, 2]
-        ra[ii, jj] <- index[i, 3]
-    }
-    # calculating inverse of the square root of V
-    V <- phi * ra
-    sqrt_V <- expm::sqrtm(V)
-    inv_sqrt_V <- Matrix::solve(sqrt_V)
-    inv_sqrt_V <- lapply(seq_len(N), function(x) inv_sqrt_V)
-    inv_sqrt_V <- Matrix::bdiag(inv_sqrt_V)
-    # final getting transformed y and X
-    yy <- c(as.matrix(inv_sqrt_V %*% y))
-    XX <- as.matrix(inv_sqrt_V %*% X)
-    # returning transform.y object
-    return(structure(list(y = yy, X = XX), class = "transform.y"))
+  )
+  index <- dplyr::bind_rows(index)
+  index <- dplyr::bind_rows(
+    index,
+    data.frame(i = index$j, j = index$i)
+  )
+  index$corr <- rep(unname(alpha), 2)
+  for (i in 1:nrow(index)) {
+    ii <- index[i, 1]
+    jj <- index[i, 2]
+    ra[ii, jj] <- index[i, 3]
+  }
+  # calculating inverse of the square root of V
+  V <- phi * ra
+  sqrt_V <- expm::sqrtm(V)
+  inv_sqrt_V <- Matrix::solve(sqrt_V)
+  inv_sqrt_V <- lapply(seq_len(N), function(x) inv_sqrt_V)
+  inv_sqrt_V <- Matrix::bdiag(inv_sqrt_V)
+  # final getting transformed y and X
+  yy <- c(as.matrix(inv_sqrt_V %*% y))
+  XX <- as.matrix(inv_sqrt_V %*% X)
+  # returning transform.y object
+  return(structure(list(y = yy, X = XX), class = "transform.y"))
 }
