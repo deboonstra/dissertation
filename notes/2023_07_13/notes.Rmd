@@ -1,0 +1,8 @@
+---
+title: "Dissertation meeting"
+date: "July 13, 2023"
+output: html_document
+---
+
+# Notes
+Are there any methods proposed that include estimation of $\boldsymbol{\beta}$, $\phi$, and $\boldsymbol{\alpha}$? Currently, GEEs only focus on $\boldsymbol{\beta}$ and other estimating equations are used to estimate $\phi$ and $\boldsymbol{\alpha}$.
