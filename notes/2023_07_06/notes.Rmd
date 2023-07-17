@@ -1,0 +1,27 @@
+---
+title: "Dissertation meeting"
+date: "July 06, 2023"
+output: html_document
+---
+
+# Talking points
+
+- Discuss the `hin_carey_wang_2007` paper (CIC)
+- Discuss the `hiin_wang_2009` paper (CIC)
+- I need to determine how QIC and CIC are estimating the $$tr(\boldsymbol{\Omega}_{I}\mathbf{V}_{R}).$$ Does it use $\hat{\boldsymbol{\beta}}(I)$ and $\hat{\phi}(I)$ in $\boldsymbol{\Omega}_{I}$?
+
+# Notes
+
+Because the $\hat{\boldsymbol{\Omega}_{I}}$ is based on the independence assumption, we need to investigate the properties of the trace term.
+
+  - In QIC(R) and CIC(R), $\hat{\boldsymbol{\Omega}}_{I} = \sum_{i = 1}^{n}\mathbf{D}_{i}^{\top}\mathbf{A}_{i}^{-1}\mathbf{D}_{i}$ given $\hat{\boldsymbol{\beta}}(R)$ and $\hat{\phi}(R)$.
+  - Notice that $\mathbf{R}_{i}(\boldsymbol{\alpha})$ is not included, so the correlation is not not included in the model-based covariance matrix. Thus, the issue in the GOF term is also in the penalty term.
+  - What would happend if $tr(\hat{\boldsymbol{\Omega}}_{I}\hat{\mathbf{V}}_{R})$ became $tr(\hat{\boldsymbol{\Omega}}_{R}\hat{\mathbf{V}}_{R})$?
+  - Also, if $\hat{\boldsymbol{\Omega}}_{I}$ is based on the transformed independent data. The transformation is based on the assumed correlation structure.
+
+# Action items
+
+- Read paper Joe sent related to Phil's PA.
+- Come up with a naming convention for dissertation
+  - See previous notes
+- Work on investigating $tr(\hat{\boldsymbol{\Omega}}_{I}\hat{\mathbf{V}}_{R})$ and its variants.
