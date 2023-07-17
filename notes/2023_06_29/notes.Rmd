@@ -1,0 +1,29 @@
+---
+title: "Dissertation meeting"
+date: "June 29, 2023"
+output: html_document
+---
+
+# Talking points
+
+- Discuss the contents of the email I sent on June 27th.
+  - Updated simulations
+  - Questions
+
+# Notes
+
+- Come up with a naming convention for the information criterions based on the likelihood, penalty, and transformation.
+- Going forward we will use the traditional likelihood for the GOF term after the transformation has occurred. 
+  - The differenes between the GOF terms appears to be off by a constant.
+  - The constant is not consistent across the simulations because of the alogrithms used.
+- Examine the CIC paper to see the properties of this information criteria when selecting the working correlation structure.
+  - This needs to be investigated because unstructured is being selected too much.
+- In future simulations
+  - start reporting the average value of the penalty terms.
+  - Calculate the $R^{2}$ for each of the simulations based of the different simulation settings.
+    - We are trying to investigate the signal-to-noise ratios. The `sim_data2` simulations may have a lower signal-to-noise ration resulting in the true model not being found.
+
+# Action items
+
+- Come up with a naming convention for the information criterions based on the likelihood, penalty, and transformation.
+- Examine the CIC paper to see the properties of this information criteria when selecting the working correlation structure.
