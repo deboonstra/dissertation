@@ -1,0 +1,128 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+% for math
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% for hyperlinks
+\usepackage{hyperref}
+% for captions
+\usepackage{caption}
+% strict table placement
+\usepackage{float}
+% Setting margins
+\usepackage{geometry}
+\geometry{margin = 1in}
+% colors
+\usepackage{xcolor}
+
+%from https://github.com/deboonstra/boonstra-latex.git
+\input{commands}
+
+\title{Notation}
+\author{D. Erik Boonstra, MS}
+\date{Summer 2023}
+
+\begin{document}
+\maketitle
+
+\noindent The current version of the notation for this project is based on Pan 2001a with some modifications made by D. Erik Boonstra and Joseph E. Cavanuagh. 
+
+\section*{Data generation}
+\noindent Suppose we have a random sample of observations from $N$ individuals. For each individual $i$, we have
+\begin{itemize}
+  \item $\y_{i} = \begin{pmatrix}
+    y_{i1} & \ldots & y_{in_{i}}
+  \end{pmatrix}\Tr$,
+  \item covariates $\X_{i} = \begin{pmatrix}
+    \x_{i1}\Tr & \ldots & \x_{in_{i}}\Tr
+  \end{pmatrix}\Tr$, where $\x_{ij}$ is a $p-$dimensional vector,
+  \item conditional on the covariates the observations of $\y_{i}$ are correlated but $\y_{i}$ and $\y_{k}$ are independent for all $i \neq k$ ,
+  \item $\cD = \left\{(\y_{1}, \X_{1}), \ldots, (\y_{N}, \X_{N})\right\}$, and
+  \item $g(\bm_{i}) = \X_{i}\bb$,
+\end{itemize}
+where $\Ex(\y_{i}\mid\X_{i}) = \bm_{i}$, $g(\cdot)$ is a specified link function, and $\bb = \begin{pmatrix}
+  \beta_{1} & \ldots & \beta_{p}
+\end{pmatrix}\Tr$ is a vector of unknown regression parameters to be estimated.
+
+\section*{Generalized estimating equations}
+\noindent For \textit{generalized estimating equations} (GEEs), the estimates for $\bb$ are obtained by using the following estimating equations (Liang and Zeger, 1986)
+\begin{equation}
+  \label{eqn:gee}
+  S(\bb; \R, \cD) = \sum_{i = 1}^{N}\D_{i}\Tr\V_{i}^{-1}(\y_{i} - \bm_{i}) = 0,
+\end{equation}
+where $\D_{i} = \D_{i}(\bb) = \partial\bm_{i}(\bb)/\partial\bb\Tr$ and $\V_{i}$ is the working covariance matrix of $\y_{i}$. This covariance matrix, $\V_{i}$, can be expressed as
+\begin{equation*}
+  \V_{i} = \A_{i}^{1/2}\R_{i}(\ba)\A_{i}^{1/2},
+\end{equation*}
+with $\R = \R_{i}(\ba)$ being the working correlation matrix and $\A_{i}$ is a diagonal matrix of marginal variance, $\Var(y_{ij}) = \phi\nu(\mu_{ij})$, where $\phi$ is the dispersion parameter and $\nu(\cdot)$ is mean-to-variance relationship defined by link function, $g(\cdot)$. GEEs are based on the quasi-likelihood. So, for simplicity, suppose we have a scalar response variable, $y$. Then, the (log) quasi-likelihood function defined by McCullagh and Nelder, 1989 is
+\begin{equation}
+  \label{eqn:qfn}
+  Q(\mu, \phi; y) = \int_{y}^{\mu} \frac{y - t}{\phi\nu(t)}dt,
+\end{equation}
+where $\mu = \Ex(y)$ and $\Var(y) = \phi\nu(\mu).$ With a $1 \times p$ covariate $\x$ and a specified regression model
+\begin{equation*}
+  \Ex(y) = \mu = g^{-1}(\x\bb),
+\end{equation*}
+the quasi-likelihood may be written as
+\begin{align*}
+  Q(\mu, \phi; y) &= Q(g^{-1}(\x\bb), \phi; y) \\
+  &= Q(\bb, \phi; (y, \x)).
+\end{align*}
+Now if the working independence model, $\R = \I$ is used, the working assumption is that the paired observations $(y_{ij}, \X_{ij})$ in $\cD$ are independent. Thus,
+\begin{equation}
+  \label{eqn:qbeta}
+  Q(\bb, \phi; \I, \cD) = \sum_{i = 1}^{N}\sum_{j = 1}^{n_{i}}Q\left[\bb, \phi; (y_{ij}, \X_{ij})\right],
+\end{equation}
+and it is easy to see that $S(\bb; \I, \cD)$ is equivalent to $\partial Q(\bb, \phi; \I, \cD)/\partial\bb$. The likelihood equivalent to $Q(\bb, \phi; \I, \cD)$ would be the log-likelihood, $\ell(\bb, \phi; \cD),$ function. For the exponential dispersion family, $Q(\bb, \phi; \I, \cD)$ and $\ell(\bb, \phi; \cD)$ are equivalent up to a constant, $c$. Assuming $\phi$ is known or estimated by another set of estimating equations, the estimate for $\bb$ is $\bb(\R)$ using the estimating equations in \ref{eqn:gee}. Additionally, the $\cov(\bbh)$ has a consistent robust or sandwich based estimator, $\hat{\V}_{r}$; and, the empirical or model-based estimator is
+\begin{equation*}
+  \hat{\bO}_{r} = \frac{-\partial^{2}Q(\bb; \R, \cD)}{\partial\bb\partial\bb\Tr}\bigg|_{\bb = \bbh(\R)}.
+\end{equation*}
+
+\section*{Data transformation}
+With the robust estimator of $\cov(\bbh)$ now being defined, suppose $\y_{i}^{*}$ and $\X_{i}^{*}$ are $\y_{i}$ and $\X_{i}$ transformed by $\R$ such that
+\begin{align*}
+  \y_{i}^{*} &= \hat{\V}_{r}^{-1}\y_{i} \\
+  \X_{i}^{*} &= \hat{\V}_{r}^{-1}\X_{i},
+\end{align*}
+and $\cD^{*} = \left\{(\y_{1}^{*}, \X_{1}^{*}), \ldots, (\y_{N}^{*}, \X_{N}^{*})\right\}.$
+
+\pagebreak
+
+\section*{Information criterions}
+The table below is the current collection of the information criterions proposed and investigated. Using the notation defined previously and letting GOF abbreviate goodness-of-fit term, we have the following.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lcccl}
+    \hline
+    \hline
+    Name & Abbreviation & GOF & Penalty & Notes \\
+    \hline
+    & & & & \\
+    "An" information & AIC & $-2\ell(\bbh, \cD)$ & $2p$ & \\
+    criteria & & & \\
+    Bayesian information & BIC & $-2\ell(\bbh, \cD)$ & $\log(N)p$ & \\
+    criterion & & & & \\
+    Quasi-likelihood & QIC(R) & $-2Q(\bbh(\R), \I, \cD)$ & $2tr(\hat{\bO}_{\I}\hat{\V}_{r})$ & \\
+    under independence & & & & \\
+    model criterion & & & & \\
+    & QICu(R) & $-2Q(\bbh(\R), \I, \cD)$ & $2p$ & $tr(\hat{\bO}_{\I}\hat{\V}_{r}) = p \text{ if } \hat{\bO}_{\I} \approxeq \hat{\V}_{r} $ \\
+    & BQICu(R) & $-2Q(\bbh(\R), \I, \cD)$ & $\log(N)p$ & Completely made up by DEB \\
+    Correlation information & CIC(R) & & $2tr(\hat{\bO}_{\I}\hat{\V}_{r})$ & \\
+    criteria & & & & \\
+    \hline
+    & & & & \\
+    & $\text{AIC}^{*}$ & $-2\ell(\bbh^{*}, \cD^{*})$ & $2p$ & \\
+    & $\text{IC}^{*}(\text{R})$ & $-2\ell(\bbh^{*}, \cD^{*})$ & $2tr(\hat{\bO}_{\I}\hat{\V}_{r})$ & \\
+    & $\text{QIC}^{*}(\text{I})$ & $-2Q(\bbh^{*}(\I), \I, \cD^{*})$ & $2tr(\hat{\bO}_{\I}^{*}\hat{\V}_{r}^{*})$ & \\
+    & $\text{QIC}^{*}(\text{R})$ & $-2Q(\bbh^{*}(\I), \I, \cD^{*})$ & $2tr(\hat{\bO}_{\I}\hat{\V}_{r})$ & Penalty is based on $\cD$ not $\cD^{*}$\\
+    & $\text{QICu}^{*}(\text{I})$ & $-2Q(\bbh^{*}(\I), \I, \cD^{*})$ & $2p$ & \\
+    & $\text{BQICu}^{*}(\text{I})$ & $-2Q(\bbh^{*}(\I), \I, \cD^{*})$ & $\log(N)p$ & \\
+    & & & & \\
+    \hline
+    \hline
+  \end{tabular}
+\end{table}
+\noindent Through simulations it was observed that $-2\ell(\bbh^{*}, \cD^{*}) = -2Q(\bbh^{*}(\I), \I, \cD^{*}) + c$. 
+\end{document}
