@@ -7,7 +7,7 @@ output:
 
 # System setup
 ```{r r loading packages, results = FALSE, message = FALSE}
-R <- list.files(path = "./simulations/R", pattern = "*.R", full.names = TRUE)
+R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
 library(knitr)
 library(kableExtra)
@@ -36,7 +36,7 @@ l <- length(w)
 # Results
 The simulations results are stored in:
 ```{r loading sim res}
-load("./simulations/outputs/norm_bqicu_sim/norm_bqicu_sim.RData")
+load("./outputs/norm_bqicu_sim/norm_bqicu_sim.RData")
 ```
 
 and provide an overall look at the performane of QIC, QICu, and BQICu.

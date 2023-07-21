@@ -7,7 +7,7 @@ output:
 
 # System setup
 ```{r loading packages, results = FALSE, message = FALSE}
-R <- list.files(path = "./simulations/R", pattern = "*.R", full.names = TRUE)
+R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
 library(knitr)
 library(kableExtra)
@@ -44,7 +44,7 @@ l <- length(w)
 
 The simulation results are stored in:
 ```{r loading sim res}
-load("./simulations/outputs/norm_glsx_mix_qic_corstr_sim/norm_glsx_mix_qic_corstr_sim.RData") 
+load("./outputs/norm_glsx_mix_qic_corstr_sim/norm_glsx_mix_qic_corstr_sim.RData") 
 ```
 and should be compared to `norm_bqicu_sim` to see the impact the transformation process has on the selection of the mean and correlation structures.
 

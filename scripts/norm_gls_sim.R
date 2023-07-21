@@ -3,7 +3,7 @@
 # GOF term in QIC. See the 2023_04_20 and 2023_05_18 notes for more detail.
 
 # Loading libraries and functions ####
-R <- list.files(path = "./simulations/R", pattern = "*.R", full.names = TRUE)
+R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
 
 # Defining global data simulation settings ####
@@ -73,5 +73,5 @@ for (j in seq_len(nsims)) {
 # Save simulations ####
 save(
     res_indp, res_cs, res_ar1,
-    file = "./simulations/outputs/norm_gls_sim/norm_gls_sim.RData"
+    file = "./outputs/norm_gls_sim/norm_gls_sim.RData"
 )

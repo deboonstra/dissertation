@@ -4,7 +4,7 @@
 # based on the original data.
 
 # Loading libraries and functions ####
-R <- list.files(path = "./simulations/R", pattern = "*.R", full.names = TRUE)
+R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
 
 # Defining global data simulation settings ####
@@ -75,10 +75,10 @@ for (j in seq_len(nsims)) {
 }
 
 # Save simulation ####
-if (!dir.exists("./simulations/outputs/norm_glsx_mix_qic_corstr_sim/")) {
-  dir.create("./simulations/outputs/norm_glsx_mix_qic_corstr_sim/")
+if (!dir.exists("./outputs/norm_glsx_mix_qic_corstr_sim/")) {
+  dir.create("./outputs/norm_glsx_mix_qic_corstr_sim/")
 }
 save(
   res_quasi, res_lik,
-  file = "./simulations/outputs/norm_glsx_mix_qic_corstr_sim/norm_glsx_mix_qic_corstr_sim.RData"
+  file = "./outputs/norm_glsx_mix_qic_corstr_sim/norm_glsx_mix_qic_corstr_sim.RData"
 )

@@ -4,7 +4,7 @@
 # See 2023_05_31 notes for more information.
 
 # Loading libraries and functions ####
-R <- list.files(path = "./simulations/R", pattern = "*.R", full.names = TRUE)
+R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
 
 # Defining global data simulation settings ####
@@ -133,5 +133,5 @@ save(
     res_indp_qic, res_cs_qic, res_ar1_qic,
     res_indp_qicu, res_cs_qicu, res_ar1_qicu,
     res_indp_bqicu, res_cs_bqicu, res_ar1_bqicu,
-    file = "./simulations/outputs/norm_glsx_bqicu_sim/norm_glsx_bqicu_sim.RData"
+    file = "./outputs/norm_glsx_bqicu_sim/norm_glsx_bqicu_sim.RData"
 )
