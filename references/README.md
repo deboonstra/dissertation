@@ -57,7 +57,7 @@ yeehin_wang_2008.pdf
 - *Authors:* Lin-Yee Hin, You-Gan Wang
 - *DOI:* https://doi.org/10.1002/sim.3489
 
-pan_2004.pdf
+pan_2001b.pdf
 - *Title:* Model Selection in Estimating Equations
 - *Authors:* Wei Pan
 - *DOI:* https://doi.org/10.1111/j.0006-341X.2001.00529.x
@@ -106,6 +106,26 @@ king_2015.pdf
 - *Title:* How robust standard errors expose methodological problems they do not fix, and what to do about it
 - *Authors:* Gary King, Margaret E. Roberts
 - *DOI:* https://doi.org/10.1093/pan/mpu015
+
+qu_2002.pdf
+- *Title:* Improving generalized estimating equations using quadratic inference functions
+- *Authors:* Annie Qu, Bruce G. Linsday and Bing Li
+- *DOI:* https://doi.org/10.1093/biomet/87.4.823
+
+Vonesh-ConditionalSecondOrderGeneralized-2002.pdf
+- *Title:* Conditional second-order generalized estimating equations for generalized linear and nonlinear mixed-effects models
+- *Authors:* Edward F. Vonesh, Hao Wang, Lei Nie, and Dibyen Majumdar
+- *DOI:* https://doi.org/10.1198/016214502753479400
+
+Vonesh-GeneralizedLeastSquares-2001.pdf
+- *Title:* Generalized least squares, Taylor series linearization, and Fisher's scoring in mulitvariate nonlinear regression
+- *Authors:* Edward F. Vonesh, Hao Wang, and Dibyen Majumdar
+- *DOI:* https://doi.org/10.1198/016214501750332857
+
+Wang-ConsistentModelSelection-2009.pdf
+- *Title:* Consistent model selection and data-drive smooth tests for longitudinal data in the estimating equations approach
+- *Authors:* Lan Wang and Annie Qu
+- *DOI:* https://doi.org/10.1111/j.1467-9868.2008.00679.x
 
 # Papers reviewed
 
