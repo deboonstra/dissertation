@@ -151,6 +151,21 @@ Ten_Eyck_Cavanaugh_2018a.pdf
 - *Authors:* Patrick Ten Eyck, Joseph E. Cavanaugh
 - *DOI:* https://doi.org/10.1007/s13571-017-0130-5
 
+hin_carey_wang_2007.pdf
+- *Title:* Criteria for Working-Correlation-Structure Selection in GEE: Assessment via Simulation
+- *Authors:* Lin-Yee Hin, Vincent J. Carey and You-Gan Wang
+- *DOI:* https://doi.org/10.1198/000313007X245122
+
+hin_wang_2009.pdf
+- *Title:* Working-correlation-structure identification in generalized estimating equations
+- *Authors:* Lin-Yee Hin and You-Gan Wang
+- *DOI:* https://doi.org/10.1002/sim.3489
+
+prentice_zhao_1991.pdf
+- *Title:* Estimating equations for parameters in means and covariances of multivariate discrete and continuous responses
+- *Authors:* Ross L. Prentice and Lue Ping Zhao
+- *DOI:* https://doi.org/10.2307/2532642
+
 ## Maybe
 
 ## Trash
