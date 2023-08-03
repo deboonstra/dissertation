@@ -13,6 +13,8 @@ transform_y <- function(data) {
   y <- data$y
   X <- data$X
   id <- data$id
+  N <- length(unique(id))
+  n <- length(y) / N
   # initial fit
   # full model with unstructured working correlation structure
   f0 <- geepack::geeglm(y ~ X, id = id, corstr = "unstructured")
@@ -37,7 +39,7 @@ transform_y <- function(data) {
     data.frame(i = index$j, j = index$i)
   )
   index$corr <- rep(unname(alpha), 2)
-  for (i in 1:nrow(index)) {
+  for (i in seq_len(nrow(index)))  {
     ii <- index[i, 1]
     jj <- index[i, 2]
     ra[ii, jj] <- index[i, 3]
