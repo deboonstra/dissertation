@@ -1,0 +1,27 @@
+---
+title: "Dissertation meeting"
+date: "July 26, 2023"
+output: html_document
+---
+
+# Talking points
+
+- Discuss the Prentice and Zhao (1991) paper
+- Notation
+- How should we proceed? I feel like we are stuck between multiple directions.
+
+# Notes
+Using the Ad-Hoc approach we could create our own version of QICu
+$$
+-2[Q(\hat{\boldsymbol{\beta}}) + Q(\hat{\boldsymbol{\alpha}})] + 2[p + q],
+$$
+where $q$ is the number of correlation parameters estimated.
+
+For model-based, the $f_{k}f_{k}^{\top}$ would become $V_{k}$ for Prentice and Zhao (1991) Ad-Hoc covariance matrix.
+
+# Action items
+
+- Explore `PROCE GEE` in SAS to see if Prentice and Zhao is in there.
+    - Also, whate are the difference between this procedure and `PROC GENMOD`.
+- Email Prentience and Zhao for computing the ad-hoc approach.
+- Try transformations based on difference correlation structures.
