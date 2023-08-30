@@ -1,0 +1,22 @@
+---
+title: "Dissertation meeting"
+date: "August 10, 2023"
+output: html_document
+---
+
+# Talking points
+
+- Discuss possible early move
+- Needing a small break and would like to cancel next week's meeting
+- Fall schedule
+- Paper on TECM - Westgate (2014)
+    - Unstructured is a problem
+    - Adjustment/penalty helps
+- MQL (multivariate quasi-likehood) paper
+
+# Notes
+
+MQL: $\mathbf{y}^{*}_{i}$ is related to FPE
+
+$\hat{\mathbf{V}}^{-1/2}g^{-1}(\mathbf{X}\boldsymbol{\beta})$ to transform $\mathbf{X}\boldsymbol{\beta}$ for $\mathbf{y}^{*}_{i} = \mathbf{V}^{-1/2}\mathbf{y}_{i}$.
+
