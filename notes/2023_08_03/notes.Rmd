@@ -1,0 +1,23 @@
+---
+title: "Dissertation meeting"
+date: "August 03, 2023"
+output: html_document
+---
+
+# Talking points
+
+- Discuss papers
+  1. Ziegler (2000) first mention of GEE2
+      - Considered to be two sets of estimating equations with correlation and scale parameters not separated.
+  2. Yan (2004) improves GEE2 with three sets of estimating equations by separating the correlation and scaled parameters.
+      - First mention of `geepack`. I HATE `geepack` documentation. I have no IDEA how to implement GEE2.
+  3. Random papers that cite Yan (2004).
+      - Westgate (2014): Improving the correlation structure selection approach for GEEs and balanced longitudinal data.
+          - Discusses the impact of unstructured correlation structures.
+      - Crespi (2008): Using second order GEEs to model heterogeneous intraclass correlation in clustered randomized trials.
+          - Improvement on GEE2
+      - Shing (2020): `GEECOR`: A SAS macro for regression models of correlated binary responses and within-cluster correlation using GEEs
+          - Implementing Prentince (1988)
+      - Imori (2015): Model selection criterion based on the multivariate quasi-likelihood for GEEs.
+- `PROC GEE`: Add weights to the data when MAR happens. Also, includes ALR.
+- Random: `rFSA`: best subsets package
