@@ -5,54 +5,77 @@
 # working correlation structured and obtaining the inverse of the squared root
 # of V. See the notes written on 2023_04_20, 2023_05_18, and 2023_05_31.
 
-transform_y <- function(data) {
+transform_y <- function(data, corstr = "unstructured") {
+  # checking parameter values
   if (class(data) != "sim.data") {
     stop("data must be generated from sim_dat.")
   }
+  if (!(corstr %in% c("ar1", "exchangeable", "unstructured", "independence"))) {
+    stop(
+      paste0(
+        "corstr must be one of defined correlation structures",
+        " available in geepack::geeglm\n"
+      )
+    )
+  }
+
   # pulling data
   y <- data$y
   X <- data$X
   id <- data$id
   N <- length(unique(id))
-  n <- length(y) / N
+  n <- length(y) / N # assuming balanced design
   # initial fit
-  # full model with unstructured working correlation structure
-  f0 <- geepack::geeglm(y ~ X, id = id, corstr = "unstructured")
+  # full model with corstr parameter value working correlation structure
+  f0 <- geepack::geeglm(y ~ X, id = id, corstr = corstr)
   geese <- f0$geese
   # obtaining scaled parameter
   phi <- geese$gamma
   # obtaining correlation estimates
   alpha <- geese$alpha
   # creating working correlation matrix
-  ra <- diag(1, n)
-  index <- lapply(
-    gsub("alpha.", "", names(alpha)),
-    function(x) {
-      hold <- unlist(strsplit(x, split = ":"))
-      hold <- as.integer(hold)
-      data.frame(i = hold[1], j = hold[2])
+  if (corstr == "unstructured") {
+    ra <- diag(1, n)
+    index <- lapply(
+      gsub("alpha.", "", names(alpha)),
+      function(x) {
+        hold <- unlist(strsplit(x, split = ":"))
+        hold <- as.integer(hold)
+        data.frame(i = hold[1], j = hold[2])
+      }
+    )
+    index <- dplyr::bind_rows(index)
+    index <- dplyr::bind_rows(
+      index,
+      data.frame(i = index$j, j = index$i)
+    )
+    index$corr <- rep(unname(alpha), 2)
+    for (i in seq_len(nrow(index))) {
+      ii <- index[i, 1]
+      jj <- index[i, 2]
+      ra[ii, jj] <- index[i, 3]
     }
-  )
-  index <- dplyr::bind_rows(index)
-  index <- dplyr::bind_rows(
-    index,
-    data.frame(i = index$j, j = index$i)
-  )
-  index$corr <- rep(unname(alpha), 2)
-  for (i in seq_len(nrow(index)))  {
-    ii <- index[i, 1]
-    jj <- index[i, 2]
-    ra[ii, jj] <- index[i, 3]
+  } else if (corstr == "exchangeable") {
+    ra <- cs(n = n, rho = alpha)
+  } else if (corstr == "ar1") {
+    ra <- ar1(n = n, rho = alpha)
+  } else {
+    ra <- indp(n = n)
   }
   # calculating inverse of the square root of V
-  V <- phi * ra
+  if (corstr != "independence") {
+    V <- phi * ra
+  } else {
+    V <- ra
+  }
   sqrt_V <- expm::sqrtm(V)
   inv_sqrt_V <- Matrix::solve(sqrt_V)
   inv_sqrt_V <- lapply(seq_len(N), function(x) inv_sqrt_V)
   inv_sqrt_V <- Matrix::bdiag(inv_sqrt_V)
   # final getting transformed y and X
-  yy <- c(as.matrix(inv_sqrt_V %*% y))
-  XX <- as.matrix(inv_sqrt_V %*% X)
+  y_star <- c(as.matrix(inv_sqrt_V %*% y))
+  X_star <- as.matrix(inv_sqrt_V %*% X)
+
   # returning transform.y object
-  return(structure(list(y = yy, X = XX), class = "transform.y"))
+  return(structure(list(y = y_star, X = X_star), class = "transform.y"))
 }
