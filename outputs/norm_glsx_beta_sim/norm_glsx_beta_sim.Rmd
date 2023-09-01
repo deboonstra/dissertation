@@ -1,0 +1,92 @@
+---
+title: "Exploring of the relationship between the original and transformed parameter estimates"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, include = FALSE}
+library(knitr)
+library(kableExtra)
+library(dplyr)
+```
+
+# Purpose of simulations
+These results are examining the relationship between parameter estimates produced by fitting GLMs via GEEs with the original data and parameter estimates produced by fitting GLMs after transforming the response and design matrix.
+
+# Data
+Following Wang *et al.* (2012) with one-hundred replications, the correlated normal responses are generated from the model $$y_{ij} = \mathbf{X}_{ij}^{\top}\boldsymbol{\beta} + \varepsilon_{ij},$$ where $i = 1, \ldots, 200,$ $j = 1, \ldots, 4,$ $\mathbf{X}_{ij} = (x_{ij, 1}, \ldots, x_{ij, 6})^{\top},$ and $\boldsymbol{\beta} = (2.0, 3.0, 0.5, 0.0, 0.0, 0.0)^{\top}.$
+
+- For the covariates,
+    - $x_{ij,1}$ was generated from the Bernoulli(0.5) distribution, and 
+    - $x_{ij,2}$ to $x_{ij,6}$ from the multivariate normal distribution with mean 0 and an AR(1) covariance matrix with marginal variance 1 and auto-correlation coefficient 0.5.
+- The random errors $(\varepsilon_{i1}, \ldots, \varepsilon_{i4})^{\top}$ are generated from the multivariate normal distribution with marginal mean 0, marginal variance 1, and an exchangeable correlation matrix with $\rho = 0.5$.
+
+# Transformation of the response and covariate matrix
+After the data was simulated, the response, $\mathbf{y},$ and the covariate matrix, $\mathbf{X},$ was transformed by:
+
+1. fitting a fully saturated model with an unstructured working correlation matrix,
+2. calculating $\mathbf{V}_{i} = \phi \mathbf{A}_{i}^{1/2}\mathbf{R}_{i}(\boldsymbol{\alpha})\mathbf{A}_{i}^{1/2}$ and finding $\mathbf{V}_{i}^{-1/2}$, and
+3. obtaining $\mathbf{y}^{*} = \mathbf{V}_{i}^{-1/2}\mathbf{y}$ and $\mathbf{X}^{*} = \mathbf{V}_{i}^{-1/2}\mathbf{X}$.
+
+Once the transformation is made, an interesting relationship appears when you compare the original data generation mechanism and the distribution of transformed data. On the face of it, $\boldsymbol{\beta}$ does not seem to be affected by the transformation because the change is being applied to the response and design matrix simultaneously. Due to the possiblitiy that the parameter estimates are unchanged, this simulation will explore the relationship between the distributions of the parameter estimates.
+$$
+\begin{aligned}
+\mathbf{y}_{i} &\sim N(\mathbf{X}_{i}\boldsymbol{\beta}, \mathbf{V}_{i}) \\
+\mathbf{y}^{*}_{i} &\sim N(\mathbf{X}^{*}_{i}\boldsymbol{\beta}, \mathbf{I})
+\end{aligned}
+$$
+
+# Fitting procedure
+With the original (untransformed) response and design matrix and the transformed response and design matrix, two separate fitting procedures were applied. For the original data, the traditional application of fitting GLMs via GEEs were used assuming the correlation structure was exchangeable. Then, for the transformed data, the traditional fitting of GLMs were used because we are assuming after the transformation is complete the observations are truly independent.
+
+# Results
+
+## Importing simulation results
+The results of the simulation are stored in the `outputs` sub-directory.
+```{r}
+load("outputs/norm_glsx_beta_sim/norm_glsx_beta_sim.RData")
+```
+
+## Comparison of coefficients
+Now the results of simulation will presented for each of the parameter estimates including the intercept, which should be centered around zero as an intercept was not included in the data generation mechanism. The title of plot will denote which parameters are being examined and the legend for the plot indicates the estimating procedure. Finally, the summary table below each one of plots provides some descriptive statistics for the parameter estimates including the standard deviation of estimates from the simulations. 
+```{r, echo = FALSE, results = "asis", fig.align = "center"}
+col <- boonstra::pal(n = 2, alpha = 0.25)
+mtitle <- c("Intercept", paste0("X", seq_len(ncol(beta_gee) - 1)))
+for (j in seq_len(ncol(beta_gee))) {
+  begin <- min(c(beta_gee[, j], beta_star[, j]))
+  end <- max(c(beta_gee[, j], beta_star[, j]))
+  breaks <- pretty(x = seq(begin, end, length.out = 100), n = 10)
+  hist_gee <- graphics::hist(x = beta_gee[, j], breaks = breaks, plot = FALSE)
+  hist_star <- graphics::hist(x = beta_star[, j], breaks = breaks, plot = FALSE)
+  max_counts <- max(c(hist_gee$counts, hist_star$counts))
+  yax_lwr <- min(pretty(0:max_counts, n = 5))
+  yax_up <- max(pretty(0:max_counts, n = 5))
+  par(mar = c(5, 4.5, 4, 12))
+  graphics::plot(
+    hist_gee, col = col[1], ylim = c(yax_lwr, yax_up), border = "white",
+    xlab = expression(widehat(beta)), main = mtitle[j]
+  )
+  graphics::plot(hist_star, col = col[2], border = "white", add = TRUE)
+  boonstra::legend_right(
+    legend = c("GLMs via GEEs", "Transformed GLMs"),
+    fill = col, border = "white"
+  )
+  tab <- dplyr::bind_cols(
+    data.frame(fit = c("GLMs via GEEs", "Transformed GLMs")),
+    dplyr::bind_rows(
+      round(summary(beta_gee[, j]), 3),
+      round(summary(beta_star[, j]), 3)
+    ),
+    data.frame(std = stats::sd(beta_gee[, j], stats::sd(beta_star[, j])))
+  )
+  tab <- knitr::kable(
+    x = tab,
+    col.names = c(
+      "Fitting procedure", "Minimum", "First quartile", "Median",
+      "Mean", "Third quartile", "Maximum", "Std. Deviation"
+    )
+  )
+  print(kableExtra::kable_styling(tab))
+  cat("\n\n<!-- -->\n\n")
+}
+```
