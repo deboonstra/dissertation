@@ -1,0 +1,31 @@
+---
+title: "Dissertation meeting"
+date: "August 31, 2023"
+output: html_document
+---
+
+# Talking points
+
+- Provide an update on changing `transform_y` to include other correlation structures
+- Discuss wanting to run a simulation investigating transformations based on other correlation structures
+- Show results examining comparison between $\hat{\boldsymbol{\beta}}$ estimates when the response is transformed and not (`norm_glsx_beta_sim`).
+
+# Notes
+
+- Making a transformation with other correlation structures is not a great direction to proceed in (by Joe's ) opninion because we never truly know the true correlation structure. Thus, the transformation applied could be incorrect, while a transformation based on the unstructured correlation structure will always produced independent observations.
+- An ad-hoc model selection criterion we should investigate is basing the goodness-of-fit term on a tranformation of the response and the penalty term using the Westgate (2014) penalty for unstructure correlation structure applied to CIC.
+    - This would be considered to be a one-stage model selection criterion.
+    - Right now we do not know if mathemtical we can the viability of this criterion.
+    - However, we are going to investigate through a simulation before exploring the mathematics of this criterion.
+- Another type of model selection process we can explore is a two-stage approach, where the working correlation structure is selected first using the saturated model then the mean structure is selected from a candidate subset of the saturated model using the selected working correlation structure.
+    - We need to explore using original version of CIC to select the working correlation structure then use QICu to select the mean structure.
+    - We need to explore using the Westgate version of CIC to select the working correlation structure then use AIC and BIC to select the mean structure based on transformating the response and design matrix. Also, it would be good to see how QICu performs when after using the Westgate CIC variant.
+
+# Action items
+
+- Run a simulation investigating using other correlation structures to make the transformation.
+    - While Joe is not a fan of this transformation process, he would still like to see these results to make sure we are not overlooking something.
+- Run a simulation investigating applying the GLS transformation and the Westgate penalty to the one-stage model selection criterion.
+- Run a simulation investigating a two-stage approach without applying the Westgate penalty and transformation.
+- Run a simulation investigating a two-stage approach that does apply the Westgate penalty to CIC to select the working correlation structure then use AIC and BIC on the transformed data to find the mean structure.
+    - Make sure to include QICu without a transformation to these results.
