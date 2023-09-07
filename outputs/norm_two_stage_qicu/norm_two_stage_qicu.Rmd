@@ -1,0 +1,586 @@
+---
+title: "Exploring the mean and correlation selection properties for a traditional two-stage approach"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+```{r, include = FALSE, results = FALSE, message = FALSE}
+R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
+sapply(R, source, .GlobalEnv)
+```
+
+# Purpose of simulations
+The results of these simulations are to define a baseline for future two-stage model selection procedures, where the correlation structure is selected first and the mean structured is determined second given the selected working correlation structure.
+
+# Simulation setup
+
+## Data
+Following Wang *et al.* (2012) with one-hundred replications, the correlated normal responses are generated from the model $$y_{ij} = \mathbf{X}_{ij}^{\top}\boldsymbol{\beta} + \varepsilon_{ij},$$ where $i = 1, \ldots, 200,$ $j = 1, \ldots, 4,$ $\mathbf{X}_{ij} = (x_{ij, 1}, \ldots, x_{ij, 6})^{\top},$ and $\boldsymbol{\beta} = (2.0, 3.0, 0.5, 0.0, 0.0, 0.0)^{\top}.$
+
+- For the covariates,
+    - $x_{ij,1}$ was generated from the Bernoulli(0.5) distribution, and 
+    - each $x_{ij,k}$ for $k = 2 \ldots 6$ was generated from the multivariate normal distribution with mean 0 and an AR(1) covariance matrix with marginal variance 1 and auto-correlation coefficient 0.5.
+- The random errors $(\varepsilon_{i1}, \ldots, \varepsilon_{i4})^{\top}$ are generated from the multivariate normal distribution with marginal mean 0, marginal variance 1, and an exchangeable correlation matrix with $\rho = 0.5$.
+
+```{r, include = FALSE}
+nsims <- 100L
+beta <- c(2.0, 3.0, 0.5, 0.0, 0.0, 0.0)
+w <- which(beta != 0)
+l <- length(w)
+```
+
+## Model selection process
+The model selection process was broken into two stages. First, the correlation structure was selected from four possible structures:
+
+- independence,
+- exchangeable,
+- AR(1), and
+- unstrctured.
+
+based on two information criterions: CIC and QIC, and a fully saturated mean structure. Then, with the selected working correlation structure, the mean structure of the model is selected from all of the $2^6 - 1 = 63$ subsets of the fully saturated model. The model selection criterions QIC and QICu were both used to select the mean structure. Traditionally, once the correlation structure is determined only QICu is needed because the penalty term of QIC is meant to account for correlation structure used. 
+
+## Fitting procedure
+For each model fitted, the generalized estimating equations were used to estimate the mean structure parameter estimates and nausiance parameters in the correlation structure. The [`geepack`
+](https://cran.r-project.org/web/packages/geepack/index.html) package was used to fit each of the proposed models.
+
+
+# Presentation of results
+
+## Import results
+The simulation results are stored in:
+```{r}
+load("./outputs/norm_two_stage_qicu/norm_two_stage_qicu.RData")
+```
+and should be compared to `norm_bqicu_sim` to see the differences between a one-stage and a two-stage selection process. One should note that these simulations do not include results based on *BQICu*, while `norm_bqicu_sim` does. The following results are presented based on the stages of the selection process.
+
+## Stage 1: Correlation structure selection {.tabset .tabset-fade}
+The first stage was meant to select the working correlation structure based on CIC or QIC. Thus, the results are presented based on the information criterion used.
+```{r, echo = FALSE}
+work_corstr <- res_cic_corstr[[1]]$work_corstr
+legend_work_corstr <- paste0(
+  toupper(substr(work_corstr, 1, 1)),
+  substr(work_corstr, 2, nchar(work_corstr))
+)
+legend_work_corstr <- ifelse(
+  test = legend_work_corstr == "Ar1",
+  yes = "AR(1)", no = legend_work_corstr
+)
+col <- boonstra::pal(length(work_corstr))
+```
+
+### CIC
+This first plot provides a visual of the criterion values across the simulation given each possible correlations structure. Any criteria value greater than 99 was truncated as the majority of the criteria values were less than 100.
+
+```{r, echo = FALSE}
+# collecting all the information criterion values
+ic_all <- matrix(NA, nrow = length(res_cic_corstr), ncol = length(work_corstr))
+for (j in seq_len(ncol(ic_all))) {
+  ic_all[, j] <- sapply(
+    X = res_cic_corstr,
+    FUN = function(x) {
+      hold <- x$ic[which(x$work_corstr == work_corstr[j])]
+      ifelse(hold > 99, 100, hold)
+    }
+  )
+}
+
+# creating an empty plot window
+graphics::plot(
+  1, xlim = c(0, 100), ylim = c(-20, 100), type = "n",
+  axes = FALSE, ylab = "CIC", xlab = "Index"
+)
+graphics::axis(side = 1, at = seq(from = 0, to = 100, by = 10))
+labs_yaxt <- seq(from = -20, to = 100, by = 20)
+labs_yaxt <- ifelse(labs_yaxt == 100, "100+", as.character(labs_yaxt))
+graphics::axis(
+  side = 2, at = seq(from = -20, to = 100, by = 20),
+  labels = labs_yaxt
+)
+
+# plotting ic
+for (j in seq_len(ncol(ic_all))) {
+  graphics::lines(
+    x = seq_len(nrow(ic_all)), y = ic_all[, j],
+    col = col[j], lwd = 2
+  )
+}
+boonstra::legend_top(
+  legend = legend_work_corstr,
+  col = col, lty = 1, lwd = 2,
+  border = "white", title = "Working correlation structures"
+)
+```
+
+The second plot provides a look at the distribution of the criterion values given the correlation structure that resulted in the minimum criterion value. The number to the right of the correlation structure in each plot title is the frequency in which the correlation structure resulted in the minimum criterion value.
+
+```{r, echo = FALSE}
+# collecting minimum ic selected
+ic_min <- sapply(
+  X = res_cic_corstr,
+  FUN = function(x) {
+    x$ic_min
+  }
+)
+corstr_min <- sapply(
+  X = res_cic_corstr,
+  FUN = function(x) {
+    x$corstr
+  }
+)
+ic_sel <- vector(mode = "list", length = length(work_corstr))
+names(ic_sel) <- work_corstr
+for (j in seq_along(work_corstr)) {
+  ic_sel[[j]] <- ic_min[which(corstr_min == work_corstr[j])]
+}
+
+# setting up axes for histograms
+begin <- min(ic_min)
+end <- max(ic_min)
+breaks <- pretty(x = seq(begin, end, length.out = 100), n = 12)
+hist_counts_max <- 0
+for (j in seq_along(ic_sel)) {
+  hist_temp <- graphics::hist(ic_sel[[j]], breaks = breaks, plot = FALSE)
+  hist_counts_max <- max(c(hist_counts_max, hist_temp$counts))
+}
+yaxt <- pretty(x = c(0, hist_counts_max), n = 5)
+
+# obtaining counts of selected correlation structures
+freq_corstr_min <- rep(NA, length(work_corstr))
+names(freq_corstr_min) <- work_corstr
+for (j in seq_along(work_corstr)) {
+  freq_corstr_min[j] <- length(which(corstr_min == work_corstr[j]))
+}
+
+# plotting histograms
+par(mfrow = c(2, 2))
+for (j in seq_along(ic_sel)) {
+  graphics::hist(
+    x = ic_sel[[j]], breaks = breaks, ylim = c(min(yaxt), max(yaxt)),
+    col = col[j], border = "white",
+    main = paste0(legend_work_corstr[j], ": ", freq_corstr_min[j]),
+    xlab = "CIC"
+  )
+}
+graphics::par(mfrow = c(1, 1))
+```
+
+### QIC
+This first plot provides a visual of the criterion values across the simulation given each possible correlations structure. Any criteria value greater than 99 was truncated as the majority of the criteria values were less than 100.
+
+```{r, echo = FALSE}
+# collecting all the information criterion values
+ic_all <- matrix(NA, nrow = length(res_qic_corstr), ncol = length(work_corstr))
+for (j in seq_len(ncol(ic_all))) {
+  ic_all[, j] <- sapply(
+    X = res_qic_corstr,
+    FUN = function(x) {
+      hold <- x$ic[which(x$work_corstr == work_corstr[j])]
+      ifelse(hold > 99, 100, hold)
+    }
+  )
+}
+
+# creating an empty plot window
+graphics::plot(
+  1, xlim = c(0, 100), ylim = c(-20, 100), type = "n",
+  axes = FALSE, ylab = "QIC", xlab = "Index"
+)
+graphics::axis(side = 1, at = seq(from = 0, to = 100, by = 10))
+labs_yaxt <- seq(from = -20, to = 100, by = 20)
+labs_yaxt <- ifelse(labs_yaxt == 100, "100+", as.character(labs_yaxt))
+graphics::axis(
+  side = 2, at = seq(from = -20, to = 100, by = 20),
+  labels = labs_yaxt
+)
+
+# plotting ic
+for (j in seq_len(ncol(ic_all))) {
+  graphics::lines(
+    x = seq_len(nrow(ic_all)), y = ic_all[, j],
+    col = col[j], lwd = 2
+  )
+}
+boonstra::legend_top(
+  legend = legend_work_corstr,
+  col = col, lty = 1, lwd = 2,
+  border = "white", title = "Working correlation structures"
+)
+```
+
+The second plot provides a look at the distribution of the criterion values given the correlation structure that resulted in the minimum criterion value. The number to the right of the correlation structure in each plot title is the frequency in which the correlation structure resulted in the minimum criterion value.
+
+```{r, echo = FALSE}
+# collecting minimum ic selected
+ic_min <- sapply(
+  X = res_qic_corstr,
+  FUN = function(x) {
+    x$ic_min
+  }
+)
+corstr_min <- sapply(
+  X = res_qic_corstr,
+  FUN = function(x) {
+    x$corstr
+  }
+)
+ic_sel <- vector(mode = "list", length = length(work_corstr))
+names(ic_sel) <- work_corstr
+for (j in seq_along(work_corstr)) {
+  ic_sel[[j]] <- ic_min[which(corstr_min == work_corstr[j])]
+}
+
+# setting up axes for histograms
+begin <- min(ic_min)
+end <- max(ic_min)
+breaks <- pretty(x = seq(begin, end, length.out = 100), n = 12)
+hist_counts_max <- 0
+for (j in seq_along(ic_sel)) {
+  hist_temp <- graphics::hist(ic_sel[[j]], breaks = breaks, plot = FALSE)
+  hist_counts_max <- max(c(hist_counts_max, hist_temp$counts))
+}
+yaxt <- pretty(x = c(0, hist_counts_max), n = 5)
+
+# obtaining counts of selected correlation structures
+freq_corstr_min <- rep(NA, length(work_corstr))
+names(freq_corstr_min) <- work_corstr
+for (j in seq_along(work_corstr)) {
+  freq_corstr_min[j] <- length(which(corstr_min == work_corstr[j]))
+}
+
+# plotting histograms
+par(mfrow = c(2, 2))
+for (j in seq_along(ic_sel)) {
+  graphics::hist(
+    x = ic_sel[[j]], breaks = breaks, ylim = c(min(yaxt), max(yaxt)),
+    col = col[j], border = "white",
+    main = paste0(legend_work_corstr[j], ": ", freq_corstr_min[j]),
+    xlab = "QIC"
+  )
+}
+graphics::par(mfrow = c(1, 1))
+```
+
+## Stage 2: Mean structure selection {.tabset .tabset-fade}
+The second stage of the selection process used the correlation structure selected in the first stage as the working correlation structure for all possible subsets of the fully saturated mean model. Then, either QIC or QICu were used to select the mean structure that resulted in the minimum information criterion value. Considering the correlation structure was selected based on two different information criteria, the results for the mean structure will be based on the criterions used for correlation structure selection. 
+
+### CIC {.tabset .tabset-fade .tabset-pills}
+Given the working correlation structure was determined by CIC, the plots present the QIC and QICu values for the mean structure that resulted in the minimum information criteria value.
+```{r, echo = FALSE}
+ic_qic <- sapply(res_cic_qic, function(x) x$ic_min, simplify = TRUE)
+ic_qicu <- sapply(res_cic_qicu, function(x) x$ic_min, simplify = TRUE)
+
+plot(
+  x = seq_along(ic_qic), y = ic_qic,
+  ylim = c(-5000, 50),
+  xlab = "Index", ylab = "QIC",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
+)
+
+plot(
+  x = seq_along(ic_qicu), y = ic_qicu,
+  ylim = c(0, 50),
+  xlab = "Index", ylab = "QICu",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
+)
+```
+
+#### Goodness-of-fit
+Now information criteria values are broken down into their parts, starting with the goodness-of-fit term. 
+```{r, echo = FALSE}
+gf_qic <- rep(NA, length(res_cic_qic))
+gf_qicu <- rep(NA, length(res_cic_qicu))
+for (j in seq_along(res_cic_qic)) {
+  w_qic <- res_cic_qic[[j]]$min
+  w_qicu <- res_cic_qicu[[j]]$min
+  gf_qic[j] <- res_cic_qic[[j]]$gof[w_qic]
+  gf_qicu[j] <- res_cic_qicu[[j]]$gof[w_qicu]
+}
+
+plot(
+  x = seq_along(gf_qic), y = gf_qic,
+  ylim = c(0, 25),
+  xlab = "Index", ylab = "GOF (QIC)",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
+)
+
+plot(
+  x = seq_along(gf_qicu), y = gf_qicu,
+  ylim = c(0, 25),
+  xlab = "Index", ylab = "GOF (QICu)",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
+)
+```
+
+#### Penalty
+Next, we have the penalty terms for mean model that resulted in the minimum QIC and QICu values.
+```{r, echo = FALSE}
+pen_qic <- rep(NA, length(res_cic_qic))
+pen_qicu <- rep(NA, length(res_cic_qicu))
+for (j in seq_along(res_cic_qic)) {
+  w_qic <- res_cic_qic[[j]]$min
+  w_qicu <- res_cic_qicu[[j]]$min
+  pen_qic[j] <- res_cic_qic[[j]]$penalty[w_qic]
+  pen_qicu[j] <- res_cic_qicu[[j]]$penalty[w_qicu]
+}
+
+plot(
+  x = seq_along(pen_qic), y = pen_qic,
+  ylim = c(-5000, 50),
+  xlab = "Index", ylab = "Penalty (QIC)",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
+)
+
+plot(
+  x = seq_along(pen_qicu), y = pen_qicu,
+  ylim = c(0, 50),
+  xlab = "Index", ylab = "Penalty (QICu)",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
+)
+```
+
+#### Structure selection
+The final presentation of mean structure selection examines the frequency in which certain types of models were selected. 
+
+##### Mean
+For measuring the overall performance of selecting the mean structure, a function was created called `look` that reports the number of models, where
+
+- the number of features selected is less than the number of non-zero coefficients in the generating model (`under`), 
+- only the non-zero features from the generating model were selected (`exact`), 
+- the number of features selected matches the number of non-zero coefficients in the generating model; however, at least one of the selected features is NOT one of the non-zero effects in the generating model (`mis`),
+- the number of features selected is greated than the number of non-zero coefficients in the generating model (`over`), and
+- the number of features selected is greated than the number of non-zero coefficients in the generating model and includes all the non-zero effects (`over_inc`).
+
+```{r, echo = FALSE}
+# creating a function to generate a look at the simulation results
+look <- function(x) {
+  under <- 0
+  exact <- 0
+  mis <- 0
+  over <- 0
+  over_inc <- 0
+  for (k in seq_along(x)) {
+    under <- under + (length(x[[k]]$vars) < l)
+    exact <- exact + identical(x[[k]]$vars, w)
+    mis <- mis + (!identical(x[[k]]$vars, w) & (length(x[[k]]$vars) == l))
+    over <- over + (length(x[[k]]$vars) > l)
+    over_inc <- over_inc + ((length(x[[k]]$vars) > l) & all(w %in% x[[k]]$vars))
+  }
+  return(
+    data.frame(
+      under = under, exact = exact,
+      mis = mis, over = over,
+      over_inc = over_inc
+    )
+  )
+}
+```
+
+Using the `look` function, we have the following summary measures from the simulation set, where the models resulting in the minimum IC value were selected as the best fitting model and the counts are based on information criterion used.
+
+```{r, echo = FALSE}
+data.frame(
+  ic = c("QIC", "QICu"),
+  dplyr::bind_rows(look(res_cic_qic), look(res_cic_qicu))
+)
+```
+
+##### Joint
+The results for joint selection further breakdown the mean structure selection based on the selected correlation structure in stage one. This look at the frequency of model types selected provides a look at how often the proper correlation and mean structures may be selected through this two-stage process.
+```{r, echo = FALSE}
+joint <- function(x) {
+  p <- function(y) {
+    if (length(y) == 0) {
+      return(data.frame(under = 0, exact = 0, mis = 0, over = 0, over_inc = 0))
+    } else {
+      return(look(x = y))
+    }
+  }
+
+  independence <- x[sapply(x, function(x) x$corstr == "independence", simplify = TRUE)]
+  exchangeable <- x[sapply(x, function(x) x$corstr == "exchangeable", simplify = TRUE)]
+  ar1 <- x[sapply(x, function(x) x$corstr == "ar1", simplify = TRUE)]
+  un <- x[sapply(x, function(x) x$corstr == "unstructured", simplify = TRUE)]
+
+  ip <- p(independence)
+  ep <- p(exchangeable)
+  ap <- p(ar1)
+  up <- p(un)
+
+  return(dplyr::bind_rows(ip, ep, ap, up))
+}
+
+tab <- data.frame(
+  ic = c("QIC", "", "", "", "QICu", "", "", ""),
+  corstr = rep(c("Independence", "Exchangeable", "AR(1)", "Unstructured"), 2),
+  dplyr::bind_rows(joint(res_cic_qic), joint(res_cic_qicu))
+)
+tab$total_corr_selected <- with(tab, under + exact + mis + over)
+tab
+```
+
+### QIC {.tabset .tabset-fade .tabset-pills}
+Given the working correlation structure was determined by QIC, the plots present the QIC and QICu values for the mean structure that resulted in the minimum information criteria value.
+```{r, echo = FALSE}
+ic_qic <- sapply(res_qic_qic, function(x) x$ic_min, simplify = TRUE)
+ic_qicu <- sapply(res_qic_qicu, function(x) x$ic_min, simplify = TRUE)
+
+plot(
+  x = seq_along(ic_qic), y = ic_qic,
+  ylim = c(-5000, 50),
+  xlab = "Index", ylab = "QIC",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
+)
+
+plot(
+  x = seq_along(ic_qicu), y = ic_qicu,
+  ylim = c(0, 50),
+  xlab = "Index", ylab = "QICu",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
+)
+```
+
+#### Goodness-of-fit
+Now information criteria values are broken down into their parts, starting with the goodness-of-fit term. 
+```{r, echo = FALSE}
+gf_qic <- rep(NA, length(res_qic_qic))
+gf_qicu <- rep(NA, length(res_qic_qicu))
+for (j in seq_along(res_cic_qic)) {
+  w_qic <- res_qic_qic[[j]]$min
+  w_qicu <- res_qic_qicu[[j]]$min
+  gf_qic[j] <- res_qic_qic[[j]]$gof[w_qic]
+  gf_qicu[j] <- res_qic_qicu[[j]]$gof[w_qicu]
+}
+
+plot(
+  x = seq_along(gf_qic), y = gf_qic,
+  ylim = c(0, 25),
+  xlab = "Index", ylab = "GOF (QIC)",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
+)
+
+plot(
+  x = seq_along(gf_qicu), y = gf_qicu,
+  ylim = c(0, 25),
+  xlab = "Index", ylab = "GOF (QICu)",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
+)
+```
+
+#### Penalty
+Next, we have the penalty terms for mean model that resulted in the minimum QIC and QICu values.
+```{r, echo = FALSE}
+pen_qic <- rep(NA, length(res_qic_qic))
+pen_qicu <- rep(NA, length(res_qic_qicu))
+for (j in seq_along(res_cic_qic)) {
+  w_qic <- res_qic_qic[[j]]$min
+  w_qicu <- res_qic_qicu[[j]]$min
+  pen_qic[j] <- res_qic_qic[[j]]$penalty[w_qic]
+  pen_qicu[j] <- res_qic_qicu[[j]]$penalty[w_qicu]
+}
+
+plot(
+  x = seq_along(pen_qic), y = pen_qic,
+  ylim = c(-5000, 50),
+  xlab = "Index", ylab = "Penalty (QIC)",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
+)
+
+plot(
+  x = seq_along(pen_qicu), y = pen_qicu,
+  ylim = c(0, 50),
+  xlab = "Index", ylab = "Penalty (QICu)",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
+)
+```
+
+#### Structure selection
+The final presentation of mean structure selection examines the frequency in which certain types of models were selected. 
+
+##### Mean
+For measuring the overall performance of selecting the mean structure, a function was created called `look` that reports the number of models, where
+
+- the number of features selected is less than the number of non-zero coefficients in the generating model (`under`), 
+- only the non-zero features from the generating model were selected (`exact`), 
+- the number of features selected matches the number of non-zero coefficients in the generating model; however, at least one of the selected features is NOT one of the non-zero effects in the generating model (`mis`),
+- the number of features selected is greated than the number of non-zero coefficients in the generating model (`over`), and
+- the number of features selected is greated than the number of non-zero coefficients in the generating model and includes all the non-zero effects (`over_inc`).
+
+```{r, echo = FALSE}
+# creating a function to generate a look at the simulation results
+look <- function(x) {
+  under <- 0
+  exact <- 0
+  mis <- 0
+  over <- 0
+  over_inc <- 0
+  for (k in seq_along(x)) {
+    under <- under + (length(x[[k]]$vars) < l)
+    exact <- exact + identical(x[[k]]$vars, w)
+    mis <- mis + (!identical(x[[k]]$vars, w) & (length(x[[k]]$vars) == l))
+    over <- over + (length(x[[k]]$vars) > l)
+    over_inc <- over_inc + ((length(x[[k]]$vars) > l) & all(w %in% x[[k]]$vars))
+  }
+  return(
+    data.frame(
+      under = under, exact = exact,
+      mis = mis, over = over,
+      over_inc = over_inc
+    )
+  )
+}
+```
+
+Using the `look` function, we have the following summary measures from the simulation set, where the models resulting in the minimum IC value were selected as the best fitting model and the counts are based on information criterion used.
+
+```{r, echo = FALSE}
+data.frame(
+  ic = c("QIC", "QICu"),
+  dplyr::bind_rows(look(res_qic_qic), look(res_qic_qicu))
+)
+```
+
+##### Joint
+The results for joint selection further breakdown the mean structure selection based on the selected correlation structure in stage one. This look at the frequency of model types selected provides a look at how often the proper correlation and mean structures may be selected through this two-stage process.
+```{r, echo = FALSE}
+joint <- function(x) {
+  p <- function(y) {
+    if (length(y) == 0) {
+      return(data.frame(under = 0, exact = 0, mis = 0, over = 0, over_inc = 0))
+    } else {
+      return(look(x = y))
+    }
+  }
+
+  independence <- x[sapply(x, function(x) x$corstr == "independence", simplify = TRUE)]
+  exchangeable <- x[sapply(x, function(x) x$corstr == "exchangeable", simplify = TRUE)]
+  ar1 <- x[sapply(x, function(x) x$corstr == "ar1", simplify = TRUE)]
+  un <- x[sapply(x, function(x) x$corstr == "unstructured", simplify = TRUE)]
+
+  ip <- p(independence)
+  ep <- p(exchangeable)
+  ap <- p(ar1)
+  up <- p(un)
+
+  return(dplyr::bind_rows(ip, ep, ap, up))
+}
+
+tab <- data.frame(
+  ic = c("QIC", "", "", "", "QICu", "", "", ""),
+  corstr = rep(c("Independence", "Exchangeable", "AR(1)", "Unstructured"), 2),
+  dplyr::bind_rows(joint(res_qic_qic), joint(res_qic_qicu))
+)
+tab$total_corr_selected <- with(tab, under + exact + mis + over)
+tab
+```
