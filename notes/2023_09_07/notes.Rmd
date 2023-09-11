@@ -1,0 +1,43 @@
+---
+title: "Dissertation meeting notes"
+date: "September 7, 2023"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+- Simulation results for `norm_glsx_beta_sim`
+- Simulation results for `norm_two_stage_qicu`
+- Computation of $\widehat{\mathbf{G}}$ for Westgate penalty
+
+# Notes
+
+Simulations of `norm_glsx_beta_sim` are neat and provide results showing the effects of GLS.
+
+- However, they are probably not general for distributional assumptions of the response.
+
+Simulations of `norm_two_stage_qicu` brings up a lot of questions for CIC and $tr\left(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{r}\right)$. These questions are listed below.
+
+- How does $tr\left(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{r}\right) \approx p$ when the correlation structure is correct?
+- Why does the unstructured correlation structure produce large CIC values? Could it be that CIC is comparing independence to unstructured, which are vastly different correlation structures?
+- What is the true behavior of $tr\left(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{r}\right)$ when the correlation structure is and is not correct?
+- Why is $\boldsymbol{\Omega}_{I}$ used in CIC? It is understandable that $\boldsymbol{\Omega}_{I}$ used in QIC because it depends on the independence assumption.
+- Also, what does $p$ mean in QICu?
+    - Is it the number of mean structure parameters or does it include the number of correlation parameters too?
+
+**We need to take a step back to understand $tr\left(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{r}\right)$.**
+
+# Action items
+
+- Run a simulation investigating $tr\left(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{r}\right)$ to choose the correlation structure when the mean structure is properly specified. This simulation will consider different pairings of correlation structures, which are listed below.
+    - Choose between independence, exchangeable, and AR(1)
+    - Choose between exchangeable and AR(1)
+    - Choose between independence, exchangeable, AR(1), and unstructured
+- Run a simulation investigating $tr\left(\widehat{\boldsymbol{\Omega}}_{r}\widehat{\mathbf{V}}_{r}\right) \ldots$ that has the same setup as the above simulation.
+- Understand the $2p$ in QICu
+- Find information on the properties of CIC, which means read the CIC paper again.
+
+**Considerations**
+
+For the simulations, use 1,000 samples and plot the CIC/$tr\left(\widehat{\boldsymbol{\Omega}}_{r}\widehat{\mathbf{V}}_{r}\right)$ across the 1,000 samples with the mean of the values for each correlation structure. 
