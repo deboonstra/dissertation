@@ -46,32 +46,32 @@ Now for each of the models with the minimum QIC, QICu and BQICu, the information
 $$
 GOF = -2 * \text{quasi-likelihood},
 $$
-which assumes independence among the response to allow the use of the quasi-likelihood framework. The penalty term for QIC is $2tr\left(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{R}\right)$. However, QICu and BQICu replace the penalty term of QIC with $2p$ and $\log(N)p,$ respectively, where $p$ is the number of parameters in the model.
+which assumes independence among the response to allow the use of the quasi-likelihood framework. The penalty term for QIC is $2tr\left(\widehat{\boldsymbol{\Omega}}_{I}\widehat{\mathbf{V}}_{R}\right)$. However, QICu and BQICu replace the penalty term of QIC with $2p$ and $\log(N)p,$ respectively, where $p$ is the number of mean parameters in the model.
 
 ```{r}
-q <- sapply(res_qic, function(x) {x$ic_min}, simplify = TRUE)
-qu <- sapply(res_qicu, function(x) {x$ic_min}, simplify = TRUE)
-bqu <- sapply(res_bqicu, function(x) {x$ic_min}, simplify = TRUE)
+q <- sapply(res_qic, function(x) x$ic_min, simplify = TRUE)
+qu <- sapply(res_qicu, function(x) x$ic_min, simplify = TRUE)
+bqu <- sapply(res_bqicu, function(x) x$ic_min, simplify = TRUE)
 
 plot(
-    x = seq_len(nsims), y = q,
-    ylim = c(600, 1000),
-    xlab = "Index", ylab = "IC",
-    type = "l", lwd = 2, col = "gray",
-    bty = "n",
+  x = seq_len(nsims), y = q,
+  ylim = c(600, 1000),
+  xlab = "Index", ylab = "IC",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n",
 )
 lines(
-    x = seq_len(nsims), y = qu,
-    col = "firebrick", lwd = 2
+  x = seq_len(nsims), y = qu,
+  col = "firebrick", lwd = 2
 )
 lines(
-    x = seq_len(nsims), y = bqu,
-    col = "steelblue4", lwd = 2
+  x = seq_len(nsims), y = bqu,
+  col = "steelblue4", lwd = 2
 )
 legend_top(
-    legend = c("QIC", "QICu", "BQICu"),
-    col = c("gray", "steelblue4", "firebrick"),
-    lwd = 2, lty = 1, title = "Information criteria"
+  legend = c("QIC", "QICu", "BQICu"),
+  col = c("gray", "steelblue4", "firebrick"),
+  lwd = 2, lty = 1, title = "Information criteria"
 )
 ```
 
@@ -81,33 +81,33 @@ gf_q <- rep(NA, nsims)
 gf_qu <- rep(NA, nsims)
 gf_bqu <- rep(NA, nsims)
 for (k in seq_len(nsims)) {
-    w_q <- res_qic[[k]]$min
-    w_qu <- res_qicu[[k]]$min
-    w_bqu <- res_bqicu[[k]]$min
-    gf_q[k] <- res_qic[[k]]$gof[w_q]
-    gf_qu[k] <- res_qicu[[k]]$gof[w_qu]
-    gf_bqu[k] <- res_bqicu[[k]]$gof[w_bqu]
+  w_q <- res_qic[[k]]$min
+  w_qu <- res_qicu[[k]]$min
+  w_bqu <- res_bqicu[[k]]$min
+  gf_q[k] <- res_qic[[k]]$gof[w_q]
+  gf_qu[k] <- res_qicu[[k]]$gof[w_qu]
+  gf_bqu[k] <- res_bqicu[[k]]$gof[w_bqu]
 }
 
 plot(
-    x = seq_len(nsims), y = gf_q,
-    ylim = c(600, 1000),
-    xlab = "Index", ylab = "GOF",
-    type = "l", lwd = 2, col = "gray",
-    bty = "n"
+  x = seq_len(nsims), y = gf_q,
+  ylim = c(600, 1000),
+  xlab = "Index", ylab = "GOF",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
 )
 lines(
-    x = seq_len(nsims), y = gf_qu,
-    col = "firebrick", lwd = 2
+  x = seq_len(nsims), y = gf_qu,
+  col = "firebrick", lwd = 2
 )
 lines(
-    x = seq_len(nsims), y = gf_bqu,
-    col = "steelblue4", lwd = 2
+  x = seq_len(nsims), y = gf_bqu,
+  col = "steelblue4", lwd = 2
 )
 legend_top(
-    legend = c("QIC", "QICu", "BQICu"),
-    col = c("gray", "steelblue4", "firebrick"),
-    lwd = 2, lty = 1, title = "Information criteria"
+  legend = c("QIC", "QICu", "BQICu"),
+  col = c("gray", "firebrick", "steelblue4"),
+  lwd = 2, lty = 1, title = "Information criteria"
 )
 ```
 
@@ -117,33 +117,33 @@ penalty_q <- rep(NA, nsims)
 penalty_qu <- rep(NA, nsims)
 penalty_bqu <- rep(NA, nsims)
 for (k in seq_len(nsims)) {
-    w_q <- res_qic[[k]]$min
-    w_qu <- res_qicu[[k]]$min
-    w_bqu <- res_bqicu[[k]]$min
-    penalty_q[k] <- res_qic[[k]]$penalty[w_q]
-    penalty_qu[k] <- res_qicu[[k]]$penalty[w_qu]
-    penalty_bqu[k] <- res_bqicu[[k]]$penalty[w_bqu]
+  w_q <- res_qic[[k]]$min
+  w_qu <- res_qicu[[k]]$min
+  w_bqu <- res_bqicu[[k]]$min
+  penalty_q[k] <- res_qic[[k]]$penalty[w_q]
+  penalty_qu[k] <- res_qicu[[k]]$penalty[w_qu]
+  penalty_bqu[k] <- res_bqicu[[k]]$penalty[w_bqu]
 }
 
 plot(
-    x = seq_len(nsims), y = penalty_q,
-    ylim = c(5, 35),
-    xlab = "Index", ylab = "Penalty",
-    type = "l", lwd = 2, col = "gray",
-    bty = "n"
+  x = seq_len(nsims), y = penalty_q,
+  ylim = c(5, 35),
+  xlab = "Index", ylab = "Penalty",
+  type = "l", lwd = 2, col = "gray",
+  bty = "n"
 )
 lines(
-    x = seq_len(nsims), y = penalty_qu,
-    col = "firebrick", lwd = 2
+  x = seq_len(nsims), y = penalty_qu,
+  col = "firebrick", lwd = 2
 )
 lines(
-    x = seq_len(nsims), y = penalty_bqu,
-    col = "steelblue4", lwd = 2
+  x = seq_len(nsims), y = penalty_bqu,
+  col = "steelblue4", lwd = 2
 )
 legend_top(
-    legend = c("QIC", "QICu", "BQICu"),
-    col = c("gray", "steelblue4", "firebrick"),
-    lwd = 2, lty = 1, title = "Information criteria"
+  legend = c("QIC", "QICu", "BQICu"),
+  col = c("gray", "firebrick", "steelblue4"),
+  lwd = 2, lty = 1, title = "Information criteria"
 )
 ```
 
@@ -161,25 +161,25 @@ For measuring the overall performance of selecting the mean structure, a functio
 ```{r}
 # creating a function to generate a look at the simulation results
 look <- function(x) {
-    under <- 0
-    exact <- 0
-    mis <- 0
-    over <- 0
-    over_inc <- 0
-    for (k in seq_along(x)) {
-        under <- under + (length(x[[k]]$vars) < l)
-        exact <- exact + identical(x[[k]]$vars, w)
-        mis <- mis + (!identical(x[[k]]$vars, w) & (length(x[[k]]$vars) == l))
-        over <- over + (length(x[[k]]$vars) > l)
-        over_inc <- over_inc + ((length(x[[k]]$vars) > l) & all(w %in% x[[k]]$vars))
-    }
-    return(
-        data.frame(
-            under = under, exact = exact,
-            mis = mis, over = over,
-            over_inc = over_inc
-        )
+  under <- 0
+  exact <- 0
+  mis <- 0
+  over <- 0
+  over_inc <- 0
+  for (k in seq_along(x)) {
+    under <- under + (length(x[[k]]$vars) < l)
+    exact <- exact + identical(x[[k]]$vars, w)
+    mis <- mis + (!identical(x[[k]]$vars, w) & (length(x[[k]]$vars) == l))
+    over <- over + (length(x[[k]]$vars) > l)
+    over_inc <- over_inc + ((length(x[[k]]$vars) > l) & all(w %in% x[[k]]$vars))
+  }
+  return(
+    data.frame(
+      under = under, exact = exact,
+      mis = mis, over = over,
+      over_inc = over_inc
     )
+  )
 }
 ```
 
@@ -187,43 +187,43 @@ Using the `look` function, we have the following summary measures from the simul
 
 ```{r}
 data.frame(
-    ic = c("QIC", "QICu", "BQICu"),
-    dplyr::bind_rows(look(res_qic), look(res_qicu), look(res_bqicu))
+  ic = c("QIC", "QICu", "BQICu"),
+  dplyr::bind_rows(look(res_qic), look(res_qicu), look(res_bqicu))
 )
 ```
 
 ### Correlation
 Now for measuring the overall performance of selecting the correlation structure, the table below presents the number of models, where the correlation structure selected from the best subsets was AR(1) (`ar1`), exchangeable (`exchangeable`), independence (`independence`), and unstructured (`unstructured`). Note that proper selection of the mean structure is not needed to select the correlation structure correctly.
 ```{r}
-corstr_q <- sapply(res_qic, function(x) {x$corstr_min}, simplify = TRUE)
-corstr_qu <- sapply(res_qicu, function(x) {x$corstr_min}, simplify = TRUE)
-corstr_bqu <- sapply(res_bqicu, function(x) {x$corstr_min}, simplify = TRUE)
+corstr_q <- sapply(res_qic, function(x) x$corstr_min, simplify = TRUE)
+corstr_qu <- sapply(res_qicu, function(x) x$corstr_min, simplify = TRUE)
+corstr_bqu <- sapply(res_bqicu, function(x) x$corstr_min, simplify = TRUE)
 
 corstr_count <- function(x) {
-    count_indp <- 0
-    count_cs <- 0
-    count_ar1 <- 0
-    count_un <- 0
-    for (i in seq_along(x)) {
-        count_indp <- count_indp + (x[i] == "independence")
-        count_cs <- count_cs + (x[i] == "exchangeable")
-        count_ar1 <- count_ar1 + (x[i] == "ar1") 
-        count_un <- count_un + (x[i] == "unstructured")
-    }
-    temp <- data.frame(
-        indpendenence = count_indp, exchangeable = count_cs,
-        ar1 = count_ar1, unstructured = count_un
-    )
-    return(temp)
+  count_indp <- 0
+  count_cs <- 0
+  count_ar1 <- 0
+  count_un <- 0
+  for (i in seq_along(x)) {
+    count_indp <- count_indp + (x[i] == "independence")
+    count_cs <- count_cs + (x[i] == "exchangeable")
+    count_ar1 <- count_ar1 + (x[i] == "ar1")
+    count_un <- count_un + (x[i] == "unstructured")
+  }
+  temp <- data.frame(
+    independence = count_indp, exchangeable = count_cs,
+    ar1 = count_ar1, unstructured = count_un
+  )
+  return(temp)
 }
 
 data.frame(
-    ic = c("QIC", "QICu", "BQICu"),
-    dplyr::bind_rows(
-        corstr_count(corstr_q),
-        corstr_count(corstr_qu),
-        corstr_count(corstr_bqu)
-    )
+  ic = c("QIC", "QICu", "BQICu"),
+  dplyr::bind_rows(
+    corstr_count(corstr_q),
+    corstr_count(corstr_qu),
+    corstr_count(corstr_bqu)
+  )
 )
 ```
 
@@ -231,30 +231,30 @@ data.frame(
 Finally, a joint selection table will provide a look at selecting the working correlation structure (`corstr`) and the mean structure appropriately. The column names listed of `under`, `exact`, `mis`, `over` and `over_inc` represent the same measures discussed previously. This table will also present results based on the information criteria used.
 ```{r}
 joint <- function(x) {
-    p <- function(y) {
-        if (length(y) == 0) {
-            return(data.frame(under = 0, exact = 0, mis = 0, over = 0, over_inc = 0))
-        } else {
-            return(look(x = y))
-        }
+  p <- function(y) {
+    if (length(y) == 0) {
+      return(data.frame(under = 0, exact = 0, mis = 0, over = 0, over_inc = 0))
+    } else {
+      return(look(x = y))
     }
+  }
 
-    independence <- x[sapply(x, function(x) {x$corstr_min == "independence"}, simplify = TRUE)]
-    exchangeable <- x[sapply(x, function(x) {x$corstr_min == "exchangeable"}, simplify = TRUE)]
-    ar1 <- x[sapply(x, function(x) {x$corstr_min == "ar1"}, simplify = TRUE)]
-    un <- x[sapply(x, function(x) {x$corstr_min == "unstructured"}, simplify = TRUE)]
+  independence <- x[sapply(x, function(x) x$corstr_min == "independence", simplify = TRUE)]
+  exchangeable <- x[sapply(x, function(x) x$corstr_min == "exchangeable", simplify = TRUE)]
+  ar1 <- x[sapply(x, function(x) x$corstr_min == "ar1", simplify = TRUE)]
+  un <- x[sapply(x, function(x) x$corstr_min == "unstructured", simplify = TRUE)]
 
-    ip <- p(independence)
-    ep <- p(exchangeable)
-    ap <- p(ar1)
-    up <- p(un)
+  ip <- p(independence)
+  ep <- p(exchangeable)
+  ap <- p(ar1)
+  up <- p(un)
 
-    return(dplyr::bind_rows(ip, ep, ap, up))
+  return(dplyr::bind_rows(ip, ep, ap, up))
 }
 
 data.frame(
-    ic = rep(c("QIC", "", "QICu", "", "BQICu", ""), rep(c(1, 3), 3)),
-    corstr = rep(c("Independence", "Exchangeable", "AR(1)", "Unstructured"), 3),
-    dplyr::bind_rows(joint(res_qic), joint(res_qicu), joint(res_bqicu))
+  ic = rep(c("QIC", "", "QICu", "", "BQICu", ""), rep(c(1, 3), 3)),
+  corstr = rep(c("Independence", "Exchangeable", "AR(1)", "Unstructured"), 3),
+  dplyr::bind_rows(joint(res_qic), joint(res_qicu), joint(res_bqicu))
 )
 ```
