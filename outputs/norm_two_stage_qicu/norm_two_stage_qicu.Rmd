@@ -69,7 +69,7 @@ col <- boonstra::pal(length(work_corstr))
 ```
 
 ### CIC
-This first plot provides a visual of the criterion values across the simulation given each possible correlations structure. Any criteria value greater than 99 was truncated as the majority of the criteria values were less than 100.
+This first plot provides a visual of the criterion values across the simulation given each possible correlations structure.
 
 ```{r, echo = FALSE}
 # collecting all the information criterion values
@@ -79,23 +79,17 @@ for (j in seq_len(ncol(ic_all))) {
     X = res_cic_corstr,
     FUN = function(x) {
       hold <- x$ic[which(x$work_corstr == work_corstr[j])]
-      ifelse(hold > 99, 100, hold)
     }
   )
 }
 
 # creating an empty plot window
 graphics::plot(
-  1, xlim = c(0, 100), ylim = c(-20, 100), type = "n",
+  1, xlim = c(0, 100), ylim = c(5, 15), type = "n",
   axes = FALSE, ylab = "CIC", xlab = "Index"
 )
 graphics::axis(side = 1, at = seq(from = 0, to = 100, by = 10))
-labs_yaxt <- seq(from = -20, to = 100, by = 20)
-labs_yaxt <- ifelse(labs_yaxt == 100, "100+", as.character(labs_yaxt))
-graphics::axis(
-  side = 2, at = seq(from = -20, to = 100, by = 20),
-  labels = labs_yaxt
-)
+graphics::axis(side = 2, at = seq(from = 5, to = 15, by = 2.5))
 
 # plotting ic
 for (j in seq_len(ncol(ic_all))) {
@@ -172,26 +166,20 @@ This first plot provides a visual of the criterion values across the simulation 
 ic_all <- matrix(NA, nrow = length(res_qic_corstr), ncol = length(work_corstr))
 for (j in seq_len(ncol(ic_all))) {
   ic_all[, j] <- sapply(
-    X = res_qic_corstr,
+    X = res_cic_corstr,
     FUN = function(x) {
       hold <- x$ic[which(x$work_corstr == work_corstr[j])]
-      ifelse(hold > 99, 100, hold)
     }
   )
 }
 
 # creating an empty plot window
 graphics::plot(
-  1, xlim = c(0, 100), ylim = c(-20, 100), type = "n",
-  axes = FALSE, ylab = "QIC", xlab = "Index"
+  1, xlim = c(0, 100), ylim = c(5, 15), type = "n",
+  axes = FALSE, ylab = "CIC", xlab = "Index"
 )
 graphics::axis(side = 1, at = seq(from = 0, to = 100, by = 10))
-labs_yaxt <- seq(from = -20, to = 100, by = 20)
-labs_yaxt <- ifelse(labs_yaxt == 100, "100+", as.character(labs_yaxt))
-graphics::axis(
-  side = 2, at = seq(from = -20, to = 100, by = 20),
-  labels = labs_yaxt
-)
+graphics::axis(side = 2, at = seq(from = 5, to = 15, by = 2.5))
 
 # plotting ic
 for (j in seq_len(ncol(ic_all))) {
@@ -265,30 +253,38 @@ The second stage of the selection process used the correlation structure selecte
 
 ### CIC {.tabset .tabset-fade .tabset-pills}
 Given the working correlation structure was determined by CIC, the plots present the QIC and QICu values for the mean structure that resulted in the minimum information criteria value.
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.align = "center"}
 ic_qic <- sapply(res_cic_qic, function(x) x$ic_min, simplify = TRUE)
 ic_qicu <- sapply(res_cic_qicu, function(x) x$ic_min, simplify = TRUE)
 
 plot(
   x = seq_along(ic_qic), y = ic_qic,
-  ylim = c(-5000, 50),
+  ylim = c(600, 1000),
   xlab = "Index", ylab = "QIC",
   type = "l", lwd = 2, col = "gray",
   bty = "n"
 )
+abline(h = mean(ic_qic), col = "red", lwd = 2, lty = 2)
+boonstra::legend_top(
+  legend = c("Mean value of QIC"), col = "red", lwd = 2, lty = 2
+)
 
 plot(
   x = seq_along(ic_qicu), y = ic_qicu,
-  ylim = c(0, 50),
+  ylim = c(600, 1000),
   xlab = "Index", ylab = "QICu",
   type = "l", lwd = 2, col = "gray",
   bty = "n"
+)
+abline(h = mean(ic_qicu), col = "red", lwd = 2, lty = 2)
+boonstra::legend_top(
+  legend = c("Mean value of QICu"), col = "red", lwd = 2, lty = 2
 )
 ```
 
 #### Goodness-of-fit
 Now information criteria values are broken down into their parts, starting with the goodness-of-fit term. 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.align = "center"}
 gf_qic <- rep(NA, length(res_cic_qic))
 gf_qicu <- rep(NA, length(res_cic_qicu))
 for (j in seq_along(res_cic_qic)) {
@@ -300,7 +296,7 @@ for (j in seq_along(res_cic_qic)) {
 
 plot(
   x = seq_along(gf_qic), y = gf_qic,
-  ylim = c(0, 25),
+  ylim = c(600, 1000),
   xlab = "Index", ylab = "GOF (QIC)",
   type = "l", lwd = 2, col = "gray",
   bty = "n"
@@ -308,7 +304,7 @@ plot(
 
 plot(
   x = seq_along(gf_qicu), y = gf_qicu,
-  ylim = c(0, 25),
+  ylim = c(600, 1000),
   xlab = "Index", ylab = "GOF (QICu)",
   type = "l", lwd = 2, col = "gray",
   bty = "n"
@@ -317,7 +313,7 @@ plot(
 
 #### Penalty
 Next, we have the penalty terms for mean model that resulted in the minimum QIC and QICu values.
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.align = "center"}
 pen_qic <- rep(NA, length(res_cic_qic))
 pen_qicu <- rep(NA, length(res_cic_qicu))
 for (j in seq_along(res_cic_qic)) {
@@ -329,7 +325,7 @@ for (j in seq_along(res_cic_qic)) {
 
 plot(
   x = seq_along(pen_qic), y = pen_qic,
-  ylim = c(-5000, 50),
+  ylim = c(5, 15),
   xlab = "Index", ylab = "Penalty (QIC)",
   type = "l", lwd = 2, col = "gray",
   bty = "n"
@@ -337,7 +333,7 @@ plot(
 
 plot(
   x = seq_along(pen_qicu), y = pen_qicu,
-  ylim = c(0, 50),
+  ylim = c(5, 15),
   xlab = "Index", ylab = "Penalty (QICu)",
   type = "l", lwd = 2, col = "gray",
   bty = "n"
@@ -426,30 +422,38 @@ tab
 
 ### QIC {.tabset .tabset-fade .tabset-pills}
 Given the working correlation structure was determined by QIC, the plots present the QIC and QICu values for the mean structure that resulted in the minimum information criteria value.
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.align = "center"}
 ic_qic <- sapply(res_qic_qic, function(x) x$ic_min, simplify = TRUE)
 ic_qicu <- sapply(res_qic_qicu, function(x) x$ic_min, simplify = TRUE)
 
 plot(
   x = seq_along(ic_qic), y = ic_qic,
-  ylim = c(-5000, 50),
+  ylim = c(600, 1000),
   xlab = "Index", ylab = "QIC",
   type = "l", lwd = 2, col = "gray",
   bty = "n"
 )
+abline(h = mean(ic_qic), col = "red", lwd = 2, lty = 2)
+boonstra::legend_top(
+  legend = c("Mean value of QIC"), col = "red", lwd = 2, lty = 2
+)
 
 plot(
   x = seq_along(ic_qicu), y = ic_qicu,
-  ylim = c(0, 50),
+  ylim = c(600, 1000),
   xlab = "Index", ylab = "QICu",
   type = "l", lwd = 2, col = "gray",
   bty = "n"
+)
+abline(h = mean(ic_qicu), col = "red", lwd = 2, lty = 2)
+boonstra::legend_top(
+  legend = c("Mean value of QICu"), col = "red", lwd = 2, lty = 2
 )
 ```
 
 #### Goodness-of-fit
 Now information criteria values are broken down into their parts, starting with the goodness-of-fit term. 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.align = "center"}
 gf_qic <- rep(NA, length(res_qic_qic))
 gf_qicu <- rep(NA, length(res_qic_qicu))
 for (j in seq_along(res_cic_qic)) {
@@ -461,7 +465,7 @@ for (j in seq_along(res_cic_qic)) {
 
 plot(
   x = seq_along(gf_qic), y = gf_qic,
-  ylim = c(0, 25),
+  ylim = c(600, 1000),
   xlab = "Index", ylab = "GOF (QIC)",
   type = "l", lwd = 2, col = "gray",
   bty = "n"
@@ -469,7 +473,7 @@ plot(
 
 plot(
   x = seq_along(gf_qicu), y = gf_qicu,
-  ylim = c(0, 25),
+  ylim = c(600, 1000),
   xlab = "Index", ylab = "GOF (QICu)",
   type = "l", lwd = 2, col = "gray",
   bty = "n"
@@ -478,7 +482,7 @@ plot(
 
 #### Penalty
 Next, we have the penalty terms for mean model that resulted in the minimum QIC and QICu values.
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.align = "center"}
 pen_qic <- rep(NA, length(res_qic_qic))
 pen_qicu <- rep(NA, length(res_qic_qicu))
 for (j in seq_along(res_cic_qic)) {
@@ -490,7 +494,7 @@ for (j in seq_along(res_cic_qic)) {
 
 plot(
   x = seq_along(pen_qic), y = pen_qic,
-  ylim = c(-5000, 50),
+  ylim = c(5, 15),
   xlab = "Index", ylab = "Penalty (QIC)",
   type = "l", lwd = 2, col = "gray",
   bty = "n"
@@ -498,7 +502,7 @@ plot(
 
 plot(
   x = seq_along(pen_qicu), y = pen_qicu,
-  ylim = c(0, 50),
+  ylim = c(5, 15),
   xlab = "Index", ylab = "Penalty (QICu)",
   type = "l", lwd = 2, col = "gray",
   bty = "n"

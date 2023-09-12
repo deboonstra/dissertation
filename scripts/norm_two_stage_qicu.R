@@ -27,7 +27,7 @@ res_qic_qicu <- list()
 pb <- utils::txtProgressBar(0, nsims, style = 3)
 for (j in seq_len(nsims)) {
   ## Simulating data ####
-  dat <- sim_data(N = n, n = n, beta = beta, rho = rho, corstr = corstr)
+  dat <- sim_data(N = N, n = n, beta = beta, rho = rho, corstr = corstr)
   y <- dat$y
   X <- dat$X
   id <- dat$id
