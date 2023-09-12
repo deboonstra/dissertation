@@ -166,6 +166,26 @@ prentice_zhao_1991.pdf
 - *Authors:* Ross L. Prentice and Lue Ping Zhao
 - *DOI:* https://doi.org/10.2307/2532642
 
+westgate_2012.pdf
+- *Title:* A bias correction for covariance estimators to improve inference with generalized estimating equations that use an unstructured correlation matrix
+- *Authors:* Philip M. Westgate
+- *DOI:* https://doi.org/10.1002/sim.5709
+
+westgate_2014.pdf
+- *Title:* Improving the correlation structure selection approach for generalized estimating equations and balanced longitudinal data
+- *Authors:* Philip M. Westgate
+- *DOI:* https://doi.org/10.1002/sim.6106
+
+yan_fine_2004.pdf
+- *Title:* Estimating equations for associations structures
+- *Authors:* Jun Yan and Jason Fine
+- *DOI:* https://doi.org/10.1002/sim.1650
+
+ziegler_2000.pdf
+- *Title:* Familial associations of lipid profiles: a generalized estimating equations approach
+- *Authors:* Andreas Ziegler, Christian Kastner, Daniel Bruner, and Maria Blettner
+- *DOI:* https://doi.org/10.1002/1097-0258(20001230)19:24%3C3345::AID-SIM829%3E3.0.CO;2-5
+
 ## Maybe
 
 ## Trash
