@@ -1,5 +1,9 @@
 # Dissertation: Model Selection for Generalized Estimating Equations (GEEs)
 
+## Problem areas to explore
+- Create an information criteria that is better than QIC by accounting for the within-cluster correlation in the goodness-of-fit term.
+- Data drive method to determine the variance estimator to use for inference of $\hat{\boldsymbol{\beta}}$ for GEEs.
+
 ## File directories
 - `notes` contains files related to meetings or notes to share.
 - `references` contains PDF files and notes of previous research in this area.
@@ -16,10 +20,6 @@ sapply(R, source, .GlobalEnv)
 
 All scripts and markdown files execute assuming the current working directory is set to the main `Dissertation` directory.
 
-## Problem areas to explore
-- Create an information criteria that is better than QIC by accounting for the within-cluster correlation in the goodness-of-fit term.
-- Data drive method to determine the variance estimator to use for inference of $\hat{\boldsymbol{\beta}}$ for GEEs.
-
 ## Results
 As described above all of the results from the simulations ran in `scripts` may be found in `outputs` with the appropriate file name, where each of the file names give a short description of the simulation is exploring. Below are more comprehensive descriptions of the simulations based on each file name.
 
@@ -32,4 +32,5 @@ As described above all of the results from the simulations ran in `scripts` may 
 - `norm_glsx_beta_sim` examines the relationship between the mean parameter estimates based on fitting GLMs via GEEs and GLMs after transforming the response and design matrix by the GLS method.
 - `norm_glsx_bqicu_sim` runs a simulation to determine the effectiveness of using the GLS approach with GEE, where the GOF term in QIC, QICu and BQICu were adjusted by producing a new $\mathbf{y}^{\ast}$ and $\mathbf{X}^{\ast}$. One should see the `2023_05_31` notes for more information.
 - `norm_glsx_mix_qic_corstr_sim` runs a simulation to determine the effectiveness of using a mixed GLS approach with GEEs. The GOF term was a by-product of the transformed $\mathbf{y}^{\ast}$ and $\mathbf{X}^{\ast}$; however, the penalty term will be based on the original data. Unlike `norm_glsx_bqicu_sim`, joint selection of the mean structure and correlation structure were examined with these simulations. Additionally, different likelihood frameworks were used to define the GOF term.
+- `norm_modified_cic_sim` examines the correlation selection properties of a modified version CIC when the mean structure is properly specified and $\boldsymbol{\Omega}_{I}$ is replaced by $\boldsymbol{\Omega}_{r}$ via a simulation. These simulations should be compared to `norm_cic_sim`.
 - `norm_two_stage_qicu` examines the mean and correlation selection properties of a two-stage model selection procedure based on CIC, QIC, and QICu.
