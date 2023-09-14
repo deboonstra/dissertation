@@ -114,13 +114,15 @@ for (j in seq_len(ncol(x))) {
     means = diff_means
   )
   graphics::barplot(
-    formula = means ~ type, data = diff_means, ylim = c(-2, 2),
+    formula = means ~ type, data = diff_means, ylim = c(-3, 3),
     border = "white", col = "gray", bty = "n",
     xlab = "Other working correlation structures",
     ylab = "Mean difference in CIC",
     main = paste0("Base working correlation: ", legend_work_corstr[j])
   )
   graphics::abline(h = 0, col = "black", lwd = 0.5, lty = 3)
+  graphics::abline(h = 2, col = "firebrick", lwd = 0.5, lty = 2)
+  graphics::abline(h = -2, col = "firebrick", lwd = 0.5, lty = 2)
 }
 ```
 
@@ -181,13 +183,15 @@ for (j in seq_len(ncol(x))) {
     means = diff_means
   )
   graphics::barplot(
-    formula = means ~ type, data = diff_means, ylim = c(-2, 2),
+    formula = means ~ type, data = diff_means, ylim = c(-3, 3),
     border = "white", col = "gray", bty = "n",
     xlab = "Other working correlation structures",
     ylab = "Mean difference in CIC",
     main = paste0("Base working correlation: ", legend_work_corstr[j])
   )
   graphics::abline(h = 0, col = "black", lwd = 0.5, lty = 3)
+  graphics::abline(h = 2, col = "firebrick", lwd = 0.5, lty = 2)
+  graphics::abline(h = -2, col = "firebrick", lwd = 0.5, lty = 2)
 }
 ```
 
