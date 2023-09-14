@@ -1,7 +1,11 @@
 ---
 title: "Simulations investigating the correlation structure selection properties for CIC"
 author: "D. Erik Boonstra, MS"
-output: html_document 
+output:
+  html_document:
+    toc: TRUE
+    toc_depth: 2
+    toc_float: TRUE
 ---
 
 ```{r, include = FALSE, results = FALSE, message = FALSE}
