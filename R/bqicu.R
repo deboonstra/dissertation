@@ -62,7 +62,7 @@ cic <- function(object, modified = FALSE) {
   if (!is.logical(modified)) {
     stop("modified must be a logical value.")
   }
-  
+
   # outputing cic
   if (!modified) {
     cic <- unname(geepack::QIC(object)[4])
