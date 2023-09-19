@@ -1,0 +1,27 @@
+---
+title: "Dissertation meeting notes"
+date: "September 14, 2023"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+- Simulation results comparing one-stage and two-stage model selection processes
+    - Hin and Wang (2009) state that the mean structure should be found first then the correlation structure should be identified on the basis of using the correct mean structure. The purpose of correlation structure selection is to provide efficient mean parameter estimates. Thus, misspecification of the mean structure can lead to misspecification of correlation structure and less efficient parameters.
+    - Thus, **all** model selection processes should be two-stage.
+- Simulation results comparing CIC and CIC~m~, $trace\left(\widehat{\boldsymbol{\Omega}}_{r}\widehat{\mathbf{V}}_{r}\right)$.
+- The derivation of CIC is **not** mathemtically linked to Kullback-Leilber divergence, but an observation from QIC and Efron's covariance penalty.
+
+# Notes
+
+- Considering the results comparing CIC and CIC~m~, further investigation into CIC is needed.
+    - CIC~m~ like AIC tends to select the correct structure but overfit at times. For correlation structure selection, if an unstructured correlation structure is included as correlation structure option, CIC~m~ will pick the correct correlation structure the majority of the time. However, CIC~m~ will select the unstructured correlation structure a non-zero amount of the time.
+    - CIC~m~ leads to wondering if there are mathematical based methods to compare square matrices instead of the ad-hoc method used in CIC~m~.
+
+- Comments made by Hin and Wang are valid, but from Joe's and mine past experiences the model selection process can be one-stage and flipped two-stage approaches.
+
+# Action items
+
+- Find different methods to compare the covariance matrices and run a simulation investigating these methods.
+- Read the thirteenth model selection notes for another approach to model selection that is not ad-hoc.
