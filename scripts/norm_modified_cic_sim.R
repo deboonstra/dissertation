@@ -114,13 +114,13 @@ for (j in seq_len(nsims)) {
 }
 
 # Save simulation results ####
-if (!dir.exists("./outputs/norm_modified_cic_sim")) {
-  dir.create("./outputs/norm_modified_cic_sim")
+if (!dir.exists("./outputs/norm-modified-cic-sim")) {
+  dir.create("./outputs/norm-modified-cic-sim")
 }
 
 save(
   res_cic1_cs, res_cic1_ar1,
   res_cic2_cs, res_cic2_ar1,
   res_cic3_cs, res_cic3_ar1,
-  file = "./outputs/norm_modified_cic_sim/norm_modified_cic_sim.RData"
+  file = "./outputs/norm-modified-cic-sim/norm_modified_cic_sim.RData"
 )

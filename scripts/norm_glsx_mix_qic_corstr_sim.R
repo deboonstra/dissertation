@@ -31,8 +31,14 @@ for (j in seq_len(nsims)) {
   Xt <- transform_data$X
   ## Produce best subsets ####
   bs_temp <- expand_cols(dat$X)
-  best_sub <- unlist(list(bs_temp, bs_temp, bs_temp, bs_temp), recursive = FALSE)
-  wc <- rep(c("independence", "exchangeable", "ar1", "unstructured"), each = length(bs_temp))
+  best_sub <- unlist(
+    list(bs_temp, bs_temp, bs_temp, bs_temp),
+    recursive = FALSE
+  )
+  wc <- rep(
+    x = c("independence", "exchangeable", "ar1", "unstructured"),
+    each = length(bs_temp)
+  )
   ## Fitting models ####
   ic_quasi <- ic_lik <- gf_quasi <- gf_lik <- pen <- corstr <- rep(NA, length(best_sub))
   for (i in seq_along(best_sub)) {
@@ -75,10 +81,10 @@ for (j in seq_len(nsims)) {
 }
 
 # Save simulation ####
-if (!dir.exists("./outputs/norm_glsx_mix_qic_corstr_sim/")) {
-  dir.create("./outputs/norm_glsx_mix_qic_corstr_sim/")
+if (!dir.exists("./outputs/norm-glsx-mix-qic-corstr-sim/")) {
+  dir.create("./outputs/norm-glsx-mix-qic-corstr-sim/")
 }
 save(
   res_quasi, res_lik,
-  file = "./outputs/norm_glsx_mix_qic_corstr_sim/norm_glsx_mix_qic_corstr_sim.RData"
+  file = "./outputs/norm-glsx-mix-qic-corstr-sim/norm_glsx_mix_qic_corstr_sim.RData"
 )

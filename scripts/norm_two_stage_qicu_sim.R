@@ -129,13 +129,13 @@ for (j in seq_len(nsims)) {
 }
 
 # Save simulation results ####
-if (!dir.exists("./outputs/norm_two_stage_qicu")) {
-  dir.create("./outputs/norm_two_stage_qicu")
+if (!dir.exists("./outputs/norm-two-stage-qicu-sim")) {
+  dir.create("./outputs/norm-two-stage-qicu-sim")
 }
 
 save(
   res_cic_corstr, res_qic_corstr,
   res_cic_qic, res_cic_qicu,
   res_qic_qic, res_qic_qicu,
-  file = "./outputs/norm_two_stage_qicu/norm_two_stage_qicu.RData"
+  file = "./outputs/norm-two-stage-qicu-sim/norm_two_stage_qicu_sim.RData"
 )

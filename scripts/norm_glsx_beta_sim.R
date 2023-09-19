@@ -43,10 +43,10 @@ for (j in seq_len(nsims)) {
 }
 
 # Save simulation ####
-if (!dir.exists("./outputs/norm_glsx_beta_sim/")) {
-  dir.create("./outputs/norm_glsx_beta_sim/")
+if (!dir.exists("./outputs/norm-glsx-beta-sim/")) {
+  dir.create("./outputs/norm-glsx-beta-sim/")
 }
 save(
   beta_gee, beta_star,
-  file = "./outputs/norm_glsx_beta_sim/norm_glsx_beta_sim.RData"
+  file = "./outputs/norm-glsx-beta-sim/norm_glsx_beta_sim.RData"
 )
