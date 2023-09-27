@@ -1,0 +1,39 @@
+---
+title: "Dissertation meeting notes"
+author: "D. Erik Boonstra, MS"
+date: "September 21, 2023"
+output: html_document
+---
+
+# Talking points
+
+- Discuss the papers that have cited CIC.
+    - The goal of this literature review was to find another methods improve upon CIC or discuss the downfalls of CIC.
+- Discuss methods of matrix comparisons. Currently, these techniques are:
+    - Bures-Wasserstein distance between positive definite matrices,
+    - Frobenius norm, and
+    - Kullback-Leibler divergence based on the normal distribution.
+
+  The `explore/matrix_comparison.html` document provided the basis for this conversation.
+- The difference between Kullback directed divergence and Kullback symmetric divergence.
+
+# Notes
+
+- Joe did not remember the KQIC chapter in Laura Acion's thesis. This chapter is relevant to our research, so it would be good read it.
+- Matrix comparison methods:
+    - Did not spend much time discussing Bures-Wasserstein distance or Frobenius norm.
+    - Kullback-Leibler divergence based on normal distributions:
+        - For the Kullback-Leibler divergence, there is $\log\frac{|\Sigma_{2}|}{|\Sigma_{1}|}$, which is another way to compare matrices based on determinants. If we examine this determinant based method, we are examining the impact of it on the KL divergence for normal distributions.
+        - Using KL divergence for normal distributions is an interesting topic because this method is based on asymptotic distribution of estimated mean parameters, which is normally distributed. Traditionally, KL is based on the entire data, which requires the likelihood. In the GEE framework, a likelihood does NOT exists, so the independence working correlation structure is used to produce a quasi-likelihood. 
+        - While in Hin and Carey (2009) do not explictly discuss KL diverengence for CIC because CIC is based on QIC, which is based on Taylor series expansion of the KL divergence, CIC is based on KL divergence with a independence working correlation structure.
+        - So far, KL diverengence has been referencing the Kullback directed divergence (KDD), which only considers one side of the comparison of two distributions. Another Kullback divergence is Kullback symmetric divergence (KSD), which considers both sides of the comparisons of two distributions. For the KL divergence based on two normal distributions, $\mathbf{X} \sim N_{n}(\boldsymbol{\mu}_{1}, \boldsymbol{\Sigma}_{1})$ and $\mathbf{Y} \sim N_{n}(\boldsymbol{\mu}_{2}, \boldsymbol{\Sigma}_{2})$, KSD is 
+        $$\begin{aligned}
+        KSD(\mathbf{X}||\mathbf{Y}) &= \frac{1}{2}\left(\log\frac{|\boldsymbol{\Sigma}_{2}|}{|\boldsymbol{\Sigma}_{1}|} + tr\left(\boldsymbol{\Sigma}_{2}^{-1}\boldsymbol{\Sigma}_{1}\right) + (\boldsymbol{\mu_{2}} - \boldsymbol{\mu}_{1})^{\top}\boldsymbol{\Sigma}_{2}^{-1}(\boldsymbol{\mu_{2}} - \boldsymbol{\mu}_{1}) - n\right) + \ldots \\
+        &\ldots + \frac{1}{2}\left(\log\frac{|\boldsymbol{\Sigma}_{1}|}{|\boldsymbol{\Sigma}_{2}|} + tr\left(\boldsymbol{\Sigma}_{1}^{-1}\boldsymbol{\Sigma}_{2}\right) + (\boldsymbol{\mu_{1}} - \boldsymbol{\mu}_{2})^{\top}\boldsymbol{\Sigma}_{1}^{-1}(\boldsymbol{\mu_{1}} - \boldsymbol{\mu}_{2}) - n\right). \\
+        \end{aligned}$$
+        - Using KDD or KSD based on the asymptotic distribution of the mean parameters is an interesting direction. So, further investigation into the selection properties of KDD and KSD are need. This should include variants of KDD and KSD based on comparisons to independence models and model-based working covariance matrices (i.e., similar to CIC and CIC~m~).
+
+# Action items
+
+- Run the simulations for KDD, KSD, KDD~m~, and KSD~m~ that have the same simulation setup as the CIC, CIC~m~ simulations.
+- Read the chapter on KQIC in Laura Acion's thesis.
