@@ -16,7 +16,24 @@ library(kableExtra)
 ```
 
 # Purpose of simulations
-The results of these simulations are to investigate the correlation structure selection properties of KSD.
+The results of these simulations are to investigate the correlation structure selection properties of the Kullback symmetric divergence (KSD). The functional form of KSD in the generalized estimating equations setting is based on the asymptotic distribution of $\hat{\boldsymbol{\beta}},$ 
+
+$$K^{1/2}\left(\hat{\boldsymbol{\beta}} - \boldsymbol{\beta}\right) \sim N\left(\mathbf{0}, \hat{\mathbf{V}}_{r}\right),$$ 
+
+where $K$ is number of parameters in $\boldsymbol{\beta}$ and $\mathbf{V}_{r}$ is the robust covariance matrix of $\hat{\boldsymbol{\beta}}$. Then, the KDD becomes
+
+$$\begin{aligned}
+KSD &= \frac{1}{2}\left(\log\frac{|\boldsymbol{\Sigma}_{MB}|}{|\mathbf{V}_{r}|} + tr\left(\boldsymbol{\Sigma}_{MB}^{-1}\mathbf{V}_{r}\right) + (\boldsymbol{\mu_{2}} - \boldsymbol{\mu}_{1})^{\top}\boldsymbol{\Sigma}_{MB}^{-1}(\boldsymbol{\mu_{2}} - \boldsymbol{\mu}_{1}) - K\right) + \ldots \\
+&\ldots + \frac{1}{2}\left(\log\frac{|\mathbf{V}_{r}|}{|\boldsymbol{\Sigma}_{MB}|} + tr\left(\mathbf{V}_{r}^{-1}\boldsymbol{\Sigma}_{MB}\right) + (\boldsymbol{\mu_{1}} - \boldsymbol{\mu}_{2})^{\top}\mathbf{V}_{r}^{-1}(\boldsymbol{\mu_{1}} - \boldsymbol{\mu}_{2}) - K\right)
+\end{aligned}$$
+
+where $\boldsymbol{\Sigma}_{MB}$ is the model-based covariance matrix for $\hat{\boldsymbol{\beta}}$. Considering $\hat{\boldsymbol{\beta}}$ consistent regardless of the working correlation structure,
+
+$$
+KSD = \frac{1}{2}\left(\log\frac{|\boldsymbol{\Sigma}_{MB}|}{|\mathbf{V}_{r}|} + tr\left(\boldsymbol{\Sigma}_{MB}^{-1}\mathbf{V}_{r}\right) - K\right) + \frac{1}{2}\left(\log\frac{|\mathbf{V}_{r}|}{|\boldsymbol{\Sigma}_{MB}|} + tr\left(\mathbf{V}_{r}^{-1}\boldsymbol{\Sigma}_{MB}\right) - K\right) \\
+$$
+
+In these simulations, we will be assuming that $\boldsymbol{\Sigma}_{MB} = \boldsymbol{\Sigma}_{MB(I)},$ where $\boldsymbol{\Sigma}_{MB(I)}$ is the model-based working covariance matrix based on an independence working correlation structure. Thus, resulting in $KSD(I).$
 
 # Simulation setup
 

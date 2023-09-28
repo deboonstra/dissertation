@@ -16,7 +16,23 @@ library(kableExtra)
 ```
 
 # Purpose of simulations
-The results of these simulations are to investigate the correlation structure selection properties of modified KDD (KDD~m~).
+The results of these simulations are to investigate the correlation structure selection properties of the modified Kullback directed divergence (KDD~m~). The functional form of KDD in the generalized estimating equations setting is based on the asymptotic distribution of $\hat{\boldsymbol{\beta}},$ 
+
+$$K^{1/2}\left(\hat{\boldsymbol{\beta}} - \boldsymbol{\beta}\right) \sim N\left(\mathbf{0}, \hat{\mathbf{V}}_{r}\right),$$ 
+
+where $K$ is number of parameters in $\boldsymbol{\beta}$ and $\mathbf{V}_{r}$ is the robust covariance matrix of $\hat{\boldsymbol{\beta}}$. Then, the KDD becomes
+
+$$
+KDD = \frac{1}{2}\left(\log\frac{|\boldsymbol{\Sigma}_{MB}|}{|\mathbf{V}_{r}|} + tr\left(\boldsymbol{\Sigma}_{MB}^{-1}\mathbf{V}_{r}\right) + (\boldsymbol{\mu_{2}} - \boldsymbol{\mu}_{1})^{\top}\boldsymbol{\Sigma}_{MB}^{-1}(\boldsymbol{\mu_{2}} - \boldsymbol{\mu}_{1}) - K\right), \\
+$$
+
+where $\boldsymbol{\Sigma}_{MB}$ is the model-based covariance matrix for $\hat{\boldsymbol{\beta}}$. Considering $\hat{\boldsymbol{\beta}}$ consistent regardless of the working correlation structure,
+
+$$
+KDD = \frac{1}{2}\left(\log\frac{|\boldsymbol{\Sigma}_{MB}|}{|\mathbf{V}_{r}|} + tr\left(\boldsymbol{\Sigma}_{MB}^{-1}\mathbf{V}_{r}\right) - K\right), \\
+$$
+
+In these simulations, we will be assuming that $\boldsymbol{\Sigma}_{MB} = \boldsymbol{\Sigma}_{MB(R)},$ where $\boldsymbol{\Sigma}_{MB(R)}$ is the model-based working covariance matrix based on the working correlation structure of interest. Thus, resulting in $KDD(R) = KDD_{m}.$
 
 # Simulation setup
 
