@@ -3,6 +3,9 @@
 # meeting notes for 2023-09-28 and the document explaining this simulation:
 # `outputs/norm-inv-cic-sim/norm_inv_cic_sim.Rmd`.
 
+# The reciprocal of the inverted CIC is used because it produces larger values
+# for the better performing correlation structures.
+
 # Loading libraries and functions ####
 R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
@@ -52,8 +55,8 @@ for (j in seq_len(nsims)) {
       data = dat_ar1, corstr = work_corstr[k]
     )
     ### Getting CIC values
-    cic_cs[k] <- cic_inv(fit_cs)
-    cic_ar1[k] <- cic_inv(fit_ar1)
+    cic_cs[k] <- 1 / cic_inv(fit_cs)
+    cic_ar1[k] <- 1 / cic_inv(fit_ar1)
   }
 
   ## Comparison  of CIC values ####
