@@ -1,5 +1,5 @@
 ---
-title: "Simulations investigating the correlation structure selection properties for KDD"
+title: "Simulations investigating the correlation structure selection properties for LD"
 author: "D. Erik Boonstra, MS"
 output:
   html_document:
