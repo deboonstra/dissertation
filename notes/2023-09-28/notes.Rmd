@@ -1,0 +1,49 @@
+---
+title: "Dissertation  meeting notes"
+author: "D. Erik Boonstra, MS"
+date: "September 28, 2023"
+output: html_document
+---
+
+# Talking points
+
+- Discuss the simulations investigating the different variants of Kullback divergence for two normally distributed random vectors.
+    - KDD and KSD
+    - They don't look good; they are worst in some instance to CIC.
+    - Did I mess up?
+
+# Notes
+
+The results of KDD and KSD are extremely confusing. It appears that there is fighting between
+$$
+\log\frac{|\boldsymbol{\Sigma}_{MB}|}{|\mathbf{V}_{r}|}
+$$
+and
+$$
+tr\left(\boldsymbol{\Sigma}_{MB}^{-1}\mathbf{V}_{r}\right).
+$$
+
+- We ran a quick simulation investigating $\log\frac{|\boldsymbol{\Sigma}_{MB}|}{|\mathbf{V}_{r}|}$.
+    - Initially, the values were off by -1, with the independence working correlation structure always being chosen, or flipping the choice of exchangeable and AR(1).
+    - We multipled $\log\frac{|\boldsymbol{\Sigma}_{MB}|}{|\mathbf{V}_{r}|}$ by -1 and got results similar to CIC.
+    - All the theory shows that a -1 should **not** ben there. So, this is something we need to work through.
+- We need to run another simulation investigating
+$$
+tr(\mathbf{V}_{r}^{-1}\boldsymbol{\Sigma}_{MB}),
+$$
+which is the inverse of CIC.
+    - For KSD with the same mean structures, the $\log\frac{|\boldsymbol{\Sigma}_{MB}|}{|\mathbf{V}_{r}|}$ and $\log\frac{|\mathbf{V}_{r}|}{|\boldsymbol{\Sigma}_{MB}|}$ cancel out. So, all that is left is $tr\left(\boldsymbol{\Sigma}_{MB}^{-1}\mathbf{V}_{r}\right)$ and $tr(\mathbf{V}_{r}^{-1}\boldsymbol{\Sigma}_{MB}),$ which appear to be competing against each other.
+
+It would be nice to use KDD and KSD to perform joint selection as these divergences include information on variance and means.
+
+- For joint selection,  we will need to use the following:
+    - $K^{-1/2}\mathbf{X}(\widehat{\boldsymbol{\beta}} - \boldsymbol{\beta}) \sim N(\mathbf{0}, \mathbf{V}_{r})$.
+    - To start, Joe would like to use the model-based unstructured estimates along with the fully saturated model as the comparison model.
+    - It would be nice to see different values of this with changing the mean and correlation structures. We are **not** doing selection.
+
+# Action items
+
+- Finish simulations for the log of the determinant metric.
+- Run selection simulations for $tr(\mathbf{V}_{r}^{-1}\boldsymbol{\Sigma}_{MB})$.
+- Run simulations for the values of the joint selection variants of KDD and KSD.
+- Read Joe's 2004 paper on KSD.
