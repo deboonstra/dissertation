@@ -53,8 +53,8 @@ for (j in seq_len(nsims)) {
       data = dat_ar1, corstr = work_corstr[k]
     )
     ### Getting ld values
-    ld_cs[k] <- -1 * log_det(fit_cs, modified = TRUE)
-    ld_ar1[k] <- -1 * log_det(fit_ar1, modified = TRUE)
+    ld_cs[k] <- log_det(fit_cs, modified = TRUE)
+    ld_ar1[k] <- log_det(fit_ar1, modified = TRUE)
   }
 
   ## Comparison  of ld values ####
@@ -66,20 +66,20 @@ for (j in seq_len(nsims)) {
   ### 1. Exchangeable and AR(1) only ####
   ld1_cs <- ld_cs[which(work_corstr %in% c("exchangeable", "ar1"))]
   ld1_ar1 <- ld_ar1[which(work_corstr %in% c("exchangeable", "ar1"))]
-  w1_cs <- which.min(ld1_cs)
-  w1_ar1 <- which.min(ld1_ar1)
+  w1_cs <- which.max(ld1_cs)
+  w1_ar1 <- which.max(ld1_ar1)
 
   ### 2. Independence, exchangeable, and AR(1)
   ld2_cs <- ld_cs[which(work_corstr != "unstructured")]
   ld2_ar1 <- ld_ar1[which(work_corstr != "unstructured")]
-  w2_cs <- which.min(ld2_cs)
-  w2_ar1 <- which.min(ld2_ar1)
+  w2_cs <- which.max(ld2_cs)
+  w2_ar1 <- which.max(ld2_ar1)
 
   ### 3. Independence, exchangeable, AR(1), and unstructured
   ld3_cs <- ld_cs
   ld3_ar1 <- ld_ar1
-  w3_cs <- which.min(ld3_cs)
-  w3_ar1 <- which.min(ld3_ar1)
+  w3_cs <- which.max(ld3_cs)
+  w3_ar1 <- which.max(ld3_ar1)
 
   ## Updating result ####
   res_ld1_cs[[j]] <- list(

@@ -16,7 +16,7 @@ library(kableExtra)
 ```
 
 # Purpose of simulations
-The results of these simulations are to investigate the correlation structure selection properties of modified inverted CIC, which is seen in modified KSD. However, the reciprocal of modified inverted CIC was used as the results were always flipped based on previous knowledge.
+The results of these simulations are to investigate the correlation structure selection properties of modified inverted CIC, which is seen in modified KSD.
 
 $$\text{Inverted } CIC_{m} = tr\left(\mathbf{V}_{r}^{-1}\boldsymbol{\Sigma}_{MB}\right),$$
 
@@ -54,7 +54,7 @@ In these simulations, there are three sets of comparisons being made between the
 2. exchangeable versus AR(1) versus independence, and
 3. exchangeable versus AR(1) versus independence versus unstrctured.
 
-We are making these comparisons because previous research usually only focuses on exchangeable and AR(1). As these simulations are meant to investigate the selection properties of inverted CIC~m~, for each comparison, the correlation structure that resulted in the minimum inverted reciprocal CIC~m~ value was selected as the best performing correlation structure.
+We are making these comparisons because previous research usually only focuses on exchangeable and AR(1). As these simulations are meant to investigate the selection properties of inverted CIC~m~, for each comparison, the correlation structure that resulted in the **maximum** inverted CIC~m~ value was selected as the best performing correlation structure.
 
 # Presentation of results
 
@@ -95,7 +95,7 @@ for (j in seq_len(ncol(cic_all_cs))) {
   )
   graphics::plot(
     x = seq_len(nsims), y = cic_all_cs[, j],
-    xlim = c(0, nsims), ylim = c(0, 1),
+    xlim = c(0, nsims), ylim = c(0, 8),
     xlab = "Index", ylab = expression(Inverted ~ CIC[m]),
     main = paste0("Working correlation: ", legend_work_corstr[j]),
     type = "p", pch = 16, col = "gray", bty = "n"
@@ -122,7 +122,7 @@ for (j in seq_len(ncol(x))) {
     means = diff_means
   )
   graphics::barplot(
-    formula = means ~ type, data = diff_means, ylim = c(-0.5, 0.5),
+    formula = means ~ type, data = diff_means, ylim = c(-2, 2),
     border = "white", col = "gray", bty = "n",
     xlab = "Other working correlation structures",
     ylab = expression(bar(Delta) ~ Inverted ~ CIC[m]),
@@ -164,7 +164,7 @@ for (j in seq_len(ncol(cic_all_ar1))) {
   )
   graphics::plot(
     x = seq_len(nsims), y = cic_all_ar1[, j],
-    xlim = c(0, nsims), ylim = c(0, 1),
+    xlim = c(0, nsims), ylim = c(0, 8),
     xlab = "Index", ylab = expression(Inverted ~ CIC[m]),
     main = paste0("Working correlation: ", legend_work_corstr[j]),
     type = "p", pch = 16, col = "gray", bty = "n"
@@ -191,7 +191,7 @@ for (j in seq_len(ncol(x))) {
     means = diff_means
   )
   graphics::barplot(
-    formula = means ~ type, data = diff_means, ylim = c(-0.5, 0.5),
+    formula = means ~ type, data = diff_means, ylim = c(-2, 2),
     border = "white", col = "gray", bty = "n",
     xlab = "Other working correlation structures",
     ylab = expression(bar(Delta) ~ Inverted ~ CIC[m]),
@@ -210,7 +210,7 @@ Now we will examine the selection properties of inverted CIC~m~ given the genera
 2. exchangeable versus AR(1) versus independence, and
 3. exchangeable versus AR(1) versus independence versus unstrctured,
 
-and the results are presented based on the defined numbering system of these comparisons. For each comparison, the hope is the working correlation structure selected by the minimum inverted reciprocal CIC~m~ value is the generating correlation structure the majority of the time.
+and the results are presented based on the defined numbering system of these comparisons. For each comparison, the hope is the working correlation structure selected by the maximum inverted CIC~m~ value is the generating correlation structure the majority of the time.
 ```{r, echo = FALSE}
 corstr_count <- function(x) {
   count_indp <- 0

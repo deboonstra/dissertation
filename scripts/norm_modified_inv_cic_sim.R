@@ -3,9 +3,6 @@
 # see the meeting notes for 2023-09-28 and the document explaining this
 # simulation: `outputs/norm-inv-cic-sim/norm_inv_cic_sim.Rmd`.
 
-# The reciprocal of the modified inverted CIC is used because it produces larger
-# values for the better performing correlation structures.
-
 # Loading libraries and functions ####
 R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
@@ -55,8 +52,8 @@ for (j in seq_len(nsims)) {
       data = dat_ar1, corstr = work_corstr[k]
     )
     ### Getting CIC values
-    cic_cs[k] <- 1 / cic_inv(fit_cs, modified = TRUE)
-    cic_ar1[k] <- 1 / cic_inv(fit_ar1, modified = TRUE)
+    cic_cs[k] <- cic_inv(fit_cs, modified = TRUE)
+    cic_ar1[k] <- cic_inv(fit_ar1, modified = TRUE)
   }
 
   ## Comparison  of CIC values ####
@@ -68,20 +65,20 @@ for (j in seq_len(nsims)) {
   ### 1. Exchangeable and AR(1) only ####
   cic1_cs <- cic_cs[which(work_corstr %in% c("exchangeable", "ar1"))]
   cic1_ar1 <- cic_ar1[which(work_corstr %in% c("exchangeable", "ar1"))]
-  w1_cs <- which.min(cic1_cs)
-  w1_ar1 <- which.min(cic1_ar1)
+  w1_cs <- which.max(cic1_cs)
+  w1_ar1 <- which.max(cic1_ar1)
 
   ### 2. Independence, exchangeable, and AR(1)
   cic2_cs <- cic_cs[which(work_corstr != "unstructured")]
   cic2_ar1 <- cic_ar1[which(work_corstr != "unstructured")]
-  w2_cs <- which.min(cic2_cs)
-  w2_ar1 <- which.min(cic2_ar1)
+  w2_cs <- which.max(cic2_cs)
+  w2_ar1 <- which.max(cic2_ar1)
 
   ### 3. Independence, exchangeable, AR(1), and unstructured
   cic3_cs <- cic_cs
   cic3_ar1 <- cic_ar1
-  w3_cs <- which.min(cic3_cs)
-  w3_ar1 <- which.min(cic3_ar1)
+  w3_cs <- which.max(cic3_cs)
+  w3_ar1 <- which.max(cic3_ar1)
 
   ## Updating result ####
   res_cic1_cs[[j]] <- list(

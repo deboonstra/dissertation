@@ -62,7 +62,7 @@ In these simulations, there are three sets of comparisons being made between the
 2. exchangeable versus AR(1) versus independence, and
 3. exchangeable versus AR(1) versus independence versus unstrctured.
 
-We are making these comparisons because previous research usually only focuses on exchangeable and AR(1). As these simulations are meant to investigate the selection properties of modified logarithm of the determinants, for each comparison, the correlation structure that resulted in the minimum of the **negative** of the modified logarithm of the determinants value was selected as the best performing correlation structure.
+We are making these comparisons because previous research usually only focuses on exchangeable and AR(1). As these simulations are meant to investigate the selection properties of modified logarithm of the determinants, for each comparison, the correlation structure that resulted in the **maximum** of the modified logarithm of the determinants value was selected as the best performing correlation structure.
 
 
 # Presentation of results
@@ -104,7 +104,7 @@ for (j in seq_len(ncol(ld_all_cs))) {
   )
   graphics::plot(
     x = seq_len(nsims), y = ld_all_cs[, j],
-    xlim = c(0, nsims), ylim = c(-1, 3),
+    xlim = c(0, nsims), ylim = c(-3, 3),
     xlab = "Index", ylab = expression(LD[m]),
     main = paste0("Working correlation: ", legend_work_corstr[j]),
     type = "p", pch = 16, col = "gray", bty = "n"
@@ -173,7 +173,7 @@ for (j in seq_len(ncol(ld_all_ar1))) {
   )
   graphics::plot(
     x = seq_len(nsims), y = ld_all_ar1[, j],
-    xlim = c(0, nsims), ylim = c(-1, 3),
+    xlim = c(0, nsims), ylim = c(-3, 3),
     xlab = "Index", ylab = expression(LD[m]),
     main = paste0("Working correlation: ", legend_work_corstr[j]),
     type = "p", pch = 16, col = "gray", bty = "n"
@@ -219,7 +219,7 @@ Now we will examine the selection properties of LD~m~ given the generating corre
 2. exchangeable versus AR(1) versus independence, and
 3. exchangeable versus AR(1) versus independence versus unstrctured,
 
-and the results are presented based on the defined numbering system of these comparisons. For each comparison, the hope is the working correlation structure selected by the minimum of the negative of LD~m~ value is the generating correlation structure the majority of the time.
+and the results are presented based on the defined numbering system of these comparisons. For each comparison, the hope is the working correlation structure selected by the maximum of the LD~m~ value is the generating correlation structure the majority of the time.
 ```{r, echo = FALSE}
 corstr_count <- function(x) {
   count_indp <- 0
