@@ -1,0 +1,32 @@
+---
+title: "Dissertation meeting notes"
+author: "D. Erik Boonstra, MS"
+date: "October 5, 2023"
+output: html_document
+---
+
+# Talking points
+
+- Discuss the impat of the logarithm of determinants (LD) and inverted CIC on KDD and KSD.
+    - Inverted CIC needed a reciprocal for selection properties based on minimum values.
+    - LD needed a negative one (-1), we could have done a reciprocal too, for selection properties based on minimum values.
+        - However, a negative one produced results the opposite of LD.
+- Discuss the computational issue of the joint KL divergence.
+    - `explore/joint_kl.R`
+    - 800 by 800 matrix causing issue not seen in previous work.
+
+# Notes
+
+We need to flip the inverted CIC and LD values to be back to their original values and base selection on the maximum values. 
+
+- Going back to the original values will allows us to see the true nature relationship between LD and CIC.
+- Run a new simulation for -LD, since we are going back to the original values.
+- This will show the relationship between $$\log\frac{|\boldsymbol{\Sigma}_{MB}|}{|\mathbf{V}_{r}|}$$ and $$\log\frac{|\mathbf{V}_{r}|}{|\boldsymbol{\Sigma}_{MB}|},$$ and $$tr\left(\boldsymbol{\Sigma}_{MB}^{-1}\mathbf{V}_{r}\right)$$ and $$tr(\mathbf{V}_{r}^{-1}\boldsymbol{\Sigma}_{MB}).$$
+    - $\log\frac{|\mathbf{V}_{r}|}{|\boldsymbol{\Sigma}_{MB}|}$ and $tr\left(\boldsymbol{\Sigma}_{MB}^{-1}\mathbf{V}_{r}\right)$ produce has the same selection properties (*push*)
+    - $\log\frac{|\boldsymbol{\Sigma}_{MB}|}{|\mathbf{V}_{r}|}$ and $tr(\mathbf{V}_{r}^{-1}\boldsymbol{\Sigma}_{MB})$ produce the same selection properties (*pull*).
+
+For $\mathbf{X}\hat{\boldsymbol{\beta}}$, we can think of a nesting situation like AIC~c~ to get us back to only using $\hat{\boldsymbol{\beta}},$ which has fewer dimensions and less computational burdens.
+
+# Action items
+
+- Redo simulations for LD and inverted CIC.
