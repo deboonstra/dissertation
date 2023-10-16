@@ -1,0 +1,45 @@
+---
+title: "Dissertation meeting"
+author: "D. Erik Boonstra, MS"
+date: "October 12, 2023"
+output: html_document
+---
+
+# Talking points
+
+- Re-discuss logarithm of determinants (LD) and inverted CIC simulations based on their original values
+- Discussing using AIC~c~ setup for KDD(SD).
+
+# Notes
+
+The results for LD and inverted CIC all make sense with the push and pull within KSD and KDD.
+
+- The results still have an issue with unstructured, which we need to tackle.
+
+To use KDD or KSD for joint selection, we will need to use a combination of frameworks from AIC~c~ and Mallows' C~p~.
+
+- AIC~c~: All candidate models are nested within a fully saturated model with an unstructured working correlation structure. The candidate models will have zero coefficients for the covariates not included in the candidate model that are in the fully saturated model.
+- C~p~: We will use the practical aspect of C~p~, where the user must specify the reference model.
+    - Remember that there are already methods for GEEs that use C~p~.
+- For KDD and KSD, we can use the push and pull argument from the LD and CIC results to create our own criterion that does not result in computional instability.
+- We could also use the simplest model as our reference model that is related to the next topic.
+
+To penalized for more general correlation structures, we can use expected optism (eo) proposed by Efron.
+- More information in the model selection notes for lecture 13.
+
+Criterions to consider:
+
+- Transform data then use likelihood based methods.
+    - Really only for mean structure selection.
+    - Could correlation structure selection be added if transformation is based on working correlation structure?
+- Adjust CIC with eo penalty
+    - Correlation selection only.
+- KDD or KSD for joint selection.
+    - May add eo penalty with making the reference model the intercept only independence model.
+
+# Action items
+
+- Read the model selection notes for lecture 13.
+- Read the model selection notes on Mallows' C~p~.
+- Read the papers using C~p~ in the GEE framework.
+- Read the model selection notes on AIC~c~.
