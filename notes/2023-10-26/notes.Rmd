@@ -1,0 +1,42 @@
+---
+title: "Dissertation meeting"
+date: "October 26, 2023"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+- Discuss the utility of the frameworks and procedures used in AIC~c~, Mallows' C~p~, and expected optism (eo).
+    - See the **Talking points** from 2023-10-19 meeting for more information.
+    - When trying to create the joint Kullback divergence function I noticed that just adding zero coefficients to the mean parameters excluded from the nested model, we run into an issue with the "nested"  covariance structure being the wrong dimension too.
+        - With the `geepack` package, we can use the start parameter in `geeglm` I believe to force non-included mean parameters to be zero.
+
+# Notes
+
+Joe realy wants to move forward with exploring the transformation method (glsx) based on AIC and BIC.
+
+- Mean structure selection only with this method, we are thing about the correlation structure as a nuisance just as Liang and Zegler did.
+- Let's get back to this:
+    - Generate data for binary and count clustered data
+    - Figure out a way to incorporate the link function in the transformation
+    - But first, generate gamma clustered data with an identity link.
+- For penalizing more complicated correlation structures, we will try eo based on the Monte Carlo method as it is the easiest and provides similar results to bootstrap and cross-validation methods from Joe's experience.
+    - Start with:
+        - Generate data with an intercept only model.
+        - Fit model with properly specified mean structure with different correlation structures.
+        - Calculate eo for each correlation structure based on different formulations of eo.
+            - $\delta(\boldsymbol{\Omega}_{Z}, \mathbf{V}_{Y}) - \delta(\boldsymbol{\Omega}_{Y}, \mathbf{V}_{Y})$
+            - $\delta(\boldsymbol{\Omega}_{Y}, \mathbf{V}_{Z}) - \delta(\boldsymbol{\Omega}_{Y}, \mathbf{V}_{Y})$
+            - These are different options where Z and Y are the different data.
+        - Present the raw eo values with no selection.
+
+# Action items
+
+- Explore the gamma based simulations
+- Simulate eo values.
+
+# Directions
+
+- glsx
+- eo
