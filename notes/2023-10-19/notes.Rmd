@@ -1,0 +1,27 @@
+---
+title: "Dissertation meeting"
+date: "October 19, 2023"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+- Take some time off in December
+    - December 10th through December 14th for Rachel's graduation
+    - December 21st through December 30th for Christmas in Texas
+- Discuss the utility of the frameworks and procedures used in AIC~c~, Mallows' C~p~, and expected optism (eo).
+    - AIC~c~: Setting excluded $\boldsymbol{\beta}$'s to zero.
+    - Mallows' C~p~: Creating a reference model for KDD(SD).
+    - eo: penalty for "generalized" correlation structures
+        - It discusses using the smallest model, while we've discussed using the largest models if we want to incorporate eo in KDD(SD).
+- Discuss the direction we want to go.
+    - We have several separate ideas, see the notes from last week's meeting.
+
+# Notes
+
+I am allowed to go to Rachel's graduation, but I might have to work. For Christmas, I can take off the entire time as Joe will not be working.
+
+Did not discuss my dissertation at all. We focused solely on time series analysis for `cf-carries`.
+
+Next week, we will discuss my dissertation.
