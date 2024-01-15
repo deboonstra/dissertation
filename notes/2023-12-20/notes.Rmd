@@ -1,0 +1,37 @@
+---
+title: "Dissertation meeting"
+date: "December 20, 2023"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+Simulating data:
+
+- Do we have to use the same mechanism to simulate data for every marginal distribution?
+- Can Joe provide me with Pat's data simulation code?
+
+eo:
+
+- What is Joe's opinion on the KDD with eo results that I sent him?
+- What if we used bootstrap method for eo? This requires observed data to be in $\delta(\cdot)$ from Joe's notes.
+- The point in eo is to penalize larger working correlation structures. Apparently, QIC~c~ already does this... However, I can NOT find the original QIC~c~ paper with the `geepack` penalty structure.
+
+# Notes
+
+Make sure to apply for Ballard-Seashore fellowship for the final semester of graduate school.
+
+Remove $K^{1/2}$ from limiting distribution of $\hat{\boldsymbol{\beta}}$.
+
+KDD calculation nees to change because are assuming that each $\hat{\boldsymbol{\beta}} \overset{\cdot}{\sim} N(\boldsymbol{\beta}, \mathbf{V})$ has the same $\boldsymbol{\beta}$. Thus, eliminating the mean part of KDD.
+
+Trying eo based on the $CIC_{m} = tr(\boldsymbol{\Omega}_{MB}, \mathbf{V}_{r})$ because there is some overfitting with CIC~m~.
+
+# Action items
+
+Email Joe about items not discussed
+
+Re-run KDD-eo simulation with removal of mean structure from the KDD equation.
+
+Investigate CIC~m~-eo
