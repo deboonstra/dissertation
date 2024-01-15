@@ -1,0 +1,31 @@
+---
+title: "Dissertation meeting"
+date: "December 7, 2023"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+Simulating non-normal data with `sim_data2`
+Exploratory simulation with KDD and eo.
+
+# Notes
+
+When the identity link is used for gamma data we see that `NA` are produced due to negative $\boldsymbol{\eta}_{i}$ from the $\mathbf{X}_{i}$ and $\boldsymbol{\varepsilon}_{i}$.
+
+- We can include an intercept that forces $\mathbf{X}_{i}\boldsymbol{\beta} + \boldsymbol{\varepsilon}_{i} > 0$ always.
+
+When proper link is sued for the gamma distribution we get reasonable parameter estimates.
+
+- However, for the poisson distribution, it does not look reasonable until $N = 2,000$. The only issue with the poisson distribution with a larger sample size is the estimation of the scale parameter. Additionally, the estimated correlation coefficient is incorrect but we believe this is due to using a log-link function.
+
+For KDD with eo:
+
+- KDD(I) has similar results to CIC
+- KDD(R) has similar results to CIC~m~.
+- Somewhat promising.
+
+# Action items
+
+- Continue work on both.
