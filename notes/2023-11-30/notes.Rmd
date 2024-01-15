@@ -1,0 +1,22 @@
+---
+title: "Dissertation meeting"
+date: "November, 30, 2023"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+Exploratory work on expected optimism (eo).
+
+- Computational intensive, I could only do 100 replications after issues arose.
+- `eo1`: $\delta(\boldsymbol{\Omega}_{Z}, \mathbf{V}_{Y})$
+- `eo2`: $\delta(\boldsymbol{\Omega}_{Y}, \mathbf{V}_{Z})$
+
+# Notes
+
+We only examined the results for the eo work I completed.
+
+- There are serious problems with the eo values because some of them are negative.
+- We need to see the average values of `cic_y`, `cic1`, and `cic2` to hopefully see why the calculations for `eo1` and `eo2` are problematic.
+- Apparently, it does not matter how the data is generated at this moment.
