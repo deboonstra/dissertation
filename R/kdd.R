@@ -92,5 +92,5 @@ kdd <- function(
   }
 
   # Output
-  return(kl)
+  return(c(kl))
 }
