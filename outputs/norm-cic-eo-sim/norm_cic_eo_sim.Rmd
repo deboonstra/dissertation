@@ -1,0 +1,237 @@
+---
+title: "Simulations investigating the correlation structure selection properties for CIC penalized with expected optimism"
+author: "D. Erik Boonstra, MS"
+output:
+  html_document:
+    toc: TRUE
+    toc_depth: 2
+    toc_float: TRUE
+---
+
+```{r, include = FALSE, results = FALSE, message = FALSE}
+R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
+sapply(R, source, .GlobalEnv)
+library(knitr)
+library(kableExtra)
+```
+
+# Purpose of simulations
+The results of these simulations are to investigate the correlation structure selection properties of CIC penalized by expected optimism.
+
+# Model selection methods 
+## Expected optimism
+For any discrepancy-based criteria $(\delta)$, expected optimism is defined to be
+
+$$
+eo = \mathbb{E}\left[\delta(Z, \hat{\theta}_{k}) - \delta(Y, \hat{\theta}_{k})\right],
+$$
+
+where $Y$ is the fitting sample, $\hat{\theta}_{k}$ is the minimum discrepancy estimator for model $M_{k}$, and $Z$ is the validation sample. For a collection of candidate models, the estimate $\widehat{eo}$ can be computed based on Monte Carlo simulations using the algorithm outlined below.
+
+- Identify the smallest model in the candidate collection. For this candidate model structure, choose a convenient, fixzed values for the parameter vector. Let $M_{f}$ denote the model based on this fixed parameter vector.
+- Use the model $M_{f}$ to generate multiple fitting samples $Y(1), \ldots, Y(R)$ and multiple validation samples $Z(1), \ldots, Z(R)$.
+- For a given candidate model structure $M_{\theta_{k}}$, obtain the minimum discrepancy estiamtor replicates $\hat{\theta}_{k}(1), \ldots, \hat{\theta}_{k}(R)$ using the fitting samples $Y(1), \ldots, Y(R)$.
+- Compute the estimate of the expected optimism as
+
+$$
+\widehat{eo} = \frac{1}{R}\sum_{i = 1}^{R}\left[\delta(Z(i), \hat{\theta}_{k}(i)) - \delta(Y(i), \hat{\theta}_{k}(i))\right].
+$$
+
+- Repeat for each candidate model structure under consideration, thereby obtaining a penalization for every model in the candidate collection. 
+
+Thus, the new penalized discrepancy measure become $\delta(Y, \hat{\theta}_{k}) + \widehat{eo}.$
+
+## CIC
+
+The correlation information criterion was proposed by Hin and Carey (2009) to select the proper working correlation structure using only the penalty term of QIC (Pan 2001a). The mathematical form of CIC is presented below:
+
+$$
+CIC = tr(\hat{\boldsymbol{\Sigma}}_{MB, I}^{-1}\hat{\mathbf{V}}_{r, R}),
+$$
+
+where $\hat{\boldsymbol{\Sigma}}_{MB, I}$ is the model-based estimated covariance matrix under the assumption of independence and $\hat{\mathbf{V}}_{r}$ is robust estimated covariance matrix of the fitted model and working correlation structure, R.
+
+Another form of CIC proposed by myself and Joe is modified CIC, CIC~m~. This form uses model-based estimated covariance matrix that is based on the working correlation structure, R. Thus,
+
+$$
+CIC_{m} = tr(\hat{\boldsymbol{\Sigma}}_{MB, R}^{-1}\hat{\mathbf{V}}_{r, R}).
+$$
+
+A function was created to calculated KDD and is presented below.
+```{r, eval = FALSE}
+cic <- function(object1, object2, modified = FALSE, env = parent.frame()) {
+  # checking object type ####
+  if (!("geeglm" %in% class(object1))) {
+    stop("object1 must be a geepack::geeglm object.")
+  }
+  if (!missing(object2)) {
+    if (!("geeglm" %in% class(object2))) {
+      stop("object2 must be a geepack::geeglm object.")
+    }
+    if (length(object1$geese$beta) != length(object2$geese$beta)) {
+      stop("Dimensionality of object1 and object2 do NOT match.")
+    }
+  }
+  if (!is.logical(modified)) {
+    stop("modified must be a logical value.")
+  }
+  if (class(env) != "environment") {
+    stop("env must be an environment object.")
+  }
+
+  # calculating cic ####
+  vr <- object1$geese$vbeta
+  if (missing(object2)) {
+    if (!modified) {
+      cic <- unname(geepack::QIC(object1)[4])
+    } else {
+      omega <- solve(object1$geese$vbeta.naiv)
+      cic <- sum(diag(omega %*% vr))
+    }
+  } else {
+    if (!modified) {
+      object2$call$corstr <- "independence"
+      model_indep <- eval(object2$call, envir = env)
+      omega <- solve(model_indep$geese$vbeta.naiv)
+    } else {
+      omega <- solve(object2$geese$vbeta.naiv)
+    }
+    cic <- sum(diag(omega %*% vr))
+  }
+
+  # returning output ####
+  return(cic)
+}
+```
+
+## Relation to KDD
+
+In the simulations for Kullback-Liebler directed divergence (KDD) penalized by expected optimism, the defined KDD(I) as KDD given the model-based estimated covariance matrix uses the assumption of independence, while KDD(R) is KDD given the model-based estimated covariance matrix uses the working correlation matrix. Thus, one can see that
+
+$$
+\begin{aligned}
+CIC &\to KDD(I) \\
+&= CIC(I) \\
+CIC_{m} &\to KDD(R) \\
+&= CIC(R)
+\end{aligned}
+$$
+
+### Penalized CIC
+From previous research, it has been seen that CIC like QIC does not account for the complexity of an unstrctured working correlation matrix. Thus, leading to CIC(R) and CIC(I) selecting the unstructured correlation structure more often even if the true correlation structure is simplier, such as exchangeable or AR(1). To account for the complexity of the correlation structures, we can use expected optimism (eo) to penalize CIC(R) and CIC(I) based on the work correlation structures leading to
+$$
+\begin{aligned}
+CIC^{*}(R) &= CIC(R) + \widehat{eo} \\
+CIC^{*}(I) &= CIC(I) + \widehat{eo}
+\end{aligned}
+$$
+
+# Simulation setup
+
+## Data
+Following Wang *et al.* (2012) with one-thousand replications, the correlated normal responses are generated from the model $$y_{ij} = \mathbf{X}_{ij}^{\top}\boldsymbol{\beta} + \varepsilon_{ij},$$ where $i = 1, \ldots, 200,$ $j = 1, \ldots, 4,$ $\mathbf{X}_{ij} = (x_{ij, 1}, \ldots, x_{ij, 6})^{\top},$ and $\boldsymbol{\beta} = (2.0, 3.0, 0.5, 0.0, 0.0, 0.0)^{\top}.$
+
+- For the covariates,
+    - $x_{ij,1}$ was generated from the Bernoulli(0.5) distribution, and 
+    - each $x_{ij,k}$ for $k = 2 \ldots 6$ was generated from the multivariate normal distribution with mean 0 and an AR(1) covariance matrix with marginal variance 1 and auto-correlation coefficient 0.5.
+- The random errors $(\varepsilon_{i1}, \ldots, \varepsilon_{i4})^{\top}$ are generated from the multivariate normal distribution with marginal mean 0, marginal variance 1, and either an **exchangeable** correlation structure with a correlation parameter of $\rho = 0.5$.
+
+## Fitting procedure
+Considering the focus of these simulations are on the correlation structure selection, each model, based on data generated by an **exchangeable** correlation structure, was fitted using generalized estimating equations. The mean structure was properly specified as $\mathbf{X}_{1}$, $\mathbf{X}_{2}$, and $\mathbf{X}_{3}$ with an intercept that was estimated to be approximately 0. To assess the correlation structure selection properties, the working correlation structure was specified as:
+
+- independence,
+- exchangeable,
+- AR(1), and
+- unstrctured.
+
+## Model selection process
+In these simulations, a comparison was made between all four considered correlation structures, where 100 Monte Carlo simulations were used to estimate expected optimism.
+
+# Results
+To simply notation in coordination with CIC, the components of $\widehat{eo}$ will become
+
+$$
+\begin{aligned}
+\widehat{eo} &= \frac{1}{100}\sum_{i = 1}^{100}\left[\delta(Z(i), \hat{\theta}_{k}(i)) - \delta(Y(i), \hat{\theta}_{k}(i))\right] \\
+&= \frac{1}{100}\sum_{i = 1}^{100}\left[CIC(Z, Y) - CIC(Y, Y)\right], \text{ or} \\
+&= \frac{1}{100}\sum_{i = 1}^{100}\left[CIC(Y, Z) - CIC(Y, Y)\right],
+\end{aligned}
+$$
+where $CIC(Z, Y)$ is related to `cic(object1 = mod_z, object2 = mod_y)` and $CIC(Y, Z)$ is related to `cic(object1 = mod_y, object2 = mod_z)`. 
+```{r, echo = FALSE}
+load(file = "./outputs/norm-cic-eo-sim/sim_res.RData")
+```
+
+## CIC(I)
+```{r, echo = FALSE}
+tab <- res_cic |>
+  dplyr::group_by(wcorstr) |>
+  dplyr::summarise_all(.funs = mean)
+tab <- knitr::kable(
+  x = tab, format = "html", digits = 4,
+  col.names = c(
+    "Correlation structure", "CIC(I)", "CIC(Y, Y)", "CIC(Y, Z)",
+    "eo(Y, Z)", "CIC(I|Y, Z)", "CIC(Z, Y)", "eo(Z, Y)", "CIC(I|Z, Y)"
+  )
+)
+kableExtra::kable_styling(kable_input = tab)
+```
+
+### Selection
+```{r, echo = FALSE}
+res_cic$sim <- rep(1:1000, times = 4)
+temp <- split(res_cic, f = factor(res_cic$sim))
+temp <- lapply(
+  X = temp,
+  FUN = function(x) {
+    w1 <- which.min(x$cic_final1)
+    w2 <- which.min(x$cic_final2)
+    data.frame(choosen1 = x$wcorstr[w1], choosen2 = x$wcorstr[w2])
+  }
+)
+temp <- dplyr::bind_rows(temp)
+mat <- matrix(NA, 2, 3)
+mat[1, ] <- c(table(temp$choosen1))
+mat[2, ] <- c(table(temp$choosen2))
+colnames(mat) <- names(c(table(temp$choosen1)))
+row.names(mat) <- c("CIC(I|Y, Z)", "CIC(I|Z, Y)")
+tab <- knitr::kable(x = mat)
+kableExtra::kable_styling(tab)
+```
+
+## CIC(R)
+```{r, echo = FALSE}
+tab <- res_modified_cic |>
+  dplyr::group_by(wcorstr) |>
+  dplyr::summarise_all(.funs = mean)
+tab <- knitr::kable(
+  x = tab, format = "html", digits = 4,
+  col.names = c(
+    "Correlation structure", "CIC(R)", "CIC(Y, Y)", "CIC(Y, Z)",
+    "eo(Y, Z)", "CIC(R|Y, Z)", "CIC(Z, Y)", "eo(Z, Y)", "CIC(R|Z, Y)"
+  )
+)
+kableExtra::kable_styling(kable_input = tab)
+```
+
+### Selection
+```{r, echo = FALSE}
+res_modified_cic$sim <- rep(1:1000, times = 4)
+temp <- split(res_modified_cic, f = factor(res_modified_cic$sim))
+temp <- lapply(
+  X = temp,
+  FUN = function(x) {
+    w1 <- which.min(x$cic_final1)
+    w2 <- which.min(x$cic_final2)
+    data.frame(choosen1 = x$wcorstr[w1], choosen2 = x$wcorstr[w2])
+  }
+)
+temp <- dplyr::bind_rows(temp)
+mat <- matrix(NA, 2, 2)
+mat[1, ] <- c(table(temp$choosen1))
+mat[2, ] <- c(table(temp$choosen2))
+colnames(mat) <- names(c(table(temp$choosen1)))
+row.names(mat) <- c("CIC(R|Y, Z)", "CIC(R|Z, Y)")
+tab <- knitr::kable(x = mat)
+kableExtra::kable_styling(tab)
+```
