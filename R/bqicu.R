@@ -53,24 +53,47 @@ qicu <- function(object) {
 }
 
 # cic ####
-cic <- function(object, modified = FALSE) {
-  # checking object type
-  if (!("geeglm" %in% class(object))) {
-    stop("object must be a geepack::geeglm object.")
+cic <- function(object1, object2, modified = FALSE, env = parent.frame()) {
+  # checking object type ####
+  if (!("geeglm" %in% class(object1))) {
+    stop("object1 must be a geepack::geeglm object.")
   }
-
+  if (!missing(object2)) {
+    if (!("geeglm" %in% class(object2))) {
+      stop("object2 must be a geepack::geeglm object.")
+    }
+    if (length(object1$geese$beta) != length(object2$geese$beta)) {
+      stop("Dimensionality of object1 and object2 do NOT match.")
+    }
+  }
   if (!is.logical(modified)) {
     stop("modified must be a logical value.")
   }
+  if (class(env) != "environment") {
+    stop("env must be an environment object.")
+  }
 
-  # outputing cic
-  if (!modified) {
-    cic <- unname(geepack::QIC(object)[4])
+  # calculating cic ####
+  vr <- object1$geese$vbeta
+  if (missing(object2)) {
+    if (!modified) {
+      cic <- unname(geepack::QIC(object1)[4])
+    } else {
+      omega <- solve(object1$geese$vbeta.naiv)
+      cic <- sum(diag(omega %*% vr))
+    }
   } else {
-    vr <- object$geese$vbeta
-    omega <- solve(object$geese$vbeta.naiv)
+    if (!modified) {
+      object2$call$corstr <- "independence"
+      model_indep <- eval(object2$call, envir = env)
+      omega <- solve(model_indep$geese$vbeta.naiv)
+    } else {
+      omega <- solve(object2$geese$vbeta.naiv)
+    }
     cic <- sum(diag(omega %*% vr))
   }
+
+  # returning output ####
   return(cic)
 }
 
