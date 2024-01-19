@@ -1,0 +1,300 @@
+---
+title: "Simulations investigating the correlation structure selection properties for KDD penalized with expected optimism"
+author: "D. Erik Boonstra, MS"
+output:
+  html_document:
+    toc: TRUE
+    toc_depth: 2
+    toc_float: TRUE
+---
+
+```{r, include = FALSE, results = FALSE, message = FALSE}
+R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
+sapply(R, source, .GlobalEnv)
+library(knitr)
+library(kableExtra)
+```
+
+# Model selection methods 
+## Expected optimism
+For any discrepancy-based criteria $(\delta)$, expected optimism is defined to be
+
+$$
+eo = \mathbb{E}\left[\delta(Z, \hat{\theta}_{k}) - \delta(Y, \hat{\theta}_{k})\right],
+$$
+
+where $Y$ is the fitting sample, $\hat{\theta}_{k}$ is the minimum discrepancy estimator for model $M_{k}$, and $Z$ is the validation sample. For a collection of candidate models, the estimate $\widehat{eo}$ can be computed based on Monte Carlo simulations using the algorithm outlined below.
+
+- Identify the smallest model in the candidate collection. For this candidate model structure, choose a convenient, fixzed values for the parameter vector. Let $M_{f}$ denote the model based on this fixed parameter vector.
+- Use the model $M_{f}$ to generate multiple fitting samples $Y(1), \ldots, Y(R)$ and multiple validation samples $Z(1), \ldots, Z(R)$.
+- For a given candidate model structure $M_{\theta_{k}}$, obtain the minimum discrepancy estiamtor replicates $\hat{\theta}_{k}(1), \ldots, \hat{\theta}_{k}(R)$ using the fitting samples $Y(1), \ldots, Y(R)$.
+- Compute the estimate of the expected optimism as
+
+$$
+\widehat{eo} = \frac{1}{R}\sum_{i = 1}^{R}\left[\delta(Z(i), \hat{\theta}_{k}(i)) - \delta(Y(i), \hat{\theta}_{k}(i))\right].
+$$
+
+- Repeat for each candidate model structure under consideration, thereby obtaining a penalization for every model in the candidate collection. 
+
+Thus, the new penalized discrepancy measure become $\delta(Y, \hat{\theta}_{k}) + \widehat{eo}.$
+
+## KDD
+
+For $\mathbf{X} \sim N_{n}(\boldsymbol{\mu}_{1}, \boldsymbol{\Sigma}_{1})$ and $\mathbf{Y} \sim N_{n}(\boldsymbol{\mu}_{2}, \boldsymbol{\Sigma}_{2})$, the Kullback-Leibler directed divergence is
+
+$$
+KDD(\mathbf{X}||\mathbf{Y}) = \frac{1}{2}\left(\log\frac{|\boldsymbol{\Sigma}_{2}|}{|\boldsymbol{\Sigma}_{1}|} + tr\left(\boldsymbol{\Sigma}_{2}^{-1}\boldsymbol{\Sigma}_{1}\right) + (\boldsymbol{\mu}_{2} - \boldsymbol{\mu}_{1})^{\top}\boldsymbol{\Sigma}_{2}^{-1}(\boldsymbol{\mu}_{2} - \boldsymbol{\mu}_{1}) - n\right).
+$$
+
+The functional form of KDD in the *generalized estimating equations* setting is based on the two asymptotic distributions of $\hat{\boldsymbol{\beta}}.$ The first asymptotic distribution is
+
+$$
+\left(\hat{\boldsymbol{\beta}} - \boldsymbol{\beta}\right) \sim N_{K}\left(\mathbf{0}, \hat{\mathbf{V}}_{r}\right),
+$$
+
+where $K$ is number of parameters in $\boldsymbol{\beta}$ and $\mathbf{V}_{r}$ is the robust covariance matrix of $\hat{\boldsymbol{\beta}}$. When the correlation structure is properly specified $\hat{\mathbf{V}}_{r} = \hat{\boldsymbol{\Sigma}}_{MB}$, where $\hat{\boldsymbol{\Sigma}}_{MB}$ is the estimated model-based covariance matrix of $\hat{\boldsymbol{\beta}}$. Thus, leading to the second asymptotic distribution of $\hat{\boldsymbol{\beta}}$
+
+$$
+\left(\hat{\boldsymbol{\beta}} - \boldsymbol{\beta}\right) \sim N_{K}\left(\mathbf{0}, \hat{\boldsymbol{\Sigma}}_{MB}\right).
+$$
+
+Using these asymptotic distributions, we have for any two candidate models of the same dimension ($K$), $M_1$ and $M_2$, KDD becomes
+
+$$
+KDD = \frac{1}{2}\left(\log\frac{|\hat{\boldsymbol{\Sigma}}_{MB_{2}}|}{|\hat{\mathbf{V}}_{r_{1}}|} + tr\left(\hat{\boldsymbol{\Sigma}}_{MB_{2}}^{-1}\hat{\mathbf{V}}_{r_{1}}\right) + (\boldsymbol{\beta}_{2} - \boldsymbol{\beta}_{1})^{\top}\hat{\boldsymbol{\Sigma}}_{MB_{2}}^{-1}(\boldsymbol{\beta}_{2} - \boldsymbol{\beta}_{1}) - K\right), \\
+$$
+
+where $\hat{\boldsymbol{\Sigma}}_{MB_{2}}$ is the model-based covariance matrix of $\hat{\boldsymbol{\beta}}$ for model $M_2$ and $\hat{\mathbf{V}}_{r_{1}}$ is the robust covariance matrix of $\hat{\boldsymbol{\beta}}$ for model $M_1$. 
+
+If $M_{1}$ and $M_{2}$ have the same mean structure, then KDD simplifies to
+
+$$
+KDD(R) = \frac{1}{2}\left(\log\frac{|\hat{\boldsymbol{\Sigma}}_{MB}|}{|\hat{\mathbf{V}}_{r}|} + tr\left(\hat{\boldsymbol{\Sigma}}_{MB}^{-1}\hat{\mathbf{V}}_{r}\right) - K\right).
+$$
+
+Furthermore, if $M_{1}$ and $M_{2}$ have the same mean structure but $M_{2}$ has an independence working correlation structure, then 
+
+$$
+\begin{aligned}
+KDD(I) &= \frac{1}{2}\left(\log\frac{|\hat{\boldsymbol{\Sigma}}_{MB_{2}}|}{|\hat{\mathbf{V}}_{r_{1}}|} + tr\left(\hat{\boldsymbol{\Sigma}}_{MB_{2}}^{-1}\hat{\mathbf{V}}_{r_{1}}\right) - K\right) \\
+&= \frac{1}{2}\left(\log\frac{|\hat{\boldsymbol{\Sigma}}_{MB_{2}}|}{|\hat{\mathbf{V}}_{r_{1}}|} + CIC - K\right).
+\end{aligned}
+$$
+
+With the mean structure completely removed from $KDD(R)$ and $KDD(I)$, we can used these forms of KDD to perform correlation structure selection. 
+
+A function was created to calculated KDD and is presented below.
+```{r, eval = FALSE}
+kdd <- function(
+  object1, object2, symmetric = FALSE, mean_included = FALSE, modified = FALSE,
+  env = parent.frame()
+) {
+  # checking object type
+  if (!("geeglm" %in% class(object1))) {
+    stop("object must be a geepack::geeglm object.")
+  }
+  if (!("geeglm" %in% class(object2))) {
+    stop("object must be a geepack::geeglm object.")
+  }
+  if (!is.logical(symmetric)) {
+    stop(
+      paste(
+        "symmetric must be a logical denoting if symmetric divergence is to",
+        "be calculated."
+      )
+    )
+  }
+  if (!is.logical(mean_included)) {
+    stop(
+      paste(
+        "mean_included must be a logical denoting if the mean difference",
+        "should be included in the calculation."
+      )
+    )
+  }
+  if (length(object1$geese$beta) != length(object2$geese$beta)) {
+    stop("Dimensionality of object1 and object2 do NOT match.")
+  }
+  if (!is.logical(modified)) {
+    stop(
+      paste(
+        "modified must be logical denoting if model-based working",
+        "covariance should be used."
+      )
+    )
+  }
+  if (class(env) != "environment") {
+    stop("env must be an environment object.")
+  }
+
+  # Calculating KDD
+
+  ## Obtaining covariance matrices
+  vr1 <- object1$geese$vbeta
+  if (!modified) {
+    object2$call$corstr <- "independence"
+    model_indep <- eval(object2$call, envir = env)
+    mb2 <- model_indep$geese$vbeta.naiv
+  } else {
+    mb2 <- object2$geese$vbeta.naiv
+  }
+
+  ## Obtaining dimension of mean parameter estimates
+  k <- length(object1$geese$beta)
+
+  ## Obtaining mean parameter estimates
+  mu1 <- matrix(data = object1$geese$beta, nrow = k, ncol = 1, byrow = TRUE)
+  mu2 <- matrix(data = object2$geese$beta, nrow = k, ncol = 1, byrow = TRUE)
+
+  ## Obtaining the components of KDD
+
+  ### Covariance components
+  log_det <- log(det(mb2) / det(vr1))
+  tr <- sum(diag(solve(mb2) %*% vr1))
+
+  ### Mean difference component
+  if (mean_included) {
+    mean_diff <- crossprod(x = mu2 - mu1, y = solve(mb2)) %*% (mu2 - mu1)
+  } else {
+    mean_diff <- 0
+  }
+
+  ## Obtaining KDD
+  kdd <- 0.5 * (log_det + tr + mean_diff - k)
+
+  ## Obtaining KSD if symmetric is true
+  if (symmetric) {
+    tr_flip <- sum(diag(solve(vr1) %*% mb2))
+    if (mean_included) {
+      mean_diff_flip <- crossprod(x = mu1 - mu2, y = solve(vr1)) %*% (mu1 - mu2)
+    } else {
+      mean_diff_flip <- 0
+    }
+    kl <- kdd + 0.5 * ((1 / log_det) + tr_flip + mean_diff_flip - k)
+  } else {
+    kl <- kdd
+  }
+
+  # Output
+  return(c(kl))
+}
+```
+
+### Penalized KDD
+From previous research, it has been seen that KDD like QIC and CIC does not account for the complexity of an unstrctured working correlation matrix. Thus, leading to KDD(R) and KDD(I) selecting the unstructured correlation structure more often even if the true correlation structure is simplier, such as exchangeable or AR(1). To account for the complexity of the correlation structures, we can use expected optimism (eo) to penalize KDD(R) and KDD(I) based on the work correlation structures leading to
+$$
+\begin{aligned}
+KDD^{*}(R) &= KDD(R) + \widehat{eo} \\
+KDD^{*}(I) &= KDD(I) + \widehat{eo}
+\end{aligned}
+$$
+
+# Simulation setup
+
+## Data
+Following Wang *et al.* (2012) with one-thousand replications, the correlated normal responses are generated from the model $$y_{ij} = \mathbf{X}_{ij}^{\top}\boldsymbol{\beta} + \varepsilon_{ij},$$ where $i = 1, \ldots, 200,$ $j = 1, \ldots, 4,$ $\mathbf{X}_{ij} = (x_{ij, 1}, \ldots, x_{ij, 6})^{\top},$ and $\boldsymbol{\beta} = (2.0, 3.0, 0.5, 0.0, 0.0, 0.0)^{\top}.$
+
+- For the covariates,
+    - $x_{ij,1}$ was generated from the Bernoulli(0.5) distribution, and 
+    - each $x_{ij,k}$ for $k = 2 \ldots 6$ was generated from the multivariate normal distribution with mean 0 and an AR(1) covariance matrix with marginal variance 1 and auto-correlation coefficient 0.5.
+- The random errors $(\varepsilon_{i1}, \ldots, \varepsilon_{i4})^{\top}$ are generated from the multivariate normal distribution with marginal mean 0, marginal variance 1, and either an **exchangeable** correlation structure with a correlation parameter of $\rho = 0.5$.
+
+## Fitting procedure
+Considering the focus of these simulations are on the correlation structure selection, each model, based on data generated by an **exchangeable** correlation structure, was fitted using generalized estimating equations. The mean structure was properly specified as $\mathbf{X}_{1}$, $\mathbf{X}_{2}$, and $\mathbf{X}_{3}$ with an intercept that was estimated to be approximately 0. To assess the correlation structure selection properties, the working correlation structure was specified as:
+
+- independence,
+- exchangeable,
+- AR(1), and
+- unstrctured.
+
+## Model selection process
+In these simulations, a comparison was made between all four considered correlation structures, where 100 Monte Carlo simulations were used to estimate expected optimism.
+
+# Results
+To simply notation in coordination with KDD, the components of $\widehat{eo}$ will become
+
+$$
+\begin{aligned}
+\widehat{eo} &= \frac{1}{100}\sum_{i = 1}^{100}\left[\delta(Z(i), \hat{\theta}_{k}(i)) - \delta(Y(i), \hat{\theta}_{k}(i))\right] \\
+&= \frac{1}{100}\sum_{i = 1}^{100}\left[KDD(Z, Y) - KDD(Y, Y)\right], \text{ or} \\
+&= \frac{1}{100}\sum_{i = 1}^{100}\left[KDD(Y, Z) - KDD(Y, Y)\right],
+\end{aligned}
+$$
+where $KDD(Z, Y)$ is related to `kdd(object1 = mod_z, object2 = mod_y)` and $KDD(Y, Z)$ is related to `kdd(object1 = mod_y, object2 = mod_z)`. **While the KDD-eo simulation investigated expected optimism being estimated with the original fitting model ($Y = X_{1} + X_{2} + X_{3}$), in this simulation expected optimism was estimated with an interecept only model.** This change was made because the replicated data was generated by an intercept only model and using the original fitting model to estimate expected optimism is misspecifying the mean structure.
+```{r, echo = FALSE}
+load(file = "./outputs/norm-kdd-eo-int-sim/sim_res.RData")
+```
+
+## KDD(I)
+```{r, echo = FALSE}
+tab <- res_kdd |>
+  dplyr::group_by(wcorstr) |>
+  dplyr::summarise_all(.funs = mean)
+tab <- knitr::kable(
+  x = tab, format = "html", digits = 4,
+  col.names = c(
+    "Correlation structure", "KDD(I)", "KDD(Y, Y)", "KDD(Y, Z)",
+    "eo(Y, Z)", "KDD(I|Y, Z)", "KDD(Z, Y)", "eo(Z, Y)", "KDD(I|Z, Y)"
+  )
+)
+kableExtra::kable_styling(kable_input = tab)
+```
+
+### Selection
+```{r, echo = FALSE}
+res_kdd$sim <- rep(1:1000, times = 4)
+temp <- split(res_kdd, f = factor(res_kdd$sim))
+temp <- lapply(
+  X = temp,
+  FUN = function(x) {
+    w1 <- which.min(x$kdd_final1)
+    w2 <- which.min(x$kdd_final2)
+    data.frame(choosen1 = x$wcorstr[w1], choosen2 = x$wcorstr[w2])
+  }
+)
+temp <- dplyr::bind_rows(temp)
+mat <- matrix(NA, 2, 4)
+mat[1, ] <- c(table(temp$choosen1))
+mat[2, ] <- c(table(temp$choosen2))
+colnames(mat) <- names(c(table(temp$choosen1)))
+row.names(mat) <- c("KDD(I|Y, Z)", "KDD(I|Z, Y)")
+tab <- knitr::kable(x = mat)
+kableExtra::kable_styling(tab)
+```
+
+## KDD(R)
+```{r, echo = FALSE}
+tab <- res_modified_kdd |>
+  dplyr::group_by(wcorstr) |>
+  dplyr::summarise_all(.funs = mean)
+tab <- knitr::kable(
+  x = tab, format = "html", digits = 4,
+  col.names = c(
+    "Correlation structure", "KDD(R)", "KDD(Y, Y)", "KDD(Y, Z)",
+    "eo(Y, Z)", "KDD(R|Y, Z)", "KDD(Z, Y)", "eo(Z, Y)", "KDD(R|Z, Y)"
+  )
+)
+kableExtra::kable_styling(kable_input = tab)
+```
+
+### Selection
+```{r, echo = FALSE}
+res_modified_kdd$sim <- rep(1:1000, times = 4)
+temp <- split(res_modified_kdd, f = factor(res_modified_kdd$sim))
+temp <- lapply(
+  X = temp,
+  FUN = function(x) {
+    w1 <- which.min(x$kdd_final1)
+    w2 <- which.min(x$kdd_final2)
+    data.frame(choosen1 = x$wcorstr[w1], choosen2 = x$wcorstr[w2])
+  }
+)
+temp <- dplyr::bind_rows(temp)
+mat <- matrix(NA, 2, 3)
+mat[1, ] <- c(table(temp$choosen1))
+mat[2, ] <- c(table(temp$choosen2))
+colnames(mat) <- names(c(table(temp$choosen1)))
+row.names(mat) <- c("KDD(R|Y, Z)", "KDD(R|Z, Y)")
+tab <- knitr::kable(x = mat)
+kableExtra::kable_styling(tab)
+```
