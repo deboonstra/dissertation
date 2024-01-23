@@ -9,8 +9,8 @@ R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
 
 # Creating output directory if one does not exists
-if (!dir.exists("./outputs/norm-cic-eo-sim/")) {
-  dir.create("./outputs/norm-cic-eo-sim/")
+if (!dir.exists("./outputs/norm-cic-eo-int-sim/")) {
+  dir.create("./outputs/norm-cic-eo-int-sim/")
 }
 
 # Defining global data simulation settings ####
@@ -53,29 +53,40 @@ for (j in seq_len(nrow(res))) {
     id = id, data = dat, corstr = res$wcorstr[j]
   )
 
-  # Fit smallest model
-  mf <- geepack::geeglm(
-    y ~ 1,
-    id = id, data = dat, corstr = "independence"
-  )
-
   # eo ####
   r <- 100 # replicates
-  dat_ystar <- fit$data
-  dat_zstar <- fit$data
+
+  ## Generating replicates based on the smallest model ####
+  ## Smallest model is an intercept only model with an independence working
+  ## correlation structure. Thus, we generate any iid N(mu, sigma), where
+  ## mu and sigma are constant and fixed.
+  yy <- matrix(
+    data = rnorm(
+      n = r * length(fit$y),
+      mean = 0,
+      sd = 1
+    ),
+    nrow = r, ncol = length(fit$y)
+  )
+  zz <- matrix(
+    data = rnorm(
+      n = r * length(fit$y),
+      mean = 0,
+      sd = 1
+    ),
+    nrow = r, ncol = length(fit$y)
+  )
   parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
   ## Calculating replicate expected optimism values ####
   eo <- parallel::parLapply(
     cl = cl,
     X = seq_len(r),
-    fun = function(i) {
-      dat_ystar$y <- rnorm(n = length(mf$y), mean = coef(mf))
-      dat_zstar$y <- rnorm(n = length(mf$y), mean = coef(mf))
+    fun = function(x) {
       mod_y <- geepack::geeglm(
-        formula = fit$formula, data = dat_ystar, id = id, corstr = fit$corstr
+        formula = yy[x, ] ~ 1, id = fit$id, corstr = fit$corstr
       )
       mod_z <- geepack::geeglm(
-        formula = fit$formula, data = dat_zstar, id = id, corstr = fit$corstr
+        formula = zz[x, ] ~ 1, id = fit$id, corstr = fit$corstr
       )
       cic_y <- cic(object1 = mod_y, object2 = mod_y)
       cic1 <- cic(object1 = mod_y, object2 = mod_z)
@@ -139,29 +150,40 @@ for (j in seq_len(nrow(res))) {
     id = id, data = dat, corstr = res$wcorstr[j]
   )
 
-  # Fit smallest model
-  mf <- geepack::geeglm(
-    y ~ 1,
-    id = id, data = dat, corstr = "independence"
-  )
-
   # eo ####
   r <- 100 # replicates
-  dat_ystar <- fit$data
-  dat_zstar <- fit$data
+
+  ## Generating replicates based on the smallest model ####
+  ## Smallest model is an intercept only model with an independence working
+  ## correlation structure. Thus, we generate any iid N(mu, sigma), where
+  ## mu and sigma are constant and fixed.
+  yy <- matrix(
+    data = rnorm(
+      n = r * length(fit$y),
+      mean = 0,
+      sd = 1
+    ),
+    nrow = r, ncol = length(fit$y)
+  )
+  zz <- matrix(
+    data = rnorm(
+      n = r * length(fit$y),
+      mean = 0,
+      sd = 1
+    ),
+    nrow = r, ncol = length(fit$y)
+  )
   parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
   ## Calculating replicate expected optimism values ####
   eo <- parallel::parLapply(
     cl = cl,
     X = seq_len(r),
-    fun = function(i) {
-      dat_ystar$y <- rnorm(n = length(mf$y), mean = coef(mf))
-      dat_zstar$y <- rnorm(n = length(mf$y), mean = coef(mf))
+    fun = function(x) {
       mod_y <- geepack::geeglm(
-        formula = fit$formula, data = dat_ystar, id = id, corstr = fit$corstr
+        formula = yy[x, ] ~ 1, id = fit$id, corstr = fit$corstr
       )
       mod_z <- geepack::geeglm(
-        formula = fit$formula, data = dat_zstar, id = id, corstr = fit$corstr
+        formula = zz[x, ] ~ 1, id = fit$id, corstr = fit$corstr
       )
       cic_y <- cic(object1 = mod_y, object2 = mod_y, modified = TRUE)
       cic1 <- cic(object1 = mod_y, object2 = mod_z, modified = TRUE)
@@ -196,5 +218,5 @@ res_modified_cic <- res
 # Exporting ####
 save(
   res_cic, res_modified_cic,
-  file = "./outputs/norm-cic-eo-sim/sim_res.RData"
+  file = "./outputs/norm-cic-eo-int-sim/sim_res.RData"
 )

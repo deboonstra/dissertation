@@ -159,7 +159,7 @@ $$
 $$
 where $CIC(Z, Y)$ is related to `cic(object1 = mod_z, object2 = mod_y)` and $CIC(Y, Z)$ is related to `cic(object1 = mod_y, object2 = mod_z)`. 
 ```{r, echo = FALSE}
-load(file = "./outputs/norm-cic-eo-sim/sim_res.RData")
+load(file = "./outputs/norm-cic-eo-int-sim/sim_res.RData")
 ```
 
 ## CIC(I)
