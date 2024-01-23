@@ -53,33 +53,44 @@ for (j in seq_len(nrow(res))) {
     id = id, data = dat, corstr = res$wcorstr[j]
   )
 
-  # Fit smallest model
-  mf <- geepack::geeglm(
-    y ~ 1,
-    id = id, data = dat, corstr = "independence"
-  )
-
   # eo ####
   r <- 100 # replicates
-  dat_ystar <- fit$data
-  dat_zstar <- fit$data
+
+  ## Generating replicates based on the smallest model ####
+  ## Smallest model is an intercept only model with an independence working
+  ## correlation structure. Thus, we generate any iid N(mu, sigma), where
+  ## mu and sigma are constant and fixed.
+  yy <- matrix(
+    data = rnorm(
+      n = r * length(fit$y),
+      mean = 0,
+      sd = 1
+    ),
+    nrow = r, ncol = length(fit$y)
+  )
+  zz <- matrix(
+    data = rnorm(
+      n = r * length(fit$y),
+      mean = 0,
+      sd = 1
+    ),
+    nrow = r, ncol = length(fit$y)
+  )
   parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
   ## Calculating replicate expected optimism values ####
   eo <- parallel::parLapply(
     cl = cl,
     X = seq_len(r),
-    fun = function(i) {
-      dat_ystar$y <- rnorm(n = length(mf$y), mean = coef(mf))
-      dat_zstar$y <- rnorm(n = length(mf$y), mean = coef(mf))
+    fun = function(x) {
       mod_y <- geepack::geeglm(
-        formula = y ~ 1, data = dat_ystar, id = id, corstr = fit$corstr
+        formula = yy[x, ] ~ 1, id = fit$id, corstr = fit$corstr
       )
       mod_z <- geepack::geeglm(
-        formula = y ~ 1, data = dat_zstar, id = id, corstr = fit$corstr
+        formula = zz[x, ] ~ 1, id = fit$id, corstr = fit$corstr
       )
-      kdd_y <- kdd(object1 = mod_y, object2 = mod_y)
-      kdd1 <- kdd(object1 = mod_y, object2 = mod_z)
-      kdd2 <- kdd(object1 = mod_z, object2 = mod_y)
+      kdd_y <- kdd(object1 = mod_y, object2 = mod_y, modified = FALSE)
+      kdd1 <- kdd(object1 = mod_y, object2 = mod_z, modified = FALSE)
+      kdd2 <- kdd(object1 = mod_z, object2 = mod_y, modified = FALSE)
       eo1 <- kdd1 - kdd_y
       eo2 <- kdd2 - kdd_y
       out <- data.frame(
@@ -95,7 +106,7 @@ for (j in seq_len(nrow(res))) {
   ## Calculating expected optimism for each simulation
   res[j, c(3, 4, 5, 7, 8)] <- colMeans(dplyr::bind_rows(eo))
   ## Calculating final KDD values with expected optimism penalty
-  res$kdd_unpenalized[j] <- kdd(object1 = fit, object2 = fit)
+  res$kdd_unpenalized[j] <- kdd(object1 = fit, object2 = fit, modified = FALSE)
   res$kdd_final1[j] <- res$kdd_unpenalized[j] + res$eo1[j]
   res$kdd_final2[j] <- res$kdd_unpenalized[j] + res$eo2[j]
   ## Updating progress bar ####
@@ -139,29 +150,40 @@ for (j in seq_len(nrow(res))) {
     id = id, data = dat, corstr = res$wcorstr[j]
   )
 
-  # Fit smallest model
-  mf <- geepack::geeglm(
-    y ~ 1,
-    id = id, data = dat, corstr = "independence"
-  )
-
   # eo ####
   r <- 100 # replicates
-  dat_ystar <- fit$data
-  dat_zstar <- fit$data
+
+  ## Generating replicates based on the smallest model ####
+  ## Smallest model is an intercept only model with an independence working
+  ## correlation structure. Thus, we generate any iid N(mu, sigma), where
+  ## mu and sigma are constant and fixed.
+  yy <- matrix(
+    data = rnorm(
+      n = r * length(fit$y),
+      mean = 0,
+      sd = 1
+    ),
+    nrow = r, ncol = length(fit$y)
+  )
+  zz <- matrix(
+    data = rnorm(
+      n = r * length(fit$y),
+      mean = 0,
+      sd = 1
+    ),
+    nrow = r, ncol = length(fit$y)
+  )
   parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
   ## Calculating replicate expected optimism values ####
   eo <- parallel::parLapply(
     cl = cl,
     X = seq_len(r),
-    fun = function(i) {
-      dat_ystar$y <- rnorm(n = length(mf$y), mean = coef(mf))
-      dat_zstar$y <- rnorm(n = length(mf$y), mean = coef(mf))
+    fun = function(x) {
       mod_y <- geepack::geeglm(
-        formula = y ~ 1, data = dat_ystar, id = id, corstr = fit$corstr
+        formula = yy[x, ] ~ 1, id = fit$id, corstr = fit$corstr
       )
       mod_z <- geepack::geeglm(
-        formula = y ~ 1, data = dat_zstar, id = id, corstr = fit$corstr
+        formula = zz[x, ] ~ 1, id = fit$id, corstr = fit$corstr
       )
       kdd_y <- kdd(object1 = mod_y, object2 = mod_y, modified = TRUE)
       kdd1 <- kdd(object1 = mod_y, object2 = mod_z, modified = TRUE)
