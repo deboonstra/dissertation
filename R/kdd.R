@@ -86,7 +86,7 @@ kdd <- function(
     } else {
       mean_diff_flip <- 0
     }
-    kl <- kdd + 0.5 * ((1 / log_det) + tr_flip + mean_diff_flip - k)
+    kl <- kdd + 0.5 * (log(det(vr1) / det(mb2)) + tr_flip + mean_diff_flip - k)
   } else {
     kl <- kdd
   }
