@@ -1,6 +1,5 @@
 # Compiled source #
 references/**/*.pdf
-!references/keep/**/*.pdf
 explore
 **/*.html
 
