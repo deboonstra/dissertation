@@ -1,0 +1,45 @@
+---
+title: "Criteria for Generalized Linear Model Selection based on Kullback's Symmetric Divergence"
+subtitle: "Notes on Laura Acion's thesis"
+date: "January 30, 2024"
+author: "D. Erik Boonstra, MS"
+output:
+  html_document:
+    toc: TRUE
+    toc_depth: 2
+    toc_float: TRUE
+---
+
+# Overall Impression
+
+I only read chapters five and six in full, and read some chapters two and three. Of what I read, it provided a great learning experience. For my own research, chapter five provided the most relevant information.
+
+# Chapter summaries
+
+## Chapter Two
+
+When reading this chapter I focused on section *2.2 Model Selection Concepts*. This provided an overview on notation for KDD and KSD along with providing an overview of Joe's paper (2004) titled *Criterian for Linear Model Selectioin based on Kullback's Symmetric Divergence*. Figure 2.1 provided a visual representation of some concepts Joe and I have previously discussed. The key take away from this figure of that KSD tends to have a steeper curve than KDD. Thus, leading to finding the minimum KSD value easier. The note from Cavanuagh (2004) about the bias-variability tradeoff that the components of KSD provide was enlightening. **It had me thinking about using KSD to determine if the model-based or robust variance estimator should be used for inference in the quasilikelihood and GEE frameworks.** This would be an extension of my research completed for my preceptorship. Estimators of KDD and KSD were derived from discrepancy measures, $d(\cdot, \cdot)$. The similarities betweeen TIC and QIC can be seen when discussing the properties of TIC. The chapter finished with an overview of QIC. All information provided on QIC except for one concept lined up with my previous readings on QIC. In Pan (2001a), from my understanding,
+
+$$
+QIC(R) = -2Q(\hat{\boldsymbol{\beta}}^{R}|\mathbf{y}) + 2tr(\mathcal{I}(\boldsymbol{\beta}^{I}|\mathbf{y})\Sigma(\boldsymbol{\beta}^{R})),
+$$
+
+where $I$ denotes the independence model and $R$ denotes the model based on the working correlation structure. However, in this thesis,
+
+$$
+QIC(R) = -2Q(\hat{\boldsymbol{\beta}}^{R}|\mathbf{y}) + 2tr(\mathcal{I}(\boldsymbol{\beta}^{R}|\mathbf{y})\Sigma(\boldsymbol{\beta}^{R})),
+$$
+
+which differs from my understanding of QIC(R). I believe my interpretation of QIC(R) is correct because software my other authors has been created using $2tr(\mathcal{I}(\boldsymbol{\beta}^{I}|\mathbf{y})\Sigma(\boldsymbol{\beta}^{R}))$ as the penalty term for QIC(R).
+
+## Chapter Three
+
+The main ulitity of this chapter for me was the notation used in deriving KIC~o~, as QKIC, which is defined in chapter five, uses similar notation. 
+
+## Chapter Five
+
+I read this entire chapter as it is directly related to my current research. I have a few questions for Joe about the loss of the expected values in equations (5.4) and (5.5). All of the derivations for QKIC is based on $\hat{\boldsymbol{\beta}}^{I}$ starting with equation (5.3), which I believe is simplification that is not needed. At this present moment, the derivations could have been based on $\hat{\boldsymbol{\beta}}^{R}$, as this estimator also converges to $\boldsymbol{\beta}_{0}$. Using $\hat{\boldsymbol{\beta}}^{R}$ could have lead to QKIC(R), which is the KSD variant of QIC(R) defined incorrectly by Laura in chapter two. Based on the math in this chapter, I do not see how $\mathcal{I}(\boldsymbol{\beta}^{I}|\mathbf{y})$ can be included in QKIC(R) to be the KSD equivalent of Pan's QIC. The rest of the work done in this chapter is great. She like alot of other researchers left out unstructured as a possible correlation structure in her simulations. Therefore, I would be curious to replicate her simulations but include unstructure as a possible working correlation structure to choose from. Additionally, the way she simulated binary and count data can be informed to my own data simulation process. I need to find the paper from Yahav and Shmueli (2008) for more information on multivariate Poisson random variables.
+
+# Final thoughts
+
+We could use QKIC(R) based on $\hat{\boldsymbol{\beta}}^{R}$ along with expected optimism to perform correlation structure selection. Using expected optimism here would hopefully increase the selection properties of QKIC(R). Then, for mean structure selection, QKIC~U~ does quite well. I don't know how we would improve that criterion after selecting the correlation structure properly.
