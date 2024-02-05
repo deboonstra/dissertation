@@ -1,0 +1,50 @@
+---
+title: "Dissertation meeting notes"
+date: "January 16, 2024"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+TA position
+
+- ANOVA course?
+- Categorical course
+
+CFTR
+
+- Ask Aaron for data?
+
+Dissertation
+
+- KDD-eo simulations
+- CIC-eo simulations
+- Mathemtical though process of using CIC~m~ based on KDD(R).
+
+# Notes
+
+Forward BIOS:5120 TA email to Margaret and Jake, and CC: Joe.
+
+Do not email Aaron about data
+
+For calculating expected optimism:
+
+- we need to investigate calculations, where the mean structure is simply the intercept only.
+  - because the proper mean structure for the smallest model is the intercept only model.
+  - Only specifying the correlation structure shows the penalty of extra estimation of the correlation parameters.
+
+In Joe's KSD paper:
+
+- the flatness of KDD shows the issue of possibly over or under fitting, as it is difficult to find a minimum value.
+- The convexity of KSD makes it easier to find a minimum because we have two push and pull happening in the formulation.
+
+# Action items
+
+Email Jake and Margaret
+
+Run new KDD and KSD simulations
+
+Run new CIC simulation with mean structure equal to the intercept only
+
+Write summary of progress document
