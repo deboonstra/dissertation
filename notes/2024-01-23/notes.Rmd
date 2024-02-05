@@ -1,0 +1,39 @@
+---
+title: "Dissertation meeting notes"
+date: "January 23, 2024"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+Simulation results for KDD, KSD, and CIC penalized by eo
+
+Whether we need to explore corrected QICC, QIC~c~.
+
+Incompleted tasks:
+
+- Reading Joe's KSD paper and Laura's chapter 5 of thesis.
+- Write summary of report --
+  - I realized that I am not as organized with my files.
+  - Need to categorize results based on selection procedures
+
+# Notes
+
+With the direction we are currently going, Laura's thesis is becoming relevant. So, I definitely need to read chapter five.
+
+Right not it is too bing of a task to create a informatio criteria that does mean and correlation selection.
+
+QIC~c~ is not mathemitcally derived as their is no formal proof. So, the idea is great but it needs more rigor.
+
+Could there be a criteria that penalizes QIC by expected optimism?
+
+We did not get a chance to look at the new simulation results.
+
+Right now it appears that expected optimism is doing a decent job of penalizing unstructured. However, the penalty is not large enough to overcome the generalizability of unstructured.
+
+# Action items
+
+Read Laura's thesis for ideas to extend
+
+Read Joe's KSD paper.
