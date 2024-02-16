@@ -1,7 +1,7 @@
 # The function of this script file is to define a function to calculate a
 # measure of disparity between two matrices, as a way to select the proper
 # correlation structure.
-delta <- function(a, b) {
+delta <- function(a, b, penalty = 0) {
   # Checking parameter values
   if (!("matrix" %in% class(a))) {
     stop("a must be a matrix.")
@@ -24,7 +24,7 @@ delta <- function(a, b) {
   binv_a <- a_diag / b_diag
 
   ## Calculating measure ####
-  measure <- sum(pmax(ainv_b, binv_a))
+  measure <- sum(pmax(ainv_b, binv_a)) + penalty
 
   # Returning value ####
   return(measure)
