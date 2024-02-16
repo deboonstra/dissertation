@@ -122,5 +122,5 @@ save(
   res_cic1_cs, res_cic1_ar1,
   res_cic2_cs, res_cic2_ar1,
   res_cic3_cs, res_cic3_ar1,
-  file = "./outputs/norm-modified-cic-sim/norm_modified_cic_sim.RData"
+  file = "./outputs/corstr/norm-modified-cic-sim/norm_modified_cic_sim.RData"
 )
