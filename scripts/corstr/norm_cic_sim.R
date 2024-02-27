@@ -97,9 +97,7 @@ for (j in seq_len(nsims)) {
 
   ## Fitting model and getting CIC values ####
   cic_cs <- rep(NA, length(work_corstr)) # for exchangeable data
-  cic0_cs <- rep(NA, length(work_corstr)) # for exchangeable data
   cic_ar1 <- rep(NA, length(work_corstr)) # for AR(1) data
-  cic0_ar1 <- rep(NA, length(work_corstr)) # for AR(1) data
   names(cic_cs) <- names(cic_ar1) <- work_corstr
   for (k in seq_along(work_corstr)) {
     ### Fitting models
