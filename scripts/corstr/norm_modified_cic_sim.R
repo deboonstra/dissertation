@@ -16,6 +16,55 @@ rho <- 0.5
 corstr <- c("exchangeable", "ar1")
 work_corstr <- c("independence", "exchangeable", "ar1", "unstructured")
 
+# Obtaining true covariance matrix ####
+set.seed(1997)
+nsims_cov <- nsims * 10L
+sigma0_cs <- matrix(
+  data = 0,
+  nrow = length(which(beta != 0)) + 1,
+  ncol = length(which(beta != 0)) + 1
+)
+sigma0_ar1 <- matrix(
+  data = 0,
+  nrow = length(which(beta != 0)) + 1,
+  ncol = length(which(beta != 0)) + 1
+)
+pb <- utils::txtProgressBar(min = 0, max = nsims_cov, style = 3)
+for (i in seq_len(nsims_cov)) {
+  ## Simulating data ####
+  ## Two data sets are being simulated for different correlation structures
+  ## to generate the random component
+  ### Exchangeable
+  dat_cs <- sim_data(N = N, n = n, beta = beta, rho = rho, corstr = corstr[1])
+  ### AR(1)
+  dat_ar1 <- sim_data(N = N, n = n, beta = beta, rho = rho, corstr = corstr[2])
+  ### Converting to data frames
+  dat_cs <- data.frame(y = dat_cs$y, dat_cs$X, id = dat_cs$id)
+  dat_ar1 <- data.frame(y = dat_ar1$y, dat_ar1$X, id = dat_ar1$id)
+
+  ## Fitting models ####
+  ### Exchangeable
+  fit_cs <- geepack::geeglm(
+    formula = y ~ X1 + X2 + X3, id = id,
+    data = dat_cs, corstr = corstr[1]
+  )
+  ### AR(1)
+  fit_ar1 <- geepack::geeglm(
+    formula = y ~ X1 + X2 + X3, id = id,
+    data = dat_ar1, corstr = corstr[2]
+  )
+
+  ## Pulling model-based covariance matrices ####
+  sigma0_cs <- sigma0_cs + ((1 / nsims_cov) * fit_cs$geese$vbeta.naiv)
+  sigma0_ar1 <- sigma0_ar1 + ((1 / nsims_cov) * fit_ar1$geese$vbeta.naiv)
+  ## Updating progress bar ####
+  utils::setTxtProgressBar(pb, i)
+  if (i == nsims_cov) {
+    close(pb)
+    cat("\n")
+  }
+}
+
 # Simulation ####
 set.seed(1997)
 res_cic1_cs <- vector(mode = "list", length = nsims)
@@ -24,6 +73,14 @@ res_cic2_cs <- vector(mode = "list", length = nsims)
 res_cic2_ar1 <- vector(mode = "list", length = nsims)
 res_cic3_cs <- vector(mode = "list", length = nsims)
 res_cic3_ar1 <- vector(mode = "list", length = nsims)
+res_cic0_cs <- matrix(
+  data = NA, nrow = nsims, ncol = length(work_corstr),
+  dimnames = list(paste0("Simulation: ", seq_len(nsims)), work_corstr)
+)
+res_cic0_ar1 <- matrix(
+  data = NA, nrow = nsims, ncol = length(work_corstr),
+  dimnames = list(paste0("Simulation: ", seq_len(nsims)), work_corstr)
+)
 pb <- utils::txtProgressBar(min = 0, max = nsims, style = 3)
 for (j in seq_len(nsims)) {
   ## Simulating data ####
@@ -42,7 +99,7 @@ for (j in seq_len(nsims)) {
   cic_ar1 <- rep(NA, length(work_corstr)) # for AR(1) data
   names(cic_cs) <- names(cic_ar1) <- work_corstr
   for (k in seq_along(work_corstr)) {
-    ### Fitting models
+    ### Fitting models ####
     fit_cs <- geepack::geeglm(
       formula = y ~ X1 + X2 + X3, id = id,
       data = dat_cs, corstr = work_corstr[k]
@@ -51,9 +108,19 @@ for (j in seq_len(nsims)) {
       formula = y ~ X1 + X2 + X3, id = id,
       data = dat_ar1, corstr = work_corstr[k]
     )
-    ### Getting CIC values
+    ### Getting CIC values ####
     cic_cs[k] <- cic(fit_cs, modified = TRUE)
     cic_ar1[k] <- cic(fit_ar1, modified = TRUE)
+
+    #### Getting true CIC values ####
+
+    ##### Exchangeable
+    omega_cs <- solve(fit_cs$geese$vbeta.naiv)
+    res_cic0_cs[j, k] <- sum(diag(omega_cs %*% sigma0_cs))
+
+    ##### AR(1)
+    omega_ar1 <- solve(fit_ar1$geese$vbeta.naiv)
+    res_cic0_ar1[j, k] <- sum(diag(omega_ar1 %*% sigma0_ar1))
   }
 
   ## Comparison  of CIC values ####
@@ -122,5 +189,6 @@ save(
   res_cic1_cs, res_cic1_ar1,
   res_cic2_cs, res_cic2_ar1,
   res_cic3_cs, res_cic3_ar1,
+  res_cic0_cs, res_cic0_ar1,
   file = "./outputs/corstr/norm-modified-cic-sim/norm_modified_cic_sim.RData"
 )
