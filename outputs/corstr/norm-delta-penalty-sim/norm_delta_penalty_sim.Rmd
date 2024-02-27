@@ -130,11 +130,13 @@ tab2 <- apply(
   MARGIN = 2,
   FUN = function(x) c(mean(x), var(x))
 )
+tab3 <- tab1[1, ] - tab2[1, ]
 tab <- data.frame(
-  stat = rep(c("Mean", "Variance"), 2),
-  type = c("Realized", "Realized", "Orcale", "Orcale"),
-  rbind(tab1, tab2)
+  stat = c(rep(c("Mean", "Variance"), 2), "Difference in mean"),
+  type = c("Realized", "Realized", "Orcale", "Orcale", "Realized - Orcale"),
+  rbind(tab1, tab2, tab3)
 )
+row.names(tab) <- NULL
 tab <- knitr::kable(
   x = tab,
   format = "html",
@@ -220,11 +222,13 @@ tab2 <- apply(
   MARGIN = 2,
   FUN = function(x) c(mean(x), var(x))
 )
+tab3 <- tab1[1, ] - tab2[1, ]
 tab <- data.frame(
-  stat = rep(c("Mean", "Variance"), 2),
-  type = c("Realized", "Realized", "Orcale", "Orcale"),
-  rbind(tab1, tab2)
+  stat = c(rep(c("Mean", "Variance"), 2), "Difference in mean"),
+  type = c("Realized", "Realized", "Orcale", "Orcale", "Realized - Orcale"),
+  rbind(tab1, tab2, tab3)
 )
+row.names(tab) <- NULL
 tab <- knitr::kable(
   x = tab,
   format = "html",
