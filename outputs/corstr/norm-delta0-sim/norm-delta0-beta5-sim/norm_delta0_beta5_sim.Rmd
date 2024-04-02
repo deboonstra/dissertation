@@ -1,5 +1,6 @@
 ---
 title: "Simulations investigating the correlation structure selection properties for $\\delta_{0}$"
+subtitle: "given $\\alpha = 0.50$ and dim($\\boldsymbol{\\beta}$) = 5"
 author: "D. Erik Boonstra, MS"
 output:
   html_document:
@@ -53,7 +54,7 @@ Then, $\delta_{0}$ may be either $\delta_{0} = \delta\left(\hat{\boldsymbol{\Sig
 ## Data
 ```{r, include = FALSE}
 nsims <- 1000L
-beta <- c(2.0, 3.0, 0.5, 0, 0, 0)
+beta <- c(2.0, 3.0, 0.5, 1.0, -1.0, 0)
 w <- which(beta != 0)
 l <- length(w)
 N <- c(rep(200, 7), 300, 240, 150, 120, 100, 80, 75)
@@ -81,7 +82,7 @@ legend_work_corstr <- ifelse(
   no = legend_work_corstr
 )
 ```
-Following Wang *et al.* (2012) with one-thousand replications, the correlated normal responses are generated from the model $$y_{ij} = \mathbf{X}_{ij}^{\top}\boldsymbol{\beta} + \varepsilon_{ij},$$ where $i = 1, \ldots, N,$ $j = 1, \ldots, n,$ $\mathbf{X}_{ij} = (x_{ij, 1}, \ldots, x_{ij, 6})^{\top},$ and $\boldsymbol{\beta} = (2.0, 3.0, 0.5, 0.0, 0.0, 0.0)^{\top}$, where the combinations of $N$ and $n$ are listed below.
+Following Wang *et al.* (2012) with one-thousand replications, the correlated normal responses are generated from the model $$y_{ij} = \mathbf{X}_{ij}^{\top}\boldsymbol{\beta} + \varepsilon_{ij},$$ where $i = 1, \ldots, N,$ $j = 1, \ldots, n,$ $\mathbf{X}_{ij} = (x_{ij, 1}, \ldots, x_{ij, 6})^{\top},$ and $\boldsymbol{\beta} = (2.0, 3.0, 0.5, 1.0, -1.0, 0)^{\top}$, where the combinations of $N$ and $n$ are listed below.
 
 ```{r, echo = FALSE}
 all_combos <- data.frame(N = N, n = n)
@@ -125,7 +126,12 @@ We are making these comparisons because previous research usually only focuses o
 ## Import results
 The simulation results can be found at:
 ```{r, echo = TRUE}
-res <- readRDS(file = "./outputs/corstr/norm-delta0-sim/norm_delta0_sim.rds")
+res <- readRDS(
+  file = paste0(
+    "./outputs/corstr/norm-delta0-sim/",
+    "norm-delta0-beta5-sim/norm_delta0_beta5_sim.rds"
+  )
+)
 ```
 
 ```{r, include = FALSE}
@@ -244,7 +250,7 @@ plot_all <- function(data, index, min_val) {
     ggplot2::guides(fill = ggplot2::guide_legend(title = "N =, n =")) +
     ggplot2::theme_bw() +
     ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5, size = 10))
-  if (mean(res_plot$unstructured) > (l * 10) || max(res_plot$unstructured) > (l * 10)) { # nolint
+  if (mean(res_plot$unstructured) > (l * 10)) {
     unstructured_plot <- unstructured_plot + ggplot2::xlim(l + 1, 10 * (l + 1))
   }
   ggpubr::ggarrange(

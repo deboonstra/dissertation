@@ -1,24 +1,42 @@
 # The function of this script file is to run a simulation investigating the
 # distribution and selection properties of the oracle forms of "delta". This
 # is a deeper dive than what was done in the `norm_delta_sim` simulations.
+# For these simulations the correlation coefficient was increases to 0.7.
 
 # Loading libraries and functions ####
 R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
 
 # Creating output sub-directory ####
-if (!dir.exists("./outputs/corstr/norm-delta0-sim/")) {
-  dir.create("./outputs/corstr/norm-delta0-sim/")
+if (!dir.exists("./outputs/corstr/norm-delta0-sim/norm-delta0-rho70-sim/")) {
+  dir.create("./outputs/corstr/norm-delta0-sim/norm-delta0-rho70-sim/")
 }
 
 # Defining global data simulation settings ####
 nsims <- 1000L
-N <- c(rep(200, 8), 160, 100, 80, 50, 40, 32)
-n <- c(3, 4, 5, 6, 7, 8, 9, 10, 5, 8, 10, 16, 20, 25)
+N <- c(rep(200, 7), 300, 240, 150, 120, 100, 80, 75)
+n <- c(4, 5, 6, 7, 8, 9, 10, 4, 5, 8, 10, 12, 15, 16)
 beta <- c(2.0, 3.0, 0.5, 0, 0, 0)
-rho <- 0.5
+form <- stats::as.formula(
+  paste0("y~", paste0("X", which(beta != 0), collapse = "+"))
+)
+rho <- 0.7
 corstr <- c("exchangeable", "ar1")
-work_corstr <- c("independence", "exchangeable", "ar1", "unstructured")
+work_corstr <- c(
+  "independence",
+  "exchangeable",
+  "AR-M",
+  "AR-M",
+  "unstructured"
+)
+names_work_corstr <- c(
+  "independence",
+  "exchangeable",
+  "ar1",
+  "ar3",
+  "unstructured"
+)
+mv <- c(1, 1, 1, 3, 1)
 
 # Creating a basis data.frame to store the simulations results ####
 res_basis <- data.frame(
@@ -29,7 +47,7 @@ res_basis <- data.frame(
   matrix(
     data = NA,
     nrow = length(corstr) * length(N), ncol = length(work_corstr),
-    dimnames = list(NULL, work_corstr)
+    dimnames = list(NULL, names_work_corstr)
   )
 )
 
@@ -71,13 +89,18 @@ for (ell in seq_along(sigma0)) {
     dat <- data.frame(y = dat$y, dat$X, id = dat$id)
 
     # Fitting model ####
-    fit <- geepack::geeglm(
-      formula = y ~ X1 + X2 + X3, id = id,
-      data = dat, corstr = res_basis$corstr[ell]
+    fit <- gee::gee(
+      formula = form, id = id,
+      data = dat,
+      corstr = ifelse(
+        test = res_basis$corstr[ell] == "ar1",
+        yes = "AR-M",
+        no = res_basis$corstr[ell]
+      )
     )
 
     ## Pulling model-based covariance matrix ####
-    mb <- fit$geese$vbeta.naiv
+    mb <- fit$naive.variance
 
     ### Obtaining new covariance matrice if diag(mb) < 0 ####
     iter <- 0
@@ -91,13 +114,18 @@ for (ell in seq_along(sigma0)) {
       dat <- data.frame(y = dat$y, dat$X, id = dat$id)
 
       # Fitting model ####
-      fit <- geepack::geeglm(
-        formula = y ~ X1 + X2 + X3, id = id,
-        data = dat, corstr = res_basis$corstr[ell]
+      fit <- gee::gee(
+        formula = form, id = id,
+        data = dat,
+        corstr = ifelse(
+          test = res_basis$corstr[ell] == "ar1",
+          yes = "AR-M",
+          no = res_basis$corstr[ell]
+        )
       )
 
       ## Pulling model-based covariance matrix ####
-      mb <- fit$geese$vbeta.naiv
+      mb <- fit$naive.variance
 
       # Updating iteration count ####
       iter <- iter + 1
@@ -105,8 +133,8 @@ for (ell in seq_along(sigma0)) {
 
     # Updating reduction variable ####
     if (iter == 100 && sum(diag(mb) < 0) >= 1) {
-      diag(mb) <- rep(0, times = dim(mb)[1])
-      D <- D + 1 #nolint
+      diag(mb) <- matrix(data = 0, nrow = dim(mb)[1], nrol = dim(mb)[2])
+      D <- D + 1 # nolint
     }
 
     # Summing model-based covariance matrices ####
@@ -156,17 +184,19 @@ for (ell in seq_len(nrow(res_basis))) {
 
       # Fitting models and getting delta values ####
       delta0_mb <- delta0_vr <- rep(NA, times = length(work_corstr))
-      names(delta0_mb) <- names(delta0_vr) <- work_corstr
+      names(delta0_mb) <- names(delta0_vr) <- names_work_corstr
       for (k in seq_along(work_corstr)) {
         ## Fitting model ####
-        fit <- geepack::geeglm(
-          formula = y ~ X1 + X2 + X3, id = id,
-          data = dat, corstr = work_corstr[k]
+        fit <- gee::gee(
+          formula = form, id = id,
+          data = dat,
+          corstr = work_corstr[k],
+          Mv = mv[k]
         )
 
         ### Pulling covariance matrices ####
-        mb <- fit$geese$vbeta.naiv
-        vr <- fit$geese$vbeta
+        mb <- fit$naive.variance
+        vr <- fit$robust.variance
 
         #### Obtaining new covariance matrice if diag(mb) < 0 ####
         iter_mb <- 0
@@ -180,13 +210,15 @@ for (ell in seq_len(nrow(res_basis))) {
           dat <- data.frame(y = dat$y, dat$X, id = dat$id)
 
           # Fitting model ####
-          fit <- geepack::geeglm(
-            formula = y ~ X1 + X2 + X3, id = id,
-            data = dat, corstr = work_corstr[k]
+          fit <- gee::gee(
+            formula = form, id = id,
+            data = dat,
+            corstr = work_corstr[k],
+            Mv = mv[k]
           )
 
           ## Pulling model-based covariance matrix ####
-          mb <- fit$geese$vbeta.naiv
+          mb <- fit$naive.variance
 
           # Updating iteration count ####
           iter_mb <- iter_mb + 1
@@ -204,13 +236,15 @@ for (ell in seq_len(nrow(res_basis))) {
           dat <- data.frame(y = dat$y, dat$X, id = dat$id)
 
           # Fitting model ####
-          fit <- geepack::geeglm(
-            formula = y ~ X1 + X2 + X3, id = id,
-            data = dat, corstr = work_corstr[k]
+          fit <- gee::gee(
+            formula = form, id = id,
+            data = dat,
+            corstr = work_corstr[k],
+            Mv = mv[k]
           )
 
           ## Pulling model-based covariance matrix ####
-          vr <- fit$geese$vbeta
+          vr <- fit$robust.variance
 
           # Updating iteration count ####
           iter_vr <- iter_vr + 1
@@ -223,7 +257,7 @@ for (ell in seq_len(nrow(res_basis))) {
           delta0_mb[k] <- NA
         } else {
           delta0_mb[k] <- delta(
-            a = fit$geese$vbeta.naiv,
+            a = mb,
             b = sigma0[[ell]]
           )
         }
@@ -233,29 +267,31 @@ for (ell in seq_len(nrow(res_basis))) {
           delta0_vr[k] <- NA
         } else {
           delta0_vr[k] <- delta(
-            a = fit$geese$vbeta,
+            a = vr,
             b = sigma0[[ell]]
           )
         }
       }
 
       # Comparison of delta values ####
-      # There will be three comparisons, which are outlined below.
+      # There will be four comparisons, which are outlined below.
       # 1. Exchangeable and AR(1)
       # 2. Independence, exchangeable, and AR(1)
-      # 3. Independence, exchangeable, AR(1), and unstructured
+      # 3. Independence, exchangeable, AR(1), and AR(3)
+      # 4. Independence, exchangeable, AR(1), AR(3), and unstructured
       # If a delta value is missing for a comparison, then NO correlation
       # structure will be selected. A missing value will be reported as a fair
       # comparison can not be made.
 
       ## 1. Exchangeable and AR(1) only ####
-      delta0_mb1 <- delta0_mb[which(work_corstr %in% c("exchangeable", "ar1"))]
+      include_corstr <- c("exchangeable", "AR-M")
+      delta0_mb1 <- delta0_mb[which(work_corstr %in% include_corstr & mv == 1)]
       sel_mb1 <- ifelse(
         test = sum(is.na(delta0_mb1)) == 0,
         yes = names(delta0_mb1)[which.min(delta0_mb1)],
         no = NA
       )
-      delta0_vr1 <- delta0_vr[which(work_corstr %in% c("exchangeable", "ar1"))]
+      delta0_vr1 <- delta0_vr[which(work_corstr %in% include_corstr & mv == 1)]
       sel_vr1 <- ifelse(
         test = sum(is.na(delta0_vr1)) == 0,
         yes = names(delta0_vr1)[which.min(delta0_vr1)],
@@ -263,26 +299,41 @@ for (ell in seq_len(nrow(res_basis))) {
       )
 
       ## 2. Independence, exchangeable, and AR(1) ####
-      delta0_mb2 <- delta0_mb[which(work_corstr != "unstructured")]
+      include_corstr <- c("independence", "exchangeable", "AR-M")
+      delta0_mb2 <- delta0_mb[which(work_corstr %in% include_corstr & mv == 1)]
       sel_mb2 <- ifelse(
         test = sum(is.na(delta0_mb2)) == 0,
         yes = names(delta0_mb2)[which.min(delta0_mb2)],
         no = NA
       )
-      delta0_vr2 <- delta0_vr[which(work_corstr != "unstructured")]
+      delta0_vr2 <- delta0_vr[which(work_corstr %in% include_corstr & mv == 1)]
       sel_vr2 <- ifelse(
         test = sum(is.na(delta0_vr2)) == 0,
         yes = names(delta0_vr2)[which.min(delta0_vr2)],
         no = NA
       )
 
-      ## 3. Independence, exchangeable, AR(1), and unstructured ####
+      ## 3. Independence, exchangeable, AR(1), and AR(3) ####
+      delta0_mb3 <- delta0_mb[which(work_corstr != "unstructured")]
       sel_mb3 <- ifelse(
+        test = sum(is.na(delta0_mb3)) == 0,
+        yes = names(delta0_mb3)[which.min(delta0_mb3)],
+        no = NA
+      )
+      delta0_vr3 <- delta0_vr[which(work_corstr != "unstructured")]
+      sel_vr3 <- ifelse(
+        test = sum(is.na(delta0_vr3)) == 0,
+        yes = names(delta0_vr3)[which.min(delta0_vr3)],
+        no = NA
+      )
+
+      ## 4. Independence, exchangeable, AR(1), AR(3), unstructured ####
+      sel_mb4 <- ifelse(
         test = sum(is.na(delta0_mb)) == 0,
         yes = names(delta0_mb)[which.min(delta0_mb)],
         no = NA
       )
-      sel_vr3 <- ifelse(
+      sel_vr4 <- ifelse(
         test = sum(is.na(delta0_vr)) == 0,
         yes = names(delta0_vr)[which.min(delta0_vr)],
         no = NA
@@ -298,11 +349,12 @@ for (ell in seq_len(nrow(res_basis))) {
         matrix(
           data = c(delta0_mb, delta0_vr),
           nrow = 2, ncol = length(work_corstr),
-          dimnames = list(NULL, work_corstr), byrow = TRUE
+          dimnames = list(NULL, names_work_corstr), byrow = TRUE
         ),
         sel1 = c(sel_mb1, sel_vr1),
         sel2 = c(sel_mb2, sel_vr2),
-        sel3 = c(sel_mb3, sel_vr3)
+        sel3 = c(sel_mb3, sel_vr3),
+        sel4 = c(sel_mb4, sel_vr4)
       )
 
       # Returning output ####
@@ -314,6 +366,7 @@ for (ell in seq_len(nrow(res_basis))) {
   cat("\n")
 }
 
+
 # Shutting down clusters ####
 parallel::stopCluster(cl = cl)
 
@@ -323,5 +376,8 @@ res <- dplyr::bind_rows(res)
 # Exporting simulation results ####
 saveRDS(
   object = res,
-  file = "./outputs/corstr/norm-delta0-sim/norm_delta0_sim.rds"
+  file = paste0(
+    "./outputs/corstr/norm-delta0-sim/",
+    "norm-delta0-rho70-sim/norm_delta0_rho70_sim.rds"
+  )
 )
