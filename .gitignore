@@ -5,3 +5,8 @@ explore
 
 # OS generated files #
 .DS_Store
+
+# outputs
+**/*.rds
+**/*.RData
+**/*.rda
