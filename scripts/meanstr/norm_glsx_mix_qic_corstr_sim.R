@@ -81,10 +81,13 @@ for (j in seq_len(nsims)) {
 }
 
 # Save simulation ####
-if (!dir.exists("./outputs/norm-glsx-mix-qic-corstr-sim/")) {
-  dir.create("./outputs/norm-glsx-mix-qic-corstr-sim/")
+if (!dir.exists("./outputs/meanstr/norm-glsx-mix-qic-corstr-sim/")) {
+  dir.create("./outputs/meanstr/norm-glsx-mix-qic-corstr-sim/")
 }
 save(
   res_quasi, res_lik,
-  file = "./outputs/norm-glsx-mix-qic-corstr-sim/norm_glsx_mix_qic_corstr_sim.RData"
+  file = paste0(
+    "./outputs/meanstr/norm-glsx-mix-qic-corstr-sim/",
+    "norm_glsx_mix_qic_corstr_sim.RData"
+  )
 )

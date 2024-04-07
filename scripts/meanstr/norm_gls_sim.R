@@ -73,5 +73,5 @@ for (j in seq_len(nsims)) {
 # Save simulations ####
 save(
   res_indp, res_cs, res_ar1,
-  file = "./outputs/norm-gls-sim/norm_gls_sim.RData"
+  file = "./outputs/meanstr/norm-gls-sim/norm_gls_sim.RData"
 )

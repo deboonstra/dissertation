@@ -63,5 +63,5 @@ for (j in seq_len(nsims)) {
 # Save simulations ####
 save(
   res_qic, res_aic,
-  file = "./outputs/norm-aic-sim/norm_aic_sim.RData"
+  file = "./outputs/meanstr/norm-aic-sim/norm_aic_sim.RData"
 )

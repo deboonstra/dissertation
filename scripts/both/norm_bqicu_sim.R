@@ -88,5 +88,5 @@ for (j in seq_len(nsims)) {
 # Save simulations ####
 save(
   res_qic, res_qicu, res_bqicu,
-  file = "./outputs/norm-bqicu-sim/norm_bqicu_sim.RData"
+  file = "./outputs/both/norm-bqicu-sim/norm_bqicu_sim.RData"
 )

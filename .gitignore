@@ -1,12 +1,21 @@
-# Compiled source #
-references/**/*.pdf
-explore
-**/*.html
-
 # OS generated files #
 .DS_Store
 
 # outputs
+outputs/**/*.html
 **/*.rds
 **/*.RData
 **/*.rda
+
+# explore
+explore
+
+# notes
+notes/**/*.html
+
+# references
+references/**/*.pdf
+references/**/*.html
+
+# misc
+misc

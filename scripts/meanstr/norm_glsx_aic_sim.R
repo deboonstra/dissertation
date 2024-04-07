@@ -66,5 +66,5 @@ if (!dir.exists("./outputs/norm-glsx-aic-sim/")) {
 }
 save(
   res_aic, res_bic,
-  file = "./outputs/norm-glsx-aic-sim/norm_glsx_aic_sim.RData"
+  file = "./outputs/meanstr/norm-glsx-aic-sim/norm_glsx_aic_sim.RData"
 )
