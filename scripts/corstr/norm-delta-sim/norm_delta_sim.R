@@ -18,6 +18,7 @@ beta <- c(2.0, 3.0, 0.5, 0, 0, 0)
 form <- stats::as.formula(
   paste0("y~", paste0("X", which(beta != 0), collapse = "+"))
 )
+l <- sum(beta != 0) + 1 # delta limit
 rho <- 0.5
 corstr <- c("exchangeable", "ar1")
 work_corstr <- c(
@@ -49,7 +50,7 @@ res_basis <- data.frame(
   )
 )
 
-# Simulation for orcale delta values ####
+# Simulation for delta values ####
 set.seed(1997)
 res <- vector(mode = "list", length = nrow(res_basis))
 dc <- parallel::detectCores()
@@ -96,9 +97,12 @@ for (ell in seq_len(nrow(res_basis))) {
         mb <- fit$naive.variance
         vr <- fit$robust.variance
 
-        #### Obtaining new covariance matrice if diag(mb) < 0 ####
-        iter_mb <- 0
-        while (sum(diag(mb) < 0) >= 1 && iter_mb <= 100) {
+        ### Getting initial delta values ####
+        dd[k] <- delta(a = mb, b = vr)
+
+        ##### Obtaining new delta values if delta < l and delta > l * 10
+        iter <- 0
+        while ((dd[k] < l || dd[k] > l * 10) && iter <= 100) {
           # Simulating data ####
           dat <- sim_data(
             N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = rho,
@@ -115,48 +119,25 @@ for (ell in seq_len(nrow(res_basis))) {
             Mv = mv[k]
           )
 
-          ## Pulling model-based covariance matrix ####
+          ## Pulling covariance matrices ####
           mb <- fit$naive.variance
-
-          # Updating iteration count ####
-          iter_mb <- iter_mb + 1
-        }
-
-        #### Obtaining new covariance matrice if diag(vr) < 0 ####
-        iter_vr <- 0
-        while (sum(diag(vr) < 0) >= 1 && iter_vr <= 100) {
-          # Simulating data ####
-          dat <- sim_data(
-            N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = rho,
-            corstr = res_basis$corstr[ell]
-          )
-          ## Converting to data.frame ####
-          dat <- data.frame(y = dat$y, dat$X, id = dat$id)
-
-          # Fitting model ####
-          fit <- gee::gee(
-            formula = form, id = id,
-            data = dat,
-            corstr = work_corstr[k],
-            Mv = mv[k]
-          )
-
-          ## Pulling model-based covariance matrix ####
           vr <- fit$robust.variance
 
+          # Getting delta ####
+          dd[k] <- delta(a = mb, b = vr)
+
           # Updating iteration count ####
-          iter_vr <- iter_vr + 1
+          iter <- iter + 1
         }
 
-        ## Getting delta values ####
+        ## Getting final delta values ####
         ## A delta value will be missing if there are still negative variances
+        ## or too large variances
         ### Model-based orcale values ####
-        cond_mb <- (iter_mb == 100 && sum(diag(mb) < 0) >= 1)
-        cond_vr <- (iter_vr == 100 && sum(diag(vr) < 0) >= 1)
-        if (cond_mb || cond_vr) {
+        if ((dd[k] < l || dd[k] > l * 10) && iter == 100) {
           dd[k] <- NA
         } else {
-          dd[k] <- delta(a = mb, b = vr)
+          dd[k] <- dd[k]
         }
       }
 

@@ -22,6 +22,7 @@ beta <- c(2.0, 3.0, 0.5, 1.0, -1.0, 0)
 form <- stats::as.formula(
   paste0("y~", paste0("X", which(beta != 0), collapse = "+"))
 )
+l <- sum(beta != 0) + 1 # delta limit
 rho <- 0.5
 corstr <- c("exchangeable", "ar1")
 work_corstr <- c(
@@ -200,9 +201,14 @@ for (ell in seq_len(nrow(res_basis))) {
         mb <- fit$naive.variance
         vr <- fit$robust.variance
 
-        #### Obtaining new covariance matrice if diag(mb) < 0 ####
+        ### Getting initial delta values ####
+
+        #### Model-based #####
+        delta0_mb[k] <- delta(a = mb, b = sigma0[[ell]])
+
+        ##### Obtaining new delta values if delta < l and delta > l * 10
         iter_mb <- 0
-        while (sum(diag(mb) < 0) >= 1 && iter_mb <= 100) {
+        while ((delta0_mb[k] < l || delta0_mb[k] > l * 10) && iter_mb <= 100) {
           # Simulating data ####
           dat <- sim_data(
             N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = rho,
@@ -222,13 +228,19 @@ for (ell in seq_len(nrow(res_basis))) {
           ## Pulling model-based covariance matrix ####
           mb <- fit$naive.variance
 
+          # Getting delta ####
+          delta0_mb[k] <- delta(a = mb, b = sigma0[[ell]])
+
           # Updating iteration count ####
           iter_mb <- iter_mb + 1
         }
 
-        #### Obtaining new covariance matrice if diag(vr) < 0 ####
+        #### Robust ####
+        delta0_vr[k] <- delta(a = vr, b = sigma0[[ell]])
+
+        ##### Obtaining new delta values if delta < l and delta > l * 10
         iter_vr <- 0
-        while (sum(diag(vr) < 0) >= 1 && iter_vr <= 100) {
+        while ((delta0_vr[k] < l || delta0_vr[k] > l * 10) && iter_vr <= 100) {
           # Simulating data ####
           dat <- sim_data(
             N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = rho,
@@ -248,30 +260,28 @@ for (ell in seq_len(nrow(res_basis))) {
           ## Pulling model-based covariance matrix ####
           vr <- fit$robust.variance
 
+          # Getting delta ####
+          delta0_vr[k] <- delta(a = vr, b = sigma0[[ell]])
+
           # Updating iteration count ####
           iter_vr <- iter_vr + 1
         }
 
-        ## Getting delta values ####
+        ## Getting final delta values ####
         ## A delta value will be missing if there are still negative variances
+        ## or too large variances
         ### Model-based orcale values ####
-        if (iter_mb == 100 && sum(diag(mb) < 0) >= 1) {
+        if ((delta0_mb[k] < l || delta0_mb[k] > l * 10) && iter_mb == 100) {
           delta0_mb[k] <- NA
         } else {
-          delta0_mb[k] <- delta(
-            a = mb,
-            b = sigma0[[ell]]
-          )
+          delta0_mb[k] <- delta0_mb[k]
         }
 
         ### Robust orcale values ####
-        if (iter_vr == 100 && sum(diag(vr) < 0) >= 1) {
+        if ((delta0_vr[k] < l || delta0_vr[k] > l * 10) && iter_vr == 100) {
           delta0_vr[k] <- NA
         } else {
-          delta0_vr[k] <- delta(
-            a = vr,
-            b = sigma0[[ell]]
-          )
+          delta0_vr[k] <- delta0_vr[k]
         }
       }
 
