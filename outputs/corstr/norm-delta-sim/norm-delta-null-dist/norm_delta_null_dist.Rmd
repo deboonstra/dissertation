@@ -178,7 +178,7 @@ null_tab <- function(data, dim_beta, alpha, index, corstr) {
     format = "html",
     digits = 4,
     col.names = c(
-      "$dim(\\boldsymbol{\\delta})$", "$\\alpha$",
+      "$dim(\\boldsymbol{\\beta})$", "$\\alpha$",
       "N", "n",
       "Correlation structure",
       "Shape", "Rate", "Scale (1 / Rate)",
@@ -225,7 +225,7 @@ realized_tab <- function(data, dim_beta, alpha, index, corstr) {
     format = "html",
     digits = 4,
     col.names = c(
-      "$dim(\\boldsymbol{\\delta})$", "$\\alpha$",
+      "$dim(\\boldsymbol{\\beta})$", "$\\alpha$",
       "N", "n",
       "Correlation structure",
       "$\\bar{\\delta}$", "$\\widehat{Var}(\\delta)$"
