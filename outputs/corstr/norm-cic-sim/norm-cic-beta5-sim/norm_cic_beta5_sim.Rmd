@@ -66,7 +66,7 @@ legend_work_corstr <- ifelse(
 )
 ```
 
-Following Wang *et al.* (2012) with one-thousand replications, the correlated normal responses are generated from the model $$y_{ij} = \mathbf{X}_{ij}^{\top}\boldsymbol{\beta} + \varepsilon_{ij},$$ where $i = 1, \ldots, N,$ $j = 1, \ldots, n,$ $\mathbf{X}_{ij} = (x_{ij, 1}, \ldots, x_{ij, 6})^{\top},$ and $\boldsymbol{\beta} = (2.0, 3.0, 0.5, 0.0, 0.0, 0.0)^{\top}$, where the combinations of $N$ and $n$ are listed below.
+Following Wang *et al.* (2012) with one-thousand replications, the correlated normal responses are generated from the model $$y_{ij} = \mathbf{X}_{ij}^{\top}\boldsymbol{\beta} + \varepsilon_{ij},$$ where $i = 1, \ldots, N,$ $j = 1, \ldots, n,$ $\mathbf{X}_{ij} = (x_{ij, 1}, \ldots, x_{ij, 6})^{\top},$ and $\boldsymbol{\beta} = (2.0, 3.0, 0.5, 1.0, -1.0, 0.0)^{\top}$, where the combinations of $N$ and $n$ are listed below.
 
 ```{r, echo = FALSE}
 all_combos <- data.frame(N = N, n = n)
