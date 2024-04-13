@@ -1,13 +1,18 @@
 # The function of script file is run a simulation to investigate the selection
 # properties of mCIC.
+# However, the correlation coefficient will be 0.70.
 
 # Loading libraries and functions ####
 R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
 
 # Creating output sub-directory ####
-if (!dir.exists("./outputs/corstr/norm-modified-cic-sim/")) {
-  dir.create("./outputs/corstr/norm-modified-cic-sim/")
+subdir <- paste0(
+  "./outputs/corstr/norm-modified-cic-sim/",
+  "norm-modified-cic-rho70-sim/"
+)
+if (!dir.exists(paths = subdir)) {
+  dir.create(path = subdir)
 }
 
 # Defining global data simulation settings ####
@@ -19,7 +24,7 @@ form <- stats::as.formula(
   paste0("y~", paste0("X", which(beta != 0), collapse = "+"))
 )
 l <- sum(beta != 0) + 1 # cic limit
-rho <- 0.5
+rho <- 0.70
 corstr <- c("exchangeable", "ar1")
 work_corstr <- c(
   "independence",
@@ -210,5 +215,5 @@ res <- dplyr::bind_rows(res)
 # Exporting simulation results ####
 saveRDS(
   object = res,
-  file = "./outputs/corstr/norm-modified-cic-sim/norm_modified_cic_sim.rds"
+  file = paste0(subdir, "norm_modified_cic_rho70_sim.rds")
 )

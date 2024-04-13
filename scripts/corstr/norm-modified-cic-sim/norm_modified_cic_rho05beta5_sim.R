@@ -1,25 +1,31 @@
 # The function of script file is run a simulation to investigate the selection
 # properties of mCIC.
+# However, there will be five non-zero mean parameters in these simulations and
+# the correlation coefficient will be 0.05.
 
 # Loading libraries and functions ####
 R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
 
 # Creating output sub-directory ####
-if (!dir.exists("./outputs/corstr/norm-modified-cic-sim/")) {
-  dir.create("./outputs/corstr/norm-modified-cic-sim/")
+subdir <- paste0(
+  "./outputs/corstr/norm-modified-cic-sim/",
+  "norm-modified-cic-rho05beta5-sim/"
+)
+if (!dir.exists(paths = subdir)) {
+  dir.create(path = subdir)
 }
 
 # Defining global data simulation settings ####
 nsims <- 1000L
 N <- c(rep(200, 7), 300, 240, 150, 120, 100, 80, 75)
 n <- c(4, 5, 6, 7, 8, 9, 10, 4, 5, 8, 10, 12, 15, 16)
-beta <- c(2.0, 3.0, 0.5, 0, 0, 0)
+beta <- c(2.0, 3.0, 0.5, 1.0, -1.0, 0)
 form <- stats::as.formula(
   paste0("y~", paste0("X", which(beta != 0), collapse = "+"))
 )
 l <- sum(beta != 0) + 1 # cic limit
-rho <- 0.5
+rho <- 0.05
 corstr <- c("exchangeable", "ar1")
 work_corstr <- c(
   "independence",
@@ -210,5 +216,5 @@ res <- dplyr::bind_rows(res)
 # Exporting simulation results ####
 saveRDS(
   object = res,
-  file = "./outputs/corstr/norm-modified-cic-sim/norm_modified_cic_sim.rds"
+  file = paste0(subdir, "norm_modified_cic_rho05beta5_sim.rds")
 )
