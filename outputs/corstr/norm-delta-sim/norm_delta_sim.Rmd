@@ -266,11 +266,12 @@ mean_all <- function(data, index) {
     exchangeable = mean(exchangeable),
     ar1 = mean(ar1),
     ar3 = mean(ar3),
-    unstructured = mean(unstructured)
+    unstructured = mean(unstructured),
+    delta0 = mean(delta0)
   )
   mean_tab <- knitr::kable(
     x = mean_tab, format = "html", digits = 3,
-    col.names = c("N =, n =", legend_work_corstr),
+    col.names = c("N =, n =", legend_work_corstr, "$\\delta_{0}$"),
     caption = "Mean of values"
   )
   kableExtra::kable_styling(kable_input = mean_tab, full_width = FALSE)
@@ -296,11 +297,12 @@ variance_all <- function(data, index) {
     exchangeable = stats::var(exchangeable),
     ar1 = stats::var(ar1),
     ar3 = stats::var(ar3),
-    unstructured = stats::var(unstructured)
+    unstructured = stats::var(unstructured),
+    delta0 = stats::var(delta0)
   )
   var_tab <- knitr::kable(
     x = var_tab, format = "html", digits = 3,
-    col.names = c("N =, n =", legend_work_corstr),
+    col.names = c("N =, n =", legend_work_corstr, "$\\delta_{0}$"),
     caption = "Variance of values"
   )
   kableExtra::kable_styling(kable_input = var_tab, full_width = FALSE)
@@ -311,6 +313,14 @@ and are dependent on the data generation mechanism (`corstr`).
 
 ## Distribution of $\delta$ {.tabset .tabset-fade}
 The first set of results being presented are the values of $\delta$ for each working correlation structure across the one-thousand replications given the data generation mechanism. The results are presented based on the data simulation process (i.e., *Fixed N* or *Fixed total number of observations*).
+
+The averages and variances of the oracle values of $\delta$, $\delta_{0}$ is presented along side the averages and variances of statistics. The $\delta_{0}$ is defined as
+
+$$
+\delta_{0} = \delta\left(\hat{\boldsymbol{\Sigma}}_{min}, \boldsymbol{\Sigma}_{0}\right),
+$$
+
+where $\hat{\boldsymbol{\Sigma}}_{min}$ is the model-based covariance matrix associated with the working correlation matrix that produced the minimum $\delta$ statistic and $\boldsymbol{\Sigma}_{0}$ is the estimated true covariance matrix.
 
 ### Generating correlation structure: Exchangeable
 The distributions of the $\delta$ presented below are based on the data generation process that used an *exchangeable* correlation structure.
