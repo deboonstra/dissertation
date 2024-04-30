@@ -29,14 +29,18 @@ delta <- function(a, b, penalty = 0, log = FALSE) {
   ainv_b <- b_diag / a_diag
   binv_a <- a_diag / b_diag
 
-  ### log-transforming ratios
-  if (log) {
-    ainv_b <- log(ainv_b)
-    binv_a <- log(binv_a)
-  }
-
   ## Calculating measure ####
-  measure <- sum(pmax(ainv_b, binv_a)) + penalty
+  ## measure is NA if the covariance matrices are non-p.d.
+  if (any(c(ainv_b < 0, binv_a < 0))) {
+    measure <- NA
+  } else {
+    if (log) {
+      ### For log-transformed ratios
+      measure <- sum(log(pmax(ainv_b, binv_a))) + penalty
+    } else {
+      measure <- sum(pmax(ainv_b, binv_a)) + penalty
+    }
+  }
 
   # Returning value ####
   return(measure)
