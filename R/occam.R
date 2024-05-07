@@ -20,13 +20,6 @@
 # Details: If length(window) ==  2 then the value of x closet in absolute value
 # to ideal is choosen.
 
-x <- c(8, 3.9, 4.25, 4.37, 4.15)
-names(x) <- c("independence", "exchangeable", "AR-M", "AR-M", "unstructured")
-ideal <- 4
-window <- c(-0.35, 0.35)
-nparms <- NULL
-mv <- c(1, 1, 1, 3, 1)
-
 occam <- function(x, ideal, window = 1, nparms = NULL, mv = 1) {
   # Checking parameter values ####
   if (!is.numeric(x) || is.null(names(x))) {
