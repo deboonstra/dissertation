@@ -63,76 +63,85 @@ occam <- function(x, ideal, window = 1, nparms = NULL, mv = 1) {
     w <- which(x >= ideal + window[1] & x <= ideal + window[2])
   }
 
-  ### Subsetting ####
+  if (length(w) > 0) {
+    ### Subsetting ####
+    #### Named vector of values to select from ####
+    x_wind <- x[w]
 
-  #### Named vector of values to select from ####
-  x_wind <- x[w]
-
-  #### Number of parameters estimated ####
-  if (!is.null(nparms)) {
-    nparms <- nparms[w]
-  }
-
-  #### mv ####
-  if (sum(names(x) %in% mv_names) > 0) {
-    mv <- mv[w]
-  }
-
-
-  ## Calculating number of parameters estimated ####
-  if (is.null(nparms)) {
-    ### Independence ####
-    if ("independence" %in% names(x_wind)) {
-      w_nparms <- which(names(x_wind) == "independence")
-      nparms[w_nparms] <- 0
+    #### Number of parameters estimated ####
+    if (!is.null(nparms)) {
+      nparms <- nparms[w]
     }
 
-    ### Exchangeable ####
-    if ("exchangeable" %in% names(x_wind)) {
-      w_nparms <- which(names(x_wind) == "exchangeable")
-      nparms[w_nparms] <- 1
+    #### mv ####
+    if (sum(names(x) %in% mv_names) > 0) {
+      mv <- mv[w]
     }
 
-    ### AR-M, Stationary and non-statationary M-dependent ####
-    if (sum(names(x_wind) %in% mv_names) > 0) {
-      w_nparms <- which(names(x_wind) %in% mv_names)
-      nparms[w_nparms] <- mv[w_nparms]
+
+    ## Calculating number of parameters estimated ####
+    if (is.null(nparms)) {
+      ### Independence ####
+      if ("independence" %in% names(x_wind)) {
+        w_nparms <- which(names(x_wind) == "independence")
+        nparms[w_nparms] <- 0
+      }
+
+      ### Exchangeable ####
+      if ("exchangeable" %in% names(x_wind)) {
+        w_nparms <- which(names(x_wind) == "exchangeable")
+        nparms[w_nparms] <- 1
+      }
+
+      ### AR-M, Stationary and non-statationary M-dependent ####
+      if (sum(names(x_wind) %in% mv_names) > 0) {
+        w_nparms <- which(names(x_wind) %in% mv_names)
+        nparms[w_nparms] <- mv[w_nparms]
+      }
+
+      ### Unstructured ####
+      if ("unstructured" %in% names(x_wind)) {
+        w_nparms <- which(names(x_wind) == "unstructured")
+        nparms[w_nparms] <- (ideal * (ideal - 1)) / 2
+      }
     }
 
-    ### Unstructured ####
-    if ("unstructured" %in% names(x_wind)) {
-      w_nparms <- which(names(x_wind) == "unstructured")
-      nparms[w_nparms] <- (ideal * (ideal - 1)) / 2
-    }
-  }
-
-  ## Selecting value with minimum number of parameters ####
-  w_sel <- which(nparms == min(nparms))
-  if (length(w_sel) == 1) {
-    x_sel <- x_wind[w_sel]
-    nparms_sel <- nparms[w_sel]
-  } else if (length(w_sel) > 1) {
-    if (length(window) == 1) {
+    ## Selecting value with minimum number of parameters ####
+    w_sel <- which(nparms == min(nparms))
+    if (length(w_sel) == 1) {
       x_sel <- x_wind[w_sel]
       nparms_sel <- nparms[w_sel]
-      x_sel <- x_sel[which(x_sel == min(x_sel))]
-      nparms_sel <- nparms_sel[which(x_sel == min(x_sel))]
-    } else if (length(window) == 2) {
-      x_sel <- x_wind[w_sel]
-      nparms_sel <- nparms[w_sel]
-      abs_diff <- abs(x_sel - ideal)
-      x_sel <- x_sel[which.min(abs_diff)]
-      nparms_sel <- nparms_sel[which.min(abs_diff)]
+    } else if (length(w_sel) > 1) {
+      if (length(window) == 1) {
+        x_sel <- x_wind[w_sel]
+        nparms_sel <- nparms[w_sel]
+        x_sel <- x_sel[which(x_sel == min(x_sel))]
+        nparms_sel <- nparms_sel[which(x_sel == min(x_sel))]
+      } else if (length(window) == 2) {
+        x_sel <- x_wind[w_sel]
+        nparms_sel <- nparms[w_sel]
+        abs_diff <- abs(x_sel - ideal)
+        x_sel <- x_sel[which.min(abs_diff)]
+        nparms_sel <- nparms_sel[which.min(abs_diff)]
+      }
     }
-  }
 
-  # Creating output data frame ####
-  out <- data.frame(
-    name = names(x_sel),
-    value = unname(x_sel),
-    ideal = unname(ideal),
-    nparms = unname(nparms_sel)
-  )
+    # Creating output data frame ####
+    out <- data.frame(
+      name = names(x_sel),
+      value = unname(x_sel),
+      ideal = unname(ideal),
+      nparms = unname(nparms_sel)
+    )
+  } else {
+    # Creating output data frame ####
+    out <- data.frame(
+      name = NA,
+      value = NA,
+      ideal = unname(ideal),
+      nparms = NA
+    )
+  }
 
   # Returning data frame ####
   return(out)
