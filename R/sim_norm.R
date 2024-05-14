@@ -12,8 +12,8 @@ sim_norm <- function(
     stop("N and n must be of integer type.")
   }
 
-  if (length(beta) == 0) {
-    stop("beta must be at least a length of 1.")
+  if (length(beta) < 3) {
+    stop("beta must be at least a length of 3.")
   }
 
   if ((rho < -1) || (rho > 1)) {
@@ -54,13 +54,9 @@ sim_norm <- function(
   X[, 2] <- rbinom(n = N * n, size = 1, prob = 0.5) # binary variable
 
   ## continuous variables
-  even <- which(seq_len(p) %% 2 == 0)
+  # even <- which(seq_len(p) %% 2 == 0)
   for (j in 3:p) {
-    if (j %in% even) {
-      X[, j] <- stats::runif(length(tmpts), tmpts, tmpts + 1)
-    } else {
-      X[, j] <- -1 * stats::runif(length(tmpts), tmpts, tmpts + 1)
-    }
+    X[, j] <- runif(n = N * n)
   }
 
   # generating within-subject effect
