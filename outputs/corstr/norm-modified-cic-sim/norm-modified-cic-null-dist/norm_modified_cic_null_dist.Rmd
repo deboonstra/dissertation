@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 ```
 
 # Purpose
-Explore the null distrubtion of the $\delta$ statistic. The null distribution will be characterized by the $\delta$ values produced by the working correlation structures that are also the generating correlation structures.
+Explore the null distrubtion of the $mCIC(R)$ statistic. The null distribution will be characterized by the $mCIC(R)$ values produced by the working correlation structures that are also the generating correlation structures.
 
 # Definition of mCIC(R)
 Let $R(\alpha) = R$ be the working correlation structure, $\hat{\boldsymbol{\beta}}(R)$ be mean parameter estimator given $R$. Furthermore, let the model-based estimated covariance matrix of $\hat{\boldsymbol{\beta}}$ be $\hat{\boldsymbol{\Sigma}}$ and the robust or sandwich estimated covariance matrix of $\hat{\boldsymbol{\beta}}$ be $\hat{\mathbf{V}}_{r}$. Then, following from Hardin and Hilbe, we have
@@ -228,14 +228,14 @@ realized_tab <- function(data, dim_beta, alpha, index, corstr) {
 }
 ```
 
-## Examining the distributions of $\delta$
-In the results below, the null and realized densities of $\delta$ are plotted with each other along with two tables characterizing the distributions.
+## Examining the distributions of mCIC(R)
+In the results below, the null and realized densities of $mCIC(R)$ are plotted with each other along with two tables characterizing the distributions.
 
 ### Correlation structure: Exchangeable
-The distributions of the $\delta$ presented below are based on the data generation process that used an *exchangeable* correlation structure.
+The distributions of the mCIC(R) presented below are based on the data generation process that used an *exchangeable* correlation structure.
 
 #### $dim(\boldsymbol{\beta}) = 3, \alpha = 0.5$
-Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(\delta) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.5$.
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(mCIC(R)) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.5$.
 
 ##### Fixed N
 In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
@@ -296,7 +296,7 @@ realized_tab(
 ```
 
 #### $dim(\boldsymbol{\beta}) = 3, \alpha = 0.05$
-Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(\delta) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.05$.
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(mCIC(R)) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.05$.
 
 ##### Fixed N
 In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
@@ -357,7 +357,7 @@ realized_tab(
 ```
 
 #### $dim(\boldsymbol{\beta}) = 3, \alpha = 0.70$
-Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(\delta) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.7$.
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(mCIC(R)) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.7$.
 
 ##### Fixed N
 In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
@@ -418,7 +418,7 @@ realized_tab(
 ```
 
 #### $dim(\boldsymbol{\beta}) = 5, \alpha = 0.5$
-Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(\delta) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.5$.
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(mCIC(R)) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.5$.
 
 ##### Fixed N
 In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
@@ -479,7 +479,7 @@ realized_tab(
 ```
 
 #### $dim(\boldsymbol{\beta}) = 5, \alpha = 0.05$
-Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(\delta) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.05$.
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(mCIC(R)) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.05$.
 
 ##### Fixed N
 In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
@@ -540,7 +540,7 @@ realized_tab(
 ```
 
 #### $dim(\boldsymbol{\beta}) = 5, \alpha = 0.7$
-Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(\delta) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.7$.
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(mCIC(R)) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.7$.
 
 ##### Fixed N
 In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
@@ -601,10 +601,10 @@ realized_tab(
 ```
 
 ### Correlation structure: AR(1)
-The distributions of the $\delta$ presented below are based on the data generation process that used an *AR(1)* correlation structure.
+The distributions of the $mCIC(R)$ presented below are based on the data generation process that used an *AR(1)* correlation structure.
 
 #### $dim(\boldsymbol{\beta}) = 3, \alpha = 0.5$
-Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(\delta) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.5$.
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(mCIC(R)) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.5$.
 
 ##### Fixed N
 In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
@@ -665,7 +665,7 @@ realized_tab(
 ```
 
 #### $dim(\boldsymbol{\beta}) = 3, \alpha = 0.05$
-Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(\delta) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.05$.
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(mCIC(R)) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.05$.
 
 ##### Fixed N
 In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
@@ -726,7 +726,7 @@ realized_tab(
 ```
 
 #### $dim(\boldsymbol{\beta}) = 3, \alpha = 0.70$
-Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(\delta) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.7$.
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(mCIC(R)) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.7$.
 
 ##### Fixed N
 In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
@@ -787,7 +787,7 @@ realized_tab(
 ```
 
 #### $dim(\boldsymbol{\beta}) = 5, \alpha = 0.5$
-Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(\delta) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.5$.
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(mCIC(R)) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.5$.
 
 ##### Fixed N
 In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
@@ -848,7 +848,7 @@ realized_tab(
 ```
 
 #### $dim(\boldsymbol{\beta}) = 5, \alpha = 0.05$
-Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(\delta) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.05$.
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(mCIC(R)) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.05$.
 
 ##### Fixed N
 In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
@@ -909,7 +909,7 @@ realized_tab(
 ```
 
 #### $dim(\boldsymbol{\beta}) = 5, \alpha = 0.7$
-Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(\delta) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.7$.
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(mCIC(R)) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.7$.
 
 ##### Fixed N
 In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
