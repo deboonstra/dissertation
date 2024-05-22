@@ -1,24 +1,29 @@
 # The function of script file is run a simulation to investigate the selection
-# properties of CIC.
+# properties of mCIC based on a new data generation process for the design
+# matrix.
 
 # Loading libraries and functions ####
 R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
 
 # Creating output sub-directory ####
-if (!dir.exists("./outputs/corstr/norm-cic-sim/")) {
-  dir.create("./outputs/corstr/norm-cic-sim/")
+sub_dir <- paste0(
+  "./outputs/corstr/norm-modified-cic-sim/",
+  "norm-modified-cic-diff-xdata-sim/"
+)
+if (!dir.exists(sub_dir)) {
+  dir.create(sub_dir)
 }
 
 # Defining global data simulation settings ####
 nsims <- 1000L
 N <- c(rep(200, 7), 300, 240, 150, 120, 100, 80, 75)
 n <- c(4, 5, 6, 7, 8, 9, 10, 4, 5, 8, 10, 12, 15, 16)
-beta <- c(2.0, 3.0, 0.5, 0, 0, 0)
+beta <- c(0, 2.0, 3.0, 0.5, 0, 0, 0)
 form <- stats::as.formula(
-  paste0("y~", paste0("X", which(beta != 0), collapse = "+"))
+  paste0("y~", paste0("X", which(beta[-1] != 0), collapse = "+"))
 )
-l <- sum(beta != 0) + 1 # cic limit
+l <- sum(beta[-1] != 0) + 1 # delta limit, + 1 for intercept
 rho <- 0.5
 corstr <- c("exchangeable", "ar1")
 work_corstr <- c(
@@ -80,7 +85,7 @@ for (ell in seq_along(sigma0)) {
   )
   for (i in seq_len(nsims_cov)) {
     # Simulating data ####
-    dat <- sim_data(
+    dat <- sim_norm(
       N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = rho,
       corstr = res_basis$corstr[ell]
     )
@@ -105,7 +110,7 @@ for (ell in seq_along(sigma0)) {
     iter <- 0
     while (sum(diag(mb) < 0) >= 1 && iter <= 100) {
       # Simulating data ####
-      dat <- sim_data(
+      dat <- sim_norm(
         N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = rho,
         corstr = res_basis$corstr[ell]
       )
@@ -173,7 +178,7 @@ for (ell in seq_len(nrow(res_basis))) {
     X = seq_len(res_basis$sims[ell]),
     fun = function(j) {
       # Simulation data ####
-      dat <- sim_data(
+      dat <- sim_norm(
         N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = rho,
         corstr = res_basis$corstr[ell]
       )
@@ -182,7 +187,8 @@ for (ell in seq_len(nrow(res_basis))) {
       dat <- data.frame(y = dat$y, dat$X, id = dat$id)
 
       # Fitting models and getting cic values ####
-      cc <- rep(NA, times = length(work_corstr))
+      cc <- rep(NA, times = length(work_corstr)) ## statistics
+      cc0 <- NA ## oracle
       names(cc) <- names_work_corstr
       for (k in seq_along(work_corstr)) {
         ## Fitting model ####
@@ -193,14 +199,14 @@ for (ell in seq_len(nrow(res_basis))) {
           Mv = mv[k]
         )
 
-        ### Getting initial cic values ####
-        cc[k] <- gee::cic(object = fit)
+        ### Getting initial mcic values ####
+        cc[k] <- mcic(object = fit)
 
-        ##### Obtaining new cic values if CIC < 0 and CIC > l * 10
+        ##### Obtaining new mcic values if mCIC < 0 and mCIC > l * 10
         iter <- 0
-        while ((is.na(cc[k]) || cc[k] < 0 || cc[k] > l * 10) && iter <= 100) {
+        while ((cc[k] < 0 || cc[k] > l * 10) && iter <= 100) {
           # Simulating data ####
-          dat <- sim_data(
+          dat <- sim_norm(
             N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = rho,
             corstr = res_basis$corstr[ell]
           )
@@ -215,62 +221,37 @@ for (ell in seq_len(nrow(res_basis))) {
             Mv = mv[k]
           )
 
-          # Getting cic ####
-          cc[k] <- gee::cic(object = fit)
+          # Getting mcic ####
+          cc[k] <- mcic(object = fit)
 
           # Updating iteration count ####
           iter <- iter + 1
         }
 
-        ## Getting final cic values ####
-        ## A cic value will be missing if there are still negative variances
+        ## Getting final mcic values ####
+        ## A mcic value will be missing if there are still negative variances
         ## or too large variances
-        ### Model-based orcale values ####
-        if ((is.na(cc[k]) || cc[k] < 0 || cc[k] > l * 10) && iter == 100) {
+        if ((cc[k] < 0 || cc[k] > l * 10) && iter == 100) {
           cc[k] <- NA
         } else {
           cc[k] <- cc[k]
         }
       }
 
-      ## Obtaining the oracle CIC ####
-      ## based on the minimum cic statistic
+      ## Obtaining the oracle mCIC ####
+      ## based on the minimum mCIC statistic
       if (all(!is.na(cc))) {
-        # Re-fitting best model ####
         fit0 <- gee::gee(
           formula = form, id = id,
           data = dat,
           corstr = work_corstr[which.min(cc)],
-          Mv = mv[which.min(cc)],
-          maxiter = 100
+          Mv = mv[which.min(cc)]
         )
-
-        # Obtaining covariance matrices ####
-
-        ### Re-fitting independence model
-        model_indep <- gee::gee(
-          formula = form, id = id,
-          data = dat,
-          corstr = "independence",
-          Mv = 1,
-          maxiter = 100,
-          b = fit0$coefficients,
-          scale.fix = TRUE,
-          scale.value = fit0$scale
+        cc0 <- sum(
+          diag(
+            crossprod(x = MASS::ginv(fit0$naive.variance), y = sigma0[[ell]])
+          )
         )
-
-        ## Getting covariance matrices ####
-
-        ### Inverse of model-based covariance under independence ####
-        omega <- MASS::ginv(
-          X = model_indep$naive.variance, tol = .Machine$double.eps
-        )
-
-        ### Robust covariance given working correlation structure ####
-        vr <- fit0$robust.variance
-
-        # Calculating CIC ####
-        cc0 <- sum(diag(x = crossprod(x = omega, y = vr)))
       } else {
         cc0 <- NA
       }
@@ -329,7 +310,7 @@ for (ell in seq_len(nrow(res_basis))) {
           nrow = 1, ncol = length(work_corstr),
           dimnames = list(NULL, names_work_corstr), byrow = TRUE
         ),
-        cic0 = cc0,
+        mcic0 = cc0,
         sel1 = sel1,
         sel2 = sel2,
         sel3 = sel3,
@@ -354,5 +335,5 @@ res <- dplyr::bind_rows(res)
 # Exporting simulation results ####
 saveRDS(
   object = res,
-  file = "./outputs/corstr/norm-cic-sim/norm_cic_sim.rds"
+  file = paste0(sub_dir, "norm_modified_cic_diff_xdata_sim.rds")
 )

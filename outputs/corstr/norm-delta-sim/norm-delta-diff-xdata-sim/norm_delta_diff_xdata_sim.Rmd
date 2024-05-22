@@ -91,9 +91,7 @@ kableExtra::kable_styling(
 - For the covariates,
   - $x_{ij, 1} = 1 \forall i, j$ to represent the intercept term,
   - $x_{ij, 2}$ was generated from the Bernoulli(0.5) distribution, and
-  - $x_{ij, k}$ for $k = 3, \ldots, 7$ was generated from the uniform distribution, where:
-    - if $k$ is an odd number then  $x_{ij, k} = -1 \times Unif(j, j + 1)$,
-    - else if $k$ is an even number then $x_{ij, k} = Unif(j, j + 1)$.
+  - $x_{ij, k}$ for $k = 3, \ldots, 7$ was generated from a Uniform(0, 10).
 - The random errors $(\varepsilon_{i1}, \ldots, \varepsilon_{in})^{\top}$ are generated from the multivariate normal distribution with marginal mean 0, marginal variance 1, and either an **exchangeable** or **AR(1)** correlation structure with a correlation parameter of $\alpha = 0.5$.
 - This data generation mechanism was implemented using the `sim_norm()` *R* function.
 

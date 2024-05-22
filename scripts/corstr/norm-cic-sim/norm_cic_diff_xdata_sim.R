@@ -1,24 +1,25 @@
 # The function of script file is run a simulation to investigate the selection
-# properties of CIC.
+# properties of CIC based on a new data generation process.
 
 # Loading libraries and functions ####
 R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
 
 # Creating output sub-directory ####
-if (!dir.exists("./outputs/corstr/norm-cic-sim/")) {
-  dir.create("./outputs/corstr/norm-cic-sim/")
+sub_dir <- "./outputs/corstr/norm-cic-sim/norm-cic-diff-xdata-sim/"
+if (!dir.exists(sub_dir)) {
+  dir.create(sub_dir)
 }
 
 # Defining global data simulation settings ####
 nsims <- 1000L
 N <- c(rep(200, 7), 300, 240, 150, 120, 100, 80, 75)
 n <- c(4, 5, 6, 7, 8, 9, 10, 4, 5, 8, 10, 12, 15, 16)
-beta <- c(2.0, 3.0, 0.5, 0, 0, 0)
+beta <- c(0, 2.0, 3.0, 0.5, 0, 0, 0)
 form <- stats::as.formula(
-  paste0("y~", paste0("X", which(beta != 0), collapse = "+"))
+  paste0("y~", paste0("X", which(beta[-1] != 0), collapse = "+"))
 )
-l <- sum(beta != 0) + 1 # cic limit
+l <- sum(beta[-1] != 0) + 1 # delta limit, + 1 for intercept
 rho <- 0.5
 corstr <- c("exchangeable", "ar1")
 work_corstr <- c(
@@ -61,8 +62,8 @@ names(sigma0) <- paste0(
 for (ell in seq_along(sigma0)) {
   sigma0[[ell]] <- matrix(
     data = 0,
-    nrow = length(which(beta != 0)) + 1,
-    ncol = length(which(beta != 0)) + 1
+    nrow = length(which(beta[-1] != 0)) + 1,
+    ncol = length(which(beta[-1] != 0)) + 1
   )
   cat(
     paste0(
@@ -80,7 +81,7 @@ for (ell in seq_along(sigma0)) {
   )
   for (i in seq_len(nsims_cov)) {
     # Simulating data ####
-    dat <- sim_data(
+    dat <- sim_norm(
       N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = rho,
       corstr = res_basis$corstr[ell]
     )
@@ -105,7 +106,7 @@ for (ell in seq_along(sigma0)) {
     iter <- 0
     while (sum(diag(mb) < 0) >= 1 && iter <= 100) {
       # Simulating data ####
-      dat <- sim_data(
+      dat <- sim_norm(
         N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = rho,
         corstr = res_basis$corstr[ell]
       )
@@ -173,7 +174,7 @@ for (ell in seq_len(nrow(res_basis))) {
     X = seq_len(res_basis$sims[ell]),
     fun = function(j) {
       # Simulation data ####
-      dat <- sim_data(
+      dat <- sim_norm(
         N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = rho,
         corstr = res_basis$corstr[ell]
       )
@@ -182,7 +183,8 @@ for (ell in seq_len(nrow(res_basis))) {
       dat <- data.frame(y = dat$y, dat$X, id = dat$id)
 
       # Fitting models and getting cic values ####
-      cc <- rep(NA, times = length(work_corstr))
+      cc <- rep(NA, times = length(work_corstr)) ## statistics
+      cc0 <- NA ## oracle
       names(cc) <- names_work_corstr
       for (k in seq_along(work_corstr)) {
         ## Fitting model ####
@@ -200,7 +202,7 @@ for (ell in seq_len(nrow(res_basis))) {
         iter <- 0
         while ((is.na(cc[k]) || cc[k] < 0 || cc[k] > l * 10) && iter <= 100) {
           # Simulating data ####
-          dat <- sim_data(
+          dat <- sim_norm(
             N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = rho,
             corstr = res_basis$corstr[ell]
           )
@@ -354,5 +356,5 @@ res <- dplyr::bind_rows(res)
 # Exporting simulation results ####
 saveRDS(
   object = res,
-  file = "./outputs/corstr/norm-cic-sim/norm_cic_sim.rds"
+  file = paste0(sub_dir, "norm_cic_diff_xdata_sim.rds")
 )

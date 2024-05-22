@@ -54,9 +54,8 @@ sim_norm <- function(
   X[, 2] <- rbinom(n = N * n, size = 1, prob = 0.5) # binary variable
 
   ## continuous variables
-  # even <- which(seq_len(p) %% 2 == 0)
   for (j in 3:p) {
-    X[, j] <- runif(n = N * n)
+    X[, j] <- runif(n = N * n, min = 0, max = 10)
   }
 
   # generating within-subject effect
