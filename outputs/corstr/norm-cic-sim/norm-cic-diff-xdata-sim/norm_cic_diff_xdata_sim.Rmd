@@ -37,9 +37,9 @@ where $\hat{\boldsymbol{\Omega}} = \hat{\boldsymbol{\Sigma}}^{-1}$.
 ## Data
 ```{r, include = FALSE}
 nsims <- 1000L
-beta <- c(2.0, 3.0, 0.5, 0, 0, 0)
-w <- which(beta != 0)
-l <- length(w)
+beta <- c(0.0, 2.0, 3.0, 0.5, 0, 0, 0)
+w <- which(beta[-1] != 0)
+l <- length(w) + 1
 N <- c(rep(200, 7), 300, 240, 150, 120, 100, 80, 75)
 n <- c(4, 5, 6, 7, 8, 9, 10, 4, 5, 8, 10, 12, 15, 16)
 names_work_corstr <- c(
@@ -333,7 +333,7 @@ res_cic <- subset(
 In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # plotting cic values
-plot_all(data = res_cic, index = fixed_n, min_val = l + 1)
+plot_all(data = res_cic, index = fixed_n, min_val = l)
 
 # table summarizing cic values
 ## Mean
@@ -348,7 +348,7 @@ variance_all(data = res_cic, index = fixed_n)
 In these results, the total number of observations does **NOT** change and stays fixed at `r N[fixed_obs[1]] * n[fixed_obs[1]]`. However, the number of subjects and the number of observations for each subject changes. The numbers of subjects are N: `r N[fixed_obs]` while the number of observations for each subjects are n: `r n[fixed_obs]`.
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # plotting cic values
-plot_all(data = res_cic, index = fixed_obs, min_val = l + 1)
+plot_all(data = res_cic, index = fixed_obs, min_val = l)
 
 # table summarizing cic values
 ## Mean
@@ -373,7 +373,7 @@ res_cic <- subset(
 In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # plotting cic values
-plot_all(data = res_cic, index = fixed_n, min_val = l + 1)
+plot_all(data = res_cic, index = fixed_n, min_val = l)
 
 # table summarizing cic values
 ## Mean
@@ -388,7 +388,7 @@ variance_all(data = res_cic, index = fixed_n)
 In these results, the total number of observations does **NOT** change and stays fixed at `r N[fixed_obs[1]] * n[fixed_obs[1]]`. However, the number of subjects and the number of observations for each subject changes. The numbers of subjects are N: `r N[fixed_obs]` while the number of observations for each subjects are n: `r n[fixed_obs]`.
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # plotting cic values
-plot_all(data = res_cic, index = fixed_obs, min_val = l + 1)
+plot_all(data = res_cic, index = fixed_obs, min_val = l)
 
 # table summarizing cic values
 ## Mean
