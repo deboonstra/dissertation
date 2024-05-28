@@ -1,0 +1,970 @@
+---
+title: "Null distributions for CIC(R)"
+author: "D. Erik Boonstra, MS"
+output:
+  html_document:
+    toc: TRUE
+    toc_depth: 4
+    toc_float: TRUE
+---
+
+```{r, include = FALSE, results = FALSE, message = FALSE}
+R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
+sapply(R, source, .GlobalEnv)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  out.width = "100%",
+  fig.align = "center",
+  warning = FALSE
+)
+```
+
+# Purpose
+Explore the null distrubtion of the $CIC(R)$ statistic. The null distribution will be characterized by the $CIC(R)$ values produced by the working correlation structures that are also the generating correlation structures.
+
+# Definition of CIC(R)
+Let $R(\alpha) = R$ be the working correlation structure, $\hat{\boldsymbol{\beta}}(R)$ be mean parameter estimator given $R$. Furthermore, let the model-based estimated covariance matrix of $\hat{\boldsymbol{\beta}}$ be $\hat{\boldsymbol{\Sigma}}$ and the robust or sandwich estimated covariance matrix of $\hat{\boldsymbol{\beta}}$ be $\hat{\mathbf{V}}_{r}$. Then, following from Hardin and Hilbe, we have
+
+$$
+CIC(R) = trace\left(\hat{\boldsymbol{\Omega}}_{I\mid \hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\beta}}(R)}\hat{\mathbf{V}}_{r\mid \hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\beta}}(R)}\right),
+$$
+
+where $\hat{\boldsymbol{\Omega}_{I}} = \hat{\boldsymbol{\Sigma}}^{-1}$ given the working correlation structure is independence.
+
+# Presentation of results
+
+## Import results
+The null distribution parameters are stored in:
+```{r, echo = TRUE}
+sub_dir <- "./outputs/corstr/norm-cic-sim/norm-cic-null-dist/"
+# Null distribution parameters ####
+null_dist <- readRDS(
+  file = paste0(
+    sub_dir, "norm_cic_null_dist.rds"
+  )
+)
+```
+while the realized values from the simulations are store in:
+```{r, echo = TRUE}
+# Realized values ####
+realized <- readRDS(
+  file = paste0(
+    sub_dir, "norm_cic_realized_values.rds"
+  )
+)
+```
+
+and are dependent on the data generation mechanism (`corstr`) plus the simulation setting defined by the number of non-zero mean parameters and the correlation coefficient (`simulation`).
+
+```{r, include = FALSE}
+# indices for all N and n values
+fixed_n <- 1:7
+fixed_obs <- c(8:9, 3, 10:14)
+N <- c(rep(200, 7), 300, 240, 150, 120, 100, 80, 75)
+n <- c(4, 5, 6, 7, 8, 9, 10, 4, 5, 8, 10, 12, 15, 16)
+set.seed(1997)
+```
+
+```{r}
+# Cleaning up names of corstr
+null_dist$corstr <- ifelse(
+  test = null_dist$corstr == "exchangeable",
+  yes = "Exchangeable",
+  no = "AR(1)"
+)
+realized$corstr <- ifelse(
+  test = realized$corstr == "exchangeable",
+  yes = "Exchangeable",
+  no = "AR(1)"
+)
+```
+
+```{r}
+# Creating a function to plot ####
+plot_all <- function(null, realized, dim_beta, alpha, index, corstr) {
+  group_id <- paste0("N = ", N[index], ", n = ", n[index])
+  nd <- null
+  nd$group <- paste0("N = ", nd$N, ", n = ", nd$n)
+  nd <- nd[
+    (
+      nd$dim_beta == dim_beta &
+        nd$alpha == alpha &
+        nd$group %in% group_id &
+        nd$corstr == corstr
+    ),
+  ]
+  res <- realized
+  res$group <- paste0("N = ", res$N, ", n = ", res$n)
+  res <- res[
+    (
+      res$dim_beta == dim_beta &
+        res$alpha == alpha &
+        res$group %in% group_id &
+        res$corstr == corstr
+    ),
+  ]
+  nd_vals <- vector(mode = "list", length = length(group_id))
+  for (j in seq_along(group_id)) {
+    pars <- subset(
+      x = nd, subset = group == group_id[j], select = c(mean, var)
+    )
+    vals <- rnorm(
+      n = 1000, mean = pars$mean, sd = sqrt(pars$var)
+    )
+    nd_vals[[j]] <- data.frame(
+      group = rep(group_id[j], 1000),
+      type = rep("Null", 1000),
+      cic = vals
+    )
+  }
+  nd_vals <- dplyr::bind_rows(nd_vals)
+  res$type <- "Realized"
+  res <- subset(
+    x = res,
+    select = c(group, type, cic)
+  )
+  plot_data <- dplyr::bind_rows(nd_vals, res)
+  plot_data$group <- factor(
+    x = plot_data$group,
+    levels = group_id,
+    ordered = TRUE
+  )
+  ggplot2::ggplot(
+    data = plot_data,
+    mapping = ggplot2::aes(x = cic, fill = type)
+  ) +
+  ggplot2::geom_density(alpha = 0.5, color = NA) +
+  ggplot2::facet_wrap(ggplot2::vars(group), ncol = 2, scales = "free_y") +
+  ggplot2::labs(
+      x = "CIC(R)",
+      y = "Density"
+    ) +
+    ggplot2::guides(fill = ggplot2::guide_legend(title = "Type of values")) +
+    ggplot2::theme_bw()
+}
+```
+
+```{r}
+# Creating functions to generate tables ####
+
+## Null information ####
+null_tab <- function(data, dim_beta, alpha, index, corstr) {
+  nd <- data
+  nd$group <- paste0("N = ", nd$N, ", n = ", nd$n)
+  group_id <- paste0("N = ", N[index], ", n = ", n[index])
+  nd <- nd[
+    (
+      nd$dim_beta == dim_beta &
+        nd$alpha == alpha &
+        nd$group %in% group_id &
+        nd$corstr == corstr
+    ),
+    !(colnames(nd) %in% c("simulation", "group"))
+  ]
+  nd <- nd[order(nd$n), ]
+  row.names(nd) <- NULL
+
+  nd_tab <- knitr::kable(
+    x = nd,
+    format = "html",
+    digits = 4,
+    col.names = c(
+      "$dim(\\boldsymbol{\\beta})$", "$\\alpha$",
+      "N", "n",
+      "Correlation structure",
+      "$\\mathbb{E}(CIC(R))$", "$Var(CIC(R))$"
+    ),
+    caption = paste0(
+      "Null distributional information for $CIC(R)$ assuming",
+      " $CIC(R) \\sim N(\\mu, \\sigma^{2})$"
+    )
+  )
+  kableExtra::kable_styling(kable_input = nd_tab, full_width = FALSE)
+}
+
+## Realized ####
+realized_tab <- function(data, dim_beta, alpha, index, corstr) {
+  res <- data
+  res$group <- paste0("N = ", res$N, ", n = ", res$n)
+  group_id <- paste0("N = ", N[index], ", n = ", n[index])
+  res <- res[
+    (
+      res$dim_beta == dim_beta &
+        res$alpha == alpha &
+        res$group %in% group_id &
+        res$corstr == corstr
+    ),
+    !(colnames(res) %in% c("simulation", "group"))
+  ]
+  res_tab <- stats::aggregate(
+    x = cic ~ dim_beta + alpha + N + n + corstr,
+    data = res,
+    FUN = function(x) {
+      out <- c(mean(x), stats::var(x))
+      names(out) <- c("mean", "var")
+      return(out)
+    }
+  )
+  res_tab$mean <- res_tab$cic[, "mean"]
+  res_tab$var <- res_tab$cic[, "var"]
+  res_tab <- subset(x = res_tab, select = colnames(res_tab) != "cic")
+  res_tab <- res_tab[order(res_tab$n), ]
+  row.names(res_tab) <- NULL
+  res_tab <- knitr::kable(
+    x = res_tab,
+    format = "html",
+    digits = 4,
+    col.names = c(
+      "$dim(\\boldsymbol{\\beta})$", "$\\alpha$",
+      "N", "n",
+      "Correlation structure",
+      "$\\bar{CIC(R)}$", "$\\widehat{Var}(CIC(R))$"
+    ),
+    caption = paste0(
+      "Mean and variance of the realized $CIC(R)$ values"
+    )
+  )
+  kableExtra::kable_styling(kable_input = res_tab, full_width = FALSE)
+}
+```
+
+## Examining the distributions of CIC(R)
+In the results below, the null and realized densities of $CIC(R)$ are plotted with each other along with two tables characterizing the distributions.
+
+### Correlation structure: Exchangeable
+The distributions of the CIC(R) presented below are based on the data generation process that used an *exchangeable* correlation structure.
+
+#### $dim(\boldsymbol{\beta}) = 3, \alpha = 0.5$
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(CIC(R)) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.5$.
+
+##### Fixed N
+In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 3,
+  alpha = 0.5,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 3,
+  alpha = 0.5,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 3,
+  alpha = 0.5,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+```
+
+##### Fixed total number of observations
+In these results, the total number of observations does **NOT** change and stays fixed at `r N[fixed_obs[1]] * n[fixed_obs[1]]`. However, the number of subjects and the number of observations for each subject changes. The numbers of subjects are N: `r N[fixed_obs]` while the number of observations for each subjects are n: `r n[fixed_obs]`.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 3,
+  alpha = 0.5,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 3,
+  alpha = 0.5,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 3,
+  alpha = 0.5,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+```
+
+#### $dim(\boldsymbol{\beta}) = 3, \alpha = 0.05$
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(CIC(R)) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.05$.
+
+##### Fixed N
+In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 3,
+  alpha = 0.05,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 3,
+  alpha = 0.05,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 3,
+  alpha = 0.05,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+```
+
+##### Fixed total number of observations
+In these results, the total number of observations does **NOT** change and stays fixed at `r N[fixed_obs[1]] * n[fixed_obs[1]]`. However, the number of subjects and the number of observations for each subject changes. The numbers of subjects are N: `r N[fixed_obs]` while the number of observations for each subjects are n: `r n[fixed_obs]`.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 3,
+  alpha = 0.05,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 3,
+  alpha = 0.05,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 3,
+  alpha = 0.05,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+```
+
+#### $dim(\boldsymbol{\beta}) = 3, \alpha = 0.70$
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(CIC(R)) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.7$.
+
+##### Fixed N
+In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 3,
+  alpha = 0.7,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 3,
+  alpha = 0.7,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 3,
+  alpha = 0.7,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+```
+
+##### Fixed total number of observations
+In these results, the total number of observations does **NOT** change and stays fixed at `r N[fixed_obs[1]] * n[fixed_obs[1]]`. However, the number of subjects and the number of observations for each subject changes. The numbers of subjects are N: `r N[fixed_obs]` while the number of observations for each subjects are n: `r n[fixed_obs]`.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 3,
+  alpha = 0.7,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 3,
+  alpha = 0.7,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 3,
+  alpha = 0.7,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+```
+
+#### $dim(\boldsymbol{\beta}) = 5, \alpha = 0.5$
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(CIC(R)) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.5$.
+
+##### Fixed N
+In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 5,
+  alpha = 0.5,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 5,
+  alpha = 0.5,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 5,
+  alpha = 0.5,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+```
+
+##### Fixed total number of observations
+In these results, the total number of observations does **NOT** change and stays fixed at `r N[fixed_obs[1]] * n[fixed_obs[1]]`. However, the number of subjects and the number of observations for each subject changes. The numbers of subjects are N: `r N[fixed_obs]` while the number of observations for each subjects are n: `r n[fixed_obs]`.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 5,
+  alpha = 0.5,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 5,
+  alpha = 0.5,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 5,
+  alpha = 0.5,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+```
+
+#### $dim(\boldsymbol{\beta}) = 5, \alpha = 0.05$
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(CIC(R)) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.05$.
+
+##### Fixed N
+In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 5,
+  alpha = 0.05,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 5,
+  alpha = 0.05,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 5,
+  alpha = 0.05,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+```
+
+##### Fixed total number of observations
+In these results, the total number of observations does **NOT** change and stays fixed at `r N[fixed_obs[1]] * n[fixed_obs[1]]`. However, the number of subjects and the number of observations for each subject changes. The numbers of subjects are N: `r N[fixed_obs]` while the number of observations for each subjects are n: `r n[fixed_obs]`.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 5,
+  alpha = 0.05,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 5,
+  alpha = 0.05,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 5,
+  alpha = 0.05,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+```
+
+#### $dim(\boldsymbol{\beta}) = 5, \alpha = 0.7$
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(CIC(R)) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.7$.
+
+##### Fixed N
+In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 5,
+  alpha = 0.7,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 5,
+  alpha = 0.7,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 5,
+  alpha = 0.7,
+  index = fixed_n,
+  corstr = "Exchangeable"
+)
+```
+
+##### Fixed total number of observations
+In these results, the total number of observations does **NOT** change and stays fixed at `r N[fixed_obs[1]] * n[fixed_obs[1]]`. However, the number of subjects and the number of observations for each subject changes. The numbers of subjects are N: `r N[fixed_obs]` while the number of observations for each subjects are n: `r n[fixed_obs]`.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 5,
+  alpha = 0.7,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 5,
+  alpha = 0.7,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 5,
+  alpha = 0.7,
+  index = fixed_obs,
+  corstr = "Exchangeable"
+)
+```
+
+### Correlation structure: AR(1)
+The distributions of the $CIC(R)$ presented below are based on the data generation process that used an *AR(1)* correlation structure.
+
+#### $dim(\boldsymbol{\beta}) = 3, \alpha = 0.5$
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(CIC(R)) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.5$.
+
+##### Fixed N
+In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 3,
+  alpha = 0.5,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 3,
+  alpha = 0.5,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 3,
+  alpha = 0.5,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+```
+
+##### Fixed total number of observations
+In these results, the total number of observations does **NOT** change and stays fixed at `r N[fixed_obs[1]] * n[fixed_obs[1]]`. However, the number of subjects and the number of observations for each subject changes. The numbers of subjects are N: `r N[fixed_obs]` while the number of observations for each subjects are n: `r n[fixed_obs]`.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 3,
+  alpha = 0.5,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 3,
+  alpha = 0.5,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 3,
+  alpha = 0.5,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+```
+
+#### $dim(\boldsymbol{\beta}) = 3, \alpha = 0.05$
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(CIC(R)) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.05$.
+
+##### Fixed N
+In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 3,
+  alpha = 0.05,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 3,
+  alpha = 0.05,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 3,
+  alpha = 0.05,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+```
+
+##### Fixed total number of observations
+In these results, the total number of observations does **NOT** change and stays fixed at `r N[fixed_obs[1]] * n[fixed_obs[1]]`. However, the number of subjects and the number of observations for each subject changes. The numbers of subjects are N: `r N[fixed_obs]` while the number of observations for each subjects are n: `r n[fixed_obs]`.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 3,
+  alpha = 0.05,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 3,
+  alpha = 0.05,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 3,
+  alpha = 0.05,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+```
+
+#### $dim(\boldsymbol{\beta}) = 3, \alpha = 0.70$
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 3$, which means the $min(CIC(R)) = 4$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.7$.
+
+##### Fixed N
+In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 3,
+  alpha = 0.7,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 3,
+  alpha = 0.7,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 3,
+  alpha = 0.7,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+```
+
+##### Fixed total number of observations
+In these results, the total number of observations does **NOT** change and stays fixed at `r N[fixed_obs[1]] * n[fixed_obs[1]]`. However, the number of subjects and the number of observations for each subject changes. The numbers of subjects are N: `r N[fixed_obs]` while the number of observations for each subjects are n: `r n[fixed_obs]`.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 3,
+  alpha = 0.7,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 3,
+  alpha = 0.7,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 3,
+  alpha = 0.7,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+```
+
+#### $dim(\boldsymbol{\beta}) = 5, \alpha = 0.5$
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(CIC(R)) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.5$.
+
+##### Fixed N
+In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 5,
+  alpha = 0.5,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 5,
+  alpha = 0.5,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 5,
+  alpha = 0.5,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+```
+
+##### Fixed total number of observations
+In these results, the total number of observations does **NOT** change and stays fixed at `r N[fixed_obs[1]] * n[fixed_obs[1]]`. However, the number of subjects and the number of observations for each subject changes. The numbers of subjects are N: `r N[fixed_obs]` while the number of observations for each subjects are n: `r n[fixed_obs]`.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 5,
+  alpha = 0.5,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 5,
+  alpha = 0.5,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 5,
+  alpha = 0.5,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+```
+
+#### $dim(\boldsymbol{\beta}) = 5, \alpha = 0.05$
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(CIC(R)) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.05$.
+
+##### Fixed N
+In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 5,
+  alpha = 0.05,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 5,
+  alpha = 0.05,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 5,
+  alpha = 0.05,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+```
+
+##### Fixed total number of observations
+In these results, the total number of observations does **NOT** change and stays fixed at `r N[fixed_obs[1]] * n[fixed_obs[1]]`. However, the number of subjects and the number of observations for each subject changes. The numbers of subjects are N: `r N[fixed_obs]` while the number of observations for each subjects are n: `r n[fixed_obs]`.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 5,
+  alpha = 0.05,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 5,
+  alpha = 0.05,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 5,
+  alpha = 0.05,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+```
+
+#### $dim(\boldsymbol{\beta}) = 5, \alpha = 0.7$
+Additionally, we will examine when $dim(\boldsymbol{\beta}) = 5$, which means the $min(CIC(R)) = 6$ by including the intercept term and the number of non-zero mean parameters, and $\alpha = 0.7$.
+
+##### Fixed N
+In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 5,
+  alpha = 0.7,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 5,
+  alpha = 0.7,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 5,
+  alpha = 0.7,
+  index = fixed_n,
+  corstr = "AR(1)"
+)
+```
+
+##### Fixed total number of observations
+In these results, the total number of observations does **NOT** change and stays fixed at `r N[fixed_obs[1]] * n[fixed_obs[1]]`. However, the number of subjects and the number of observations for each subject changes. The numbers of subjects are N: `r N[fixed_obs]` while the number of observations for each subjects are n: `r n[fixed_obs]`.
+```{r}
+plot_all(
+  null = null_dist,
+  realized = realized,
+  dim_beta = 5,
+  alpha = 0.7,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+
+null_tab(
+  data = null_dist,
+  dim_beta = 5,
+  alpha = 0.7,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+
+realized_tab(
+  data = realized,
+  dim_beta = 5,
+  alpha = 0.7,
+  index = fixed_obs,
+  corstr = "AR(1)"
+)
+```
