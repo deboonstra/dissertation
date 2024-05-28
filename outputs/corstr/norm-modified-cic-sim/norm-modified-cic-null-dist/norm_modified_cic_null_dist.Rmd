@@ -136,7 +136,7 @@ plot_all <- function(null, realized, dim_beta, alpha, index, corstr) {
   ggplot2::geom_density(alpha = 0.5, color = NA) +
   ggplot2::facet_wrap(ggplot2::vars(group), ncol = 2, scales = "free_y") +
   ggplot2::labs(
-      x = expression(delta),
+      x = "mCIC(R)",
       y = "Density"
     ) +
     ggplot2::guides(fill = ggplot2::guide_legend(title = "Type of values")) +
