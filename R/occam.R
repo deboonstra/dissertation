@@ -52,7 +52,7 @@ occam <- function(x, ideal, window = 1, nparms = NULL, mv = 1) {
 
   ### Determining which values within window ####
   if (length(window) == 1) {
-    w <- which(x >= ideal & x <= (ideal + window))
+    w <- which(x <= (ideal + window))
   } else if (length(window) == 2) {
     if (window[1] > 0) {
       window[1] <- -1 * window[1]
