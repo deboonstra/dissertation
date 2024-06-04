@@ -282,7 +282,7 @@ for (ell in seq_len(nrow(res_basis))) {
         occam_sel1 <- occam(
           x = cic_sel1,
           ideal = l,
-          window = c(-1 * wind, wind),
+          window = wind,
           mv = mv_sel1
         )
         sel1 <- occam_sel1$name
@@ -304,7 +304,7 @@ for (ell in seq_len(nrow(res_basis))) {
         occam_sel2 <- occam(
           x = cic_sel2,
           ideal = l,
-          window = c(-1 * wind, wind),
+          window = wind,
           mv = mv_sel2
         )
         sel2 <- occam_sel2$name
@@ -325,7 +325,7 @@ for (ell in seq_len(nrow(res_basis))) {
         occam_sel3 <- occam(
           x = cic_sel3,
           ideal = l,
-          window = c(-1 * wind, wind),
+          window = wind,
           mv = mv_sel3
         )
         sel3 <- occam_sel3$name
@@ -344,7 +344,7 @@ for (ell in seq_len(nrow(res_basis))) {
         occam_sel4 <- occam(
           x = cc,
           ideal = l,
-          window = c(-1 * wind, wind),
+          window = wind,
           mv = mv
         )
         sel4 <- occam_sel4$name
