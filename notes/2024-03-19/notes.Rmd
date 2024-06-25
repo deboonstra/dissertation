@@ -1,0 +1,40 @@
+---
+title: "Dissertation meeting notes"
+date: "March 19, 2024"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+- New $\delta$ simulations using various $N$ and $n$ combinations
+- BIOS:7410 midterm
+- `#antibiotic-trends` update
+
+# Notes
+
+Occam's window
+
+When examining the new $\delta$ simulations we were able to determine that:
+
+  - simulations where the sample size is fixed (i.e., $N$) demonstrates the bias of the $cov\left(\hat{\boldsymbol{\beta}}\right)$ estimators,
+  - while the simulations where the total number of observations are fixed show the variability of the $cov\left(\hat{\boldsymbol{\beta}}\right)$ estimators.
+
+More specifically, when the total number observations are fixed, we see that as $n \to \infty$ and $N \to 0$, $\delta$ grows in value. However, the selection properties for unstructured have a non-zero value even when $\delta \to \infty$. Thus there must be instances where $\delta_{exchangeable} \geq \delta_{unstructured}$, which is only possible if $var\left(\delta_{unstructured}\right) >> 0$.
+
+  - We believe this is due to $var\left(\hat{\mathbf{V}}_{r}\right) > var\left(\hat{\boldsymbol{\Sigma}}\right)$ as seen in my preceptorship.
+
+This leads us to determining the distribution of $\delta_{0}$, where
+
+- $\delta_{0} = \delta\left(\hat{\mathbf{V}}_{r}, \boldsymbol{\Sigma}_{0}\right)$ informs us about the variability of $cov\left(\hat{\boldsymbol{\beta}}\right)$ on the variability of $\delta$, and
+- $\delta_{0} = \delta\left(\hat{\boldsymbol{\Sigma}}, \boldsymbol{\Sigma}_{0}\right)$ informs us about the bias of $cov\left(\hat{\boldsymbol{\beta}}\right)$ on the bias of $\delta$.
+
+Examining these distriubtions, we hope to match the distribution to a known distribution in addition to leaning more about the selection properties of $\delta$.
+
+With knowing the distributions of $\delta_{0}$, we hope to devise either a penalty for $\delta$ or apply the Occam's window method.
+
+- Occam's window based on the distribution of $\delta_{0}$ could help select the more parismonious models that are within the window, which could be 1 standard deviation away from the minimum value that is determined by $dim\left(\hat{\boldsymbol{\beta}}\right)$.
+
+# Action items
+
+- Find $\delta_{0}$ and its distributionand selection properties using the various combinations of $N$ and $n$.

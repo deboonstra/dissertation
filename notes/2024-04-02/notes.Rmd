@@ -1,0 +1,27 @@
+---
+title: "Dissertation meeting notes"
+date: "April 2, 2024"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+- Simulations for $\delta_{0}$
+- Simulations for $\delta$
+- Next step is to run simulations for CIC and mCIC
+
+# Notes
+
+Model-based $\delta_{0}$ will definitely show us bias and will show variability when $N << n$.
+
+- This can be seen when examining exchangeable for robust and model-based.
+
+Robust $\delta_{0}$ does not show bias but inflation in $\delta_{0}$ is due to variability while model-based show inflation due to bias.
+
+- Independence shows the extreme bias
+- AR(1) show more bias and less variability
+- AR(3) show less bias due to flexilibity and more variability due to estimating more parameters.
+- Unstructured show variability due to estimating more parameters.
+
+Moving forward focus on model-based for $\delta_{0}$ as it show bias and variability due to the structures themselves not due to the covariance structures.

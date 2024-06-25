@@ -1,0 +1,23 @@
+---
+title: "Dissertation meeting notes"
+date: "April 16, 2024"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+- Null distribution of VIC, $\delta$.
+- Comparison of mCIC(R) and VIC
+  - Oracle
+  - Statistics
+
+# Notes
+
+Test out a new measure
+
+$$
+\sum_{i = 1}^{p} max\left\{log\frac{\hat{\mathbf{V}}_{r, ii}}{\hat{\boldsymbol{\Sigma}}_{ii}}, log\frac{\hat{\boldsymbol{\Sigma}}_{ii}}{\hat{\mathbf{V}}_{r, ii}}\right\},
+$$
+
+where this measure will have a minimum of 0. Thus, this measure won't be affected by the mean structure. It will also reign in the outliers.

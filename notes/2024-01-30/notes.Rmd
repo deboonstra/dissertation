@@ -1,0 +1,33 @@
+---
+title: "Dissertation meeting notes"
+date: "January 30, 2024"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+- Simulation results for KDD, KSD, and CIC
+- Lauran Acion's thesis and my thoughts
+
+# Notes
+
+We examined the simulation results for CIC.
+
+- The results for CIC(I), which the traditional variant of CIC did not look great. However, CIC(R)/mCIC looked better but **not** as good as the traditional simulation results for mCIC.
+- The expected optimism values are not large enough to increase the penalty needed to not select unstructured as much.
+- These simulations led us to re-evaluate the definition of QIC and CIC because mCIC without the expected optimism penalty performed really well.
+
+What is QIC(R), QIC(I), and CIC(R)?
+
+- The way Pan describes QIC is very confusing.
+- We are having a hard time determining if $\hat{\Omega}_{I} = \hat{\Omega}_{I\mid \hat{\beta}_{R}}$ or $\hat{\Omega}_{I} = \hat{\Omega}_{I\mid \hat{\beta}_{I}}$.
+- This problem was attenuated by how the trace term is calculated in the `geepack` package.
+- Based on the Taylor series expansion, $\hat{\Omega}_{I}$ should be $\hat{\Omega}_{I\mid \hat{\beta}_{I}}$. However, Pan does not clearly say/use that.
+
+# Action items
+
+- Email Joe my question qbout using $\hat{\beta}_{R}$ in QKIC derivation instead of $\hat{\beta}_{I}$.
+- Read Pan (2001a) again.
+- Determined how to $\hat{\Omega}_{I} = \hat{\Omega}_{I\mid \hat{\beta}_{R}}$ in *R*.
+- Investigate the properties of $tr(A^{-1}B)$ as a descrepancy measure.
+  - What are the properties of a descrepancy measure? How about a distant measure?

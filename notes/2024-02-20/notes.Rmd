@@ -1,0 +1,28 @@
+---
+title: "Dissertation meeting notes"
+date: "February 20, 2024"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+- Simulations for $\delta$.
+
+# Notes
+
+For a discrepancy based measure, we are trying to estimate the true covariance matrix of $\beta$, $\boldsymbol{\Sigma}_{0}$, to obtain the oracle of the measure. As an example, for CIC(R), we want 
+
+$$
+\mathbb{E}\left\{tr\left(\hat{\boldsymbol{\Omega}}\boldsymbol{\Sigma}_{0}\right)\right\}.
+$$
+
+To estimate $\boldsymbol{\Sigma}_{0}$, we need to run a bunch of simulations where the model-based covariance matrix is obtained then take an average of those matrices. 
+
+# Action items
+
+- Update all correlation structure selection simulations to include an estimate of the oracle values for CIC, mCIC, and $\delta$. 
+
+  - CIC: $\mathbb{E}\left\{tr\left(\hat{\boldsymbol{\Omega}}_{I}\boldsymbol{\Sigma}_{0}\right)\right\}$
+  - mCIC: $\mathbb{E}\left\{tr\left(\hat{\boldsymbol{\Omega}}_{R}\boldsymbol{\Sigma}_{0}\right)\right\}$
+  - $\delta$: $\mathbb{E}\left\{\delta\left(\hat{\boldsymbol{\Sigma}}, \boldsymbol{\Sigma}_{0}\right)\right\}$

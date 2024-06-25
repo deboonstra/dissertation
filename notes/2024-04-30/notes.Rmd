@@ -1,0 +1,59 @@
+---
+title: "Dissertation meeting notes"
+date: "April 30, 2024"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+- Comparisons of oracle values and statistics
+  - VIC, $\delta$, mCIC(R)
+- log-VIC simulations
+- Null distribution of VIC
+- Planning for after graduation
+  - Jobs
+  - Conferences
+
+# Notes
+
+Pro's of VIC:
+
+- Parameters of interest and inference of the parameters are all you care about, then VIC is good.
+
+Pro's of mCIC(R)
+
+- Prediction of new values because covariances are needed.
+
+While on average VIC only selects the proper correlation structure 50% of the time, I really don't care about the correlation structure being overparameterized, I do care about it being misspecified for inference.
+
+- Unstructured is not wrong, it is just overparameterized.
+
+VIC = $\hat{\beta}$ only.
+mCIC(R) = combination of $\hat{\beta}$'s like contrasts and predictions.
+
+For mCIC(R) and CIC(R), the perfect value is $p$, the number of non-zero mean parameters because if $A = B$ then $A^{-1}B = I$. Thus, $tr(I) = p$.
+
+mCIC(R)~0~ looks normally distributed with a constant variance. What is that variance? We need to look into the null distribution.
+
+For correlation selection, we need to included
+
+- Occam's window
+- Wald intervals for VIC and mCIC to make the argument for the uses of VIC and mCIC(R)
+- Create a correlation structure that is truly unstructured but exchangeable is close.
+
+For job:
+
+- Start searching in August and September when end-date of dissertation is more definitive. This includes reaching out to UNMC.
+- Attending JSM might be worth it for job search.
+
+# Action items
+
+- Explore the null distribution of mCIC(R)
+- Develop a function that select best correlation structure within a window.
+  - Ideally, this window is based on the null distribution.
+
+  ```
+  occam(x, nparms, min, window)
+  ```
+- Add a simulation that investigates the properties of VIC and mCIC(R), where the true correlation structure is unstructured but exchangeable is close.

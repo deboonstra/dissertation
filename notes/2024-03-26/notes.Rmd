@@ -1,0 +1,43 @@
+---
+title: "Dissertation meeting notes"
+date: "March 26, 2024"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+- Examine the simulaitons investigating $\delta_{0}$
+
+# Notes
+
+The simulations demonstrate the instability of having to estimate large number of correlation parameters.
+
+- More specifically, for all settings more complex than $N = 80, n = 10$ and the working correlation structure is unstructured, the $\delta_{0}$ are unstable with values ranging from less than zero to greater than one-thousand. This is due to the GEE fitting procedure producing variance estiamtes that are unstable.
+
+The current $\delta$ simulations need to updated to account for unstable variance estimates.
+
+- Use the checking procedure employed in the $\delta_{0}$ simulations.
+
+The distributions of $\delta_{0}$ given the true correlation structure is exchangeable appears to have a $\chi^{2}$-like distribution.
+
+- For an exchangeable structure, the $\delta_{0}$'s have a consistent distribution.
+- For an independence structure, the $\delta_{0}$'s are large enough that the distributions become symmetric. The means are increasing as the $n \to \infty$; however, the variances are constant.
+- For an AR(1) structure, the distributions of $\delta_{0}$ start out as $\chi^{2}$ then move to being symmetric.
+- For all correlation structures, we see that the means and variances are connected. This isn't surprising as the distributions are right-skewed. 
+
+The way the "Fixed total number of observations" simulations are setup produces a huge jumpe in the number of correlation parameters to estimate when you go from $N = 80, n = 10$ to $N = 50, n = 16$.
+
+- Therefore, we aren't able to see a clear relationship as we gradually increase the number of correlation parameters to estimate in this setting.
+- Therefore, I need to change the total number of observations to 1,200 and use the $n = 3 \to 16$ factors.
+
+Additionally, there is a huge jumpe in the number of correlation parameters to estimate when you go from an exchangeable correlation structure to an unstructured correlation structure.
+
+- Thus, there needs to be a middle ground correlation structure, such as M-dependent.
+
+The $\delta$, CIC, and mCIC simulations are outdated, so these simulations needs to be updated to match $\delta_{0}$
+
+# Action items
+
+- Update the $\delta_{0}$, $\delta$, CIC, and mCIC simulations
+- Create $CIC_{0}$ and $mCIC_{0}$ simulations

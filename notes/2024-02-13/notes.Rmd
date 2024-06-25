@@ -1,0 +1,62 @@
+---
+title: "Dissertation meeting notes"
+date: "February 8, 2024"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+- Discuss the derivation of QKIC using $\hat{\beta}_{I}$ versus ysing $\hat{\beta}_{R}$.
+- Disucss the "Validating trace of matrix" document for the use of $tr\left(\hat{\Omega}_{R}\hat{V}_{r}\right)$ as an information criteria.
+
+# Notes
+
+Instead of using the entire covariance matrices, we could just pull the diagonal of the covariance matrices because we care about the standard errors for inference.
+
+- We could use KDD and KSD based on correct AIC method for nested models.
+- More precisely, for correlation selection, let $A_{n\times n}$ and $B_{n\times n}$ be non-singular matrices with positive values along the diagonal. Then, $A^{*} = diag(A)$ and $B^{*} = diag(B)$. We can define a measure $\delta(\cdot)$ as
+
+$$
+\delta(A^{*}, B^{*}) = \sum_{i = i}^{n} max\left\{\frac{b_{ii}^{*}}{a_{ii}^{*}}, \frac{a_{ii}^{*}}{b_{ii}^{*}}\right\}.
+$$
+
+- $\delta(A^{*}, B^{*})$ will have a minimum value of $n$, the dimension of the matrices because $\forall b_{ii}^{*} \approx a_{ii}^{*}$ then $\delta(A^{*}, B^{*}) = \sum_{i = 1}^{n}(1) = n$
+
+Defintion of a distance measure:
+
+- $d(A, B) \geq d(A, A)$
+- $d(A, B) = d(B, A)$ (i.e., symmetry)
+- $d(A, B) \leq d(A, C) + d(C, B)$ (i.e., triangle inequaltiy holds)
+
+At the very least $\delta(A^{*}, B^{*})$ will be a symmetric discrepancy measure because $\delta(A^{*}, B^{*}) = \delta(B^{*}, A^{*})$ and $\delta(A^{*}, B^{*}) \geq \delta(A^{*}, A^{*})$.
+
+- Now for $\delta(A^{*}, B^{*})$ to be a distance measure, we must show that the triangle inequaltiy holds.
+
+$\delta(A^{*}, B^{*})$ is **not** a norm because:
+
+- $\delta(A^{*}, B^{*}) \ngeq 0$ if and only if $(A^{*})^{-1}B = 0$ or $(B^{*})^{-1}A = 0$. However, $\delta(A^{*}, B^{*}) - n \geq 0$.
+- $\delta(A^{*}, B^{*})$ has homogeneity but $\delta(A^{*}, B^{*}) - n$ does **not**.
+- How about triangle inequaltiy?
+
+# Action items
+
+- Write a function that calculates $\delta(A^{*}, B^{*})$
+- Run a simulation investigating $\delta(A^{*}, B^{*})$
+
+Actually, let $\delta(\cdot)$ be:
+
+$$
+\delta(A, B) = \sum_{i = i}^{n} max\left\{\frac{b_{ii}}{a_{ii}}, \frac{a_{ii}}{b_{ii}}\right\} = \delta(B, A)
+$$
+
+For GEEs
+
+$$
+\begin{aligned}
+\delta(A, B) &= \delta\left(\hat{\boldsymbol{\Sigma}}, \hat{\mathbf{V}}_{r}\right) \\
+&= \sum_{i = 1}^{n} max\left\{\frac{\hat{\mathbf{V}}_{r, ii}}{\hat{\boldsymbol{\Sigma}}_{ii}}, \frac{\hat{\boldsymbol{\Sigma}}_{ii}}{\hat{\mathbf{V}}_{r, ii}}\right\} \\
+&= \delta\left(\hat{\mathbf{V}}_{r}, \hat{\boldsymbol{\Sigma}}\right) \\
+&= \delta(B, A)
+\end{aligned}
+$$

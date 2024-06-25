@@ -1,0 +1,38 @@
+---
+title: "Dissertation meeting notes"
+date: "April 9, 2024"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+- Comparison between $\delta_{0}$ and $\delta$ for various $N$ and $n$ combinations
+- Comparison between $\delta$ and CIC(R) for various $N$ and $n$ combinations
+
+# Notes
+
+We need to continue exploring mCIC(R) as it is a middle ground between CIC(R) and $\delta = VIC$ (variance information criteria).
+
+- $CIC(R) \to mCIC(R) \to VIC$
+
+The fact that CIC(R) continues to climb as $n \to \infty$ is an indication that the $cov\left(\boldsymbol{\beta}\right)$ is a problem.
+
+We need to look at the oracle's for CIC(R).
+
+- We will compare to $\delta_{0}$.
+
+To further explain VIC, we need to understand the null distribution of the statistic.
+
+- It appears to be $\chi^{2}$ or, more generally, $\Gamma$.
+- With VIC being based on a $max$ function, we will have a collection of $\chi^{2}$ and $\frac{1}{\chi^{2}}$ values that make up VIC. So, if we can prove we have this collection, we can speak more about VIC, such as Occam's window.
+- The null distribution of VIC is the distribution based on the true correlation structure.
+- The values will be $\chi^{2}$ if the $max = \frac{\hat{\mathbf{V}}_{r, ii}}{\hat{\boldsymbol{\Sigma}}_{ii}}$ and will be $\frac{1}{\chi^{2}}$ if $max = \frac{\hat{\boldsymbol{\Sigma}}_{ii}}{\hat{\mathbf{V}}_{r, ii}}$.
+- We need to find a *R* package to estimate $\Gamma$ parameter values based on data.
+
+# Action items
+
+- Run simulations for CIC(R)~0~
+- Run simulations for mCIC(R)
+- Run simulations for mCIC(R)~0~
+- Explore null distribution of VIC via $\Gamma$ or $\chi^2$ distribution

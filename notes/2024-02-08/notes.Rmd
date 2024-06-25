@@ -1,0 +1,15 @@
+---
+title: "Dissertation meeting notes"
+date: "February 8, 2024"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+- Discuss the definition of $\hat{\Omega}_{I}$ in Pan (2001a) and Hin and Wang (2009).
+- Discuss the derivation of QKIC using $\hat{\beta}_{I}$ versus $\hat{\beta}_{R}$.
+
+# Notes
+
+We started our conservation and realized the wording of Pan's paper is difficult to understand. However, it is correct. Hin and Wang's paper helped with the notation.
+
+The goal is to create $tr(\hat{\Omega}_{R}\hat{V}_{r})$.

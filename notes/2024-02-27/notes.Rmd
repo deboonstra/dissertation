@@ -1,0 +1,37 @@
+---
+title: "Dissertation meeting notes"
+date: "February 27, 2024"
+author: "D. Erik Boonstra, MS"
+output: html_document
+---
+
+# Talking points
+
+- Discuss an analytical way to penalize information criterions based on the oracles. This discussion will be based on my simulations and Joe's math exploration.
+
+# Notes
+
+Joe explored using the Wishart distribution, which is analogous to a multivariate version of the $\chi^{2}$ distribution to determine the analyatical form of a bias correction for information criterion to select a correlation structure.
+
+- None of his work resulted in a penalty term which involved the structure of the working correlation structures.
+- At this moment, we are going to stop on this topic.
+
+We explored a few papers by Westgate (2012, 2014), which provides a bias correction for the unstructured correlation structure.
+
+- At face value, it is difficult to see how this bias correction works and how to estimate it.
+- We need to read  these papers more  throughly.
+
+Finally, we looked at my simulations that include the oracle information estimates.
+
+- Generally, the oracles were smaller in value because there was one less object to estimate.
+- Some of the results were puzzling because the oracle values for the working correlation structure that is also the generating correlation structure was not the smallest.
+  - However, it could be possible that the correct comparison would be to the dimension of the covariance matrix.
+- Theis lead us to look at the expected optimism simulations for $\delta$. 
+  - $\delta_{eo}$ looks promising because the penalization by expected optimism looks appropriate given the size of the clusters and the ability to easily estimate everything.
+  - The selection properties of $\delta_{eo}$ look good for the generating correlation structure being AR(1).
+- Additionally, the bias correction seen for $\delta$ looks good because the working correlation structure that is always the generating correlation structure had a large enough reduction to make the correlation structure get selected the most often.
+
+# Action items
+
+- Run updated simulations for $\delta$ and $\delta_{eo}$ as the size of the clusters increase from 4 to 10.
+  - Goal: See if the size of cluster affects the estimability of the correlation structures. Thus, leading to more variability and large expected optimism values for unstructured due to estimating more parameters.
