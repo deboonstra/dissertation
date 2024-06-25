@@ -704,7 +704,7 @@ kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
 ```
 
 ### Generating correlation structure: AR(1) {.tabset .tabset-fade .tabset-pills}
-The selection properties of the $\delta$ presented below are based on the data generation process that used an *exchangeable* correlation structure.
+The selection properties of the $\delta$ presented below are based on the data generation process that used an *AR(1)* correlation structure.
 
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # Subsetting the results to only include generating correlation structure
