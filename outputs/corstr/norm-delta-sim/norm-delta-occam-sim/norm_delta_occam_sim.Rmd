@@ -112,7 +112,14 @@ In these simulations, there are four sets of comparisons being made between the 
 3. exchangeable versus AR(1) versus independence versus AR(3), and
 4. exchangeable versus AR(1) versus independence versus AR(3) versus unstructured.
 
-We are making these comparisons because previous research usually only focuses on exchangeable and AR(1). As these simulations are meant to investigate the selection properties of $\delta$, for each comparison, the correlation structure that resulted in the minimum number of correlation parameters estimated that has a $\delta$ value within Occam's window based on the theortical minimum value of $\delta_{min} =$ `r l + 1` was selected as the best performing correlation structure. Occam's window was defined by calculating the 90th percentile of the sampling distribution of $\delta$. 
+We are making these comparisons because previous research usually only focuses on exchangeable and AR(1). As these simulations are meant to investigate the selection properties of $\delta$, for each comparison, the correlation structure that resulted in the minimum number of correlation parameters estimated that has a $\delta$ value within Occam's window based on the theortical minimum value of $\delta_{min} =$ `r l + 1` was selected as the best performing correlation structure. Occam's window was defined by calculating the 90th percentile of the sampling distribution of $\delta$. Additionally, Occam's window was implemented for each comparison outline above. Considering the exchangeable and AR(1) correlation structures have identical number of correlation parameters estimated, the correlation structure that has the minimum $\hat{\delta}$ value will be selected.
+
+- Additionally, if there are no criterion values that fall within Occam's window, then the **NO** correlation structure is selected.
+
+### Sampling distribution of $\delta$
+In defining Occam's window for each of the model selection comparisons, the sampling distribution of $\delta$ was used. In these simulations, the exact simulation distribution of $\delta$ was not used. Instead, an approximation of the sampling distribution was used based on an observation when examining the sampling distribution.
+
+- The sampling distribution is approximately gamma with a rate parameter approximately equal to the sample size ($N$) and has a mean value approximately equal to the minimum observed $\hat{\delta}$. Thus, the shape parameter of the gamma distribution is approximately equal to $N \times \hat{\delta}$.
 
 # Presentation of results
 
@@ -714,7 +721,7 @@ kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
 ```
 
 ### Generating correlation structure: AR(1) {.tabset .tabset-fade .tabset-pills}
-The selection properties of the $\delta$ presented below are based on the data generation process that used an *exchangeable* correlation structure.
+The selection properties of the $\delta$ presented below are based on the data generation process that used an *AR(1)* correlation structure.
 
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # Subsetting the results to only include generating correlation structure

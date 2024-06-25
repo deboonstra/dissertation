@@ -1,26 +1,19 @@
 # The function of script file is run a simulation to investigate the selection
-# properties of mCIC, where Occam's window is implemented.
+# properties of mCIC, where Occam's window is implemented and the structure
+# related to the minimum value is selected if all the mCIC(R) values fall
+# outside of Occam's window. The window is determined by randomly
+# generating data and obtaining the information criterion sampling distribution
+# for the largest correlation structure of interest.
 
 # Loading libraries and functions ####
 R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
 
 # Creating output sub-directory ####
-sub_dir <- "./outputs/corstr/norm-modified-cic-sim/norm-modified-cic-occam-sim/"
+sub_dir <- "./outputs/corstr/norm-modified-cic-sim/norm-modified-cic-occam-gen-samp-sim/" #nolint
 if (!dir.exists(sub_dir)) {
   dir.create(sub_dir)
 }
-
-# Importing sampling distribution parameters ####
-# This is being done to examine the utility of Occam's window for mCIC(R), where
-# we currently do not know how to characterize the variance of the sampleing
-# distribution.
-samp_dist <- readRDS(
-  file = paste0(
-    "./outputs/corstr/norm-modified-cic-sim/",
-    "norm-modified-cic-null-dist/norm_modified_cic_null_dist.rds"
-  )
-)
 
 # Defining global data simulation settings ####
 nsims <- 1000L
@@ -48,30 +41,7 @@ names_work_corstr <- c(
   "unstructured"
 )
 mv <- c(1, 1, 1, 3, 1)
-
-# Subsetting the sampling distribution data ####
-# to match the simulation parameters and res_basis data.frame
-samp_dist <- subset(
-  x = samp_dist,
-  subset = dim_beta == l - 1 & alpha == rho
-)
-fixed_n <- subset(
-  x = samp_dist,
-  subset = N == 200
-)
-fixed_n <- dplyr::arrange(
-  .data = fixed_n,
-  N, n, dplyr::desc(corstr)
-)
-fixed_obs <- subset(
-  x = samp_dist,
-  subset = N != 200
-)
-fixed_obs <- dplyr::arrange(
-  .data = fixed_obs,
-  dplyr::desc(N), n, dplyr::desc(corstr)
-)
-samp_dist <- dplyr::bind_rows(fixed_n, fixed_obs)
+strict_upper <- FALSE
 
 # Creating a basis data.frame to store the simulations results ####
 res_basis <- data.frame(
@@ -87,6 +57,7 @@ res_basis <- data.frame(
 )
 
 # Obtaining the true covariance matrix ####
+cat("Obtaining the true covariance matrix\n")
 set.seed(1997)
 nsims_cov <- nsims * 10L
 D <- 0 # nolint: Reducing nsims_cov if diag(mb) < 0
@@ -186,11 +157,228 @@ for (ell in seq_along(sigma0)) {
   sigma0[[ell]] <- (1 / (nsims_cov - D)) * sigma0[[ell]]
 }
 
-# Simulation for cic values ####
+# Obtaining the sampling distributions
+cat("Obtaining the sampling distributions\n")
 set.seed(1997)
-res <- vector(mode = "list", length = nrow(res_basis))
 dc <- parallel::detectCores()
 cl <- parallel::makeCluster(spec = (dc - 1))
+un_mcic <- vector(mode = "list", length = nrow(res_basis))
+names(un_mcic) <- paste0(
+  "N", res_basis$N, "n", res_basis$n, "corstr_", res_basis$corstr
+)
+ar3_mcic <- vector(mode = "list", length = nrow(res_basis))
+names(ar3_mcic) <- paste0(
+  "N", res_basis$N, "n", res_basis$n, "corstr_", res_basis$corstr
+)
+sel2_mcic <- vector(mode = "list", length = nrow(res_basis))
+names(sel2_mcic) <- paste0(
+  "N", res_basis$N, "n", res_basis$n, "corstr_", res_basis$corstr
+)
+for (ell in seq_len(nrow(res_basis))) {
+  cat(
+    paste0(
+      "Simulations for N = ",
+      res_basis$N[ell],
+      " and n = ",
+      res_basis$n[ell],
+      " given corstr = ",
+      res_basis$corstr[ell],
+      "\n"
+    )
+  )
+  parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
+  un_mcic[[ell]] <- parallel::parSapply(
+    cl = cl,
+    X = seq_len(nsims),
+    FUN = function(j) {
+      # Simulating data ####
+      dat <- sim_data(
+        N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
+        corstr = "independence"
+      )
+      ## Converting to data.frame ####
+      dat <- data.frame(y = dat$y, dat$X, id = dat$id)
+      # Fitting models and getting mcic values ####
+
+      ## Fitting model ####
+      fit <- gee::gee(
+        formula = form, id = id,
+        data = dat,
+        corstr = "unstructured",
+        Mv = 1
+      )
+
+      ### Getting initial mcic values ####
+      cc <- mcic(object = fit)
+
+      ##### Obtaining new mcic values if mcic < l and mcic > l * 10
+      iter <- 0
+      while ((is.na(cc) || cc < 0 || cc > l * 10) && iter <= 100) {
+        # Simulating data ####
+        dat <- sim_data(
+          N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
+          corstr = "independence"
+        )
+        ## Converting to data.frame ####
+        dat <- data.frame(y = dat$y, dat$X, id = dat$id)
+
+        # Fitting model ####
+        fit <- gee::gee(
+          formula = form, id = id,
+          data = dat,
+          corstr = "unstructured",
+          Mv = 1
+        )
+
+        ## Pulling covariance matrices ####
+        mb <- fit$naive.variance
+        vr <- fit$robust.variance
+
+        # Getting mcic ####
+        cc <- mcic(object = fit)
+
+        # Updating iteration count ####
+        iter <- iter + 1
+      }
+      if ((is.na(cc) || cc < 0 || cc > l * 10) && iter == 100) {
+        cc <- NA
+      } else {
+        cc <- cc
+      }
+      # Returning output ####
+      return(cc)
+    }
+  )
+  ar3_mcic[[ell]] <- parallel::parSapply(
+    cl = cl,
+    X = seq_len(nsims),
+    FUN = function(j) {
+      # Simulating data ####
+      dat <- sim_data(
+        N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
+        corstr = "independence"
+      )
+      ## Converting to data.frame ####
+      dat <- data.frame(y = dat$y, dat$X, id = dat$id)
+      # Fitting models and getting mcic values ####
+
+      ## Fitting model ####
+      fit <- gee::gee(
+        formula = form, id = id,
+        data = dat,
+        corstr = "AR-M",
+        Mv = 3
+      )
+
+      ### Getting initial mcic values ####
+      cc <- mcic(object = fit)
+
+      ##### Obtaining new mcic values if mcic < l and mcic > l * 10
+      iter <- 0
+      while ((is.na(cc) || cc < 0 || cc > l * 10) && iter <= 100) {
+        # Simulating data ####
+        dat <- sim_data(
+          N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
+          corstr = "independence"
+        )
+        ## Converting to data.frame ####
+        dat <- data.frame(y = dat$y, dat$X, id = dat$id)
+
+        # Fitting model ####
+        fit <- gee::gee(
+          formula = form, id = id,
+          data = dat,
+          corstr = "AR-M",
+          Mv = 3
+        )
+
+        # Getting mcic ####
+        cc <- mcic(object = fit)
+
+        # Updating iteration count ####
+        iter <- iter + 1
+      }
+      if ((is.na(cc) || cc < 0 || cc > l * 10) && iter == 100) {
+        cc <- NA
+      } else {
+        cc <- cc
+      }
+      # Returning output ####
+      return(cc)
+    }
+  )
+  sel2_mcic[[ell]] <- parallel::parSapply(
+    cl = cl,
+    X = seq_len(nsims),
+    FUN = function(j) {
+      # Simulating data ####
+      dat <- sim_data(
+        N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
+        corstr = "independence"
+      )
+      ## Converting to data.frame ####
+      dat <- data.frame(y = dat$y, dat$X, id = dat$id)
+      # Fitting models and getting mcic values ####
+
+      ## Fitting model ####
+      fit <- gee::gee(
+        formula = form, id = id,
+        data = dat,
+        corstr = ifelse(
+          test = res_basis$corstr[ell] == "ar1",
+          yes = "AR-M",
+          no = res_basis$corstr[ell]
+        )
+      )
+
+      ### Getting initial mcic values ####
+      cc <- mcic(object = fit)
+
+      ##### Obtaining new mcic values if mcic < l and mcic > l * 10
+      iter <- 0
+      while ((is.na(cc) || cc < 0 || cc > l * 10) && iter <= 100) {
+        # Simulating data ####
+        dat <- sim_data(
+          N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
+          corstr = "independence"
+        )
+        ## Converting to data.frame ####
+        dat <- data.frame(y = dat$y, dat$X, id = dat$id)
+
+        # Fitting model ####
+        fit <- gee::gee(
+          formula = form, id = id,
+          data = dat,
+          corstr = ifelse(
+            test = res_basis$corstr[ell] == "ar1",
+            yes = "AR-M",
+            no = res_basis$corstr[ell]
+          )
+        )
+
+        # Getting mcic ####
+        cc <- mcic(object = fit)
+
+        # Updating iteration count ####
+        iter <- iter + 1
+      }
+      if ((is.na(cc) || cc < 0 || cc > l * 10) && iter == 100) {
+        cc <- NA
+      } else {
+        cc <- cc
+      }
+      # Returning output ####
+      return(cc)
+    }
+  )
+  # Updating progress ####
+  cat("\n")
+}
+
+# Simulation for cic values ####
+cat("Simulation for mCIC(R) values\n")
+set.seed(1997)
+res <- vector(mode = "list", length = nrow(res_basis))
 for (ell in seq_len(nrow(res_basis))) {
   cat(
     paste0(
@@ -297,35 +485,22 @@ for (ell in seq_len(nrow(res_basis))) {
       # structure will be selected. A missing value will be reported as a fair
       # comparison can not be made.
 
-      # Variance value for window
-      var_sel <- samp_dist$var[ell]
-
-      # Window
-      wind <- qnorm(p = 0.9, mean = l, sd = sqrt(var_sel)) - l
-
       ## 1. Exchangeable and AR(1) only ####
+      ## Because exchangeable and AR(1) have the same number of parameters, we
+      ## don't have to implement Occam's window.
       include_corstr <- c("exchangeable", "AR-M")
       cic_sel1 <- cc[which(work_corstr %in% include_corstr & mv == 1)]
-      names(cic_sel1) <- work_corstr[which(work_corstr %in% include_corstr & mv == 1)] #nolint
       mv_sel1 <- mv[which(work_corstr %in% include_corstr & mv == 1)]
-      if (sum(is.na(cic_sel1)) == 0) {
-        occam_sel1 <- occam(
-          x = cic_sel1,
-          ideal = l,
-          window = wind,
-          mv = mv_sel1
-        )
-        sel1 <- occam_sel1$name
-        sel1 <- ifelse(
-          test = sel1 == "AR-M",
-          yes = paste0("ar", occam_sel1$nparms),
-          no = sel1
-        )
-      } else {
-        sel1 <- NA
-      }
+      sel1 <- ifelse(
+        test = sum(is.na(cic_sel1)) == 0,
+        yes = names(cic_sel1)[which.min(cic_sel1)],
+        no = NA
+      )
 
       ## 2. Independence, exchangeable, and AR(1) ####
+      ## The window here is determined by the generating correlation structure,
+      ## as in practice you would be able to see if the correlation among
+      ## observations taper off (i.e., AR(1)) or constant (i.e., exchangeable)
       include_corstr <- c("independence", "exchangeable", "AR-M")
       cic_sel2 <- cc[which(work_corstr %in% include_corstr & mv == 1)]
       names(cic_sel2) <- work_corstr[which(work_corstr %in% include_corstr & mv == 1)] #nolint
@@ -334,8 +509,9 @@ for (ell in seq_len(nrow(res_basis))) {
         occam_sel2 <- occam(
           x = cic_sel2,
           ideal = l,
-          window = wind,
-          mv = mv_sel2
+          window = unname(quantile(x = sel2_mcic[[ell]], probs = 0.9)) - l,
+          mv = mv_sel2,
+          strict_upper = strict_upper
         )
         sel2 <- occam_sel2$name
         sel2 <- ifelse(
@@ -349,14 +525,15 @@ for (ell in seq_len(nrow(res_basis))) {
 
       ## 3. Independence, exchangeable, AR(1), and AR(3) ####
       cic_sel3 <- cc[which(work_corstr != "unstructured")]
-      names(cic_sel3) <- work_corstr[which(work_corstr != "unstructured")] #nolint
+      names(cic_sel3) <- work_corstr[which(work_corstr != "unstructured")]
       mv_sel3 <- mv[which(work_corstr != "unstructured")]
       if (sum(is.na(cic_sel3)) == 0) {
         occam_sel3 <- occam(
           x = cic_sel3,
           ideal = l,
-          window = wind,
-          mv = mv_sel3
+          window = unname(quantile(x = ar3_mcic[[ell]], probs = 0.9)) - l,
+          mv = mv_sel3,
+          strict_upper = strict_upper
         )
         sel3 <- occam_sel3$name
         sel3 <- ifelse(
@@ -374,8 +551,9 @@ for (ell in seq_len(nrow(res_basis))) {
         occam_sel4 <- occam(
           x = cc,
           ideal = l,
-          window = wind,
-          mv = mv
+          window = unname(quantile(x = un_mcic[[ell]], probs = 0.9)) - l,
+          mv = mv,
+          strict_upper = strict_upper
         )
         sel4 <- occam_sel4$name
         sel4 <- ifelse(
@@ -423,5 +601,5 @@ res <- dplyr::bind_rows(res)
 # Exporting simulation results ####
 saveRDS(
   object = res,
-  file = paste0(sub_dir, "norm_modified_cic_occam_sim.rds")
+  file = paste0(sub_dir, "norm_modified_cic_occam_gen_samp_sim.rds")
 )

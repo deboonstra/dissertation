@@ -1,12 +1,14 @@
 # The function of script file is run a simulation to investigate the selection
-# properties of mCIC, where Occam's window is implemented.
+# properties of mCIC, where Occam's window is implemented and the structure
+# related to the minimum value is selected if all the mCIC(R) values fall
+# outside of Occam's window.
 
 # Loading libraries and functions ####
 R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
 sapply(R, source, .GlobalEnv)
 
 # Creating output sub-directory ####
-sub_dir <- "./outputs/corstr/norm-modified-cic-sim/norm-modified-cic-occam-sim/"
+sub_dir <- "./outputs/corstr/norm-modified-cic-sim/norm-modified-cic-occam-min-sim/" #nolint
 if (!dir.exists(sub_dir)) {
   dir.create(sub_dir)
 }
@@ -48,6 +50,7 @@ names_work_corstr <- c(
   "unstructured"
 )
 mv <- c(1, 1, 1, 3, 1)
+strict_upper <- FALSE
 
 # Subsetting the sampling distribution data ####
 # to match the simulation parameters and res_basis data.frame
@@ -313,7 +316,8 @@ for (ell in seq_len(nrow(res_basis))) {
           x = cic_sel1,
           ideal = l,
           window = wind,
-          mv = mv_sel1
+          mv = mv_sel1,
+          strict_upper = strict_upper
         )
         sel1 <- occam_sel1$name
         sel1 <- ifelse(
@@ -335,7 +339,8 @@ for (ell in seq_len(nrow(res_basis))) {
           x = cic_sel2,
           ideal = l,
           window = wind,
-          mv = mv_sel2
+          mv = mv_sel2,
+          strict_upper = strict_upper
         )
         sel2 <- occam_sel2$name
         sel2 <- ifelse(
@@ -356,7 +361,8 @@ for (ell in seq_len(nrow(res_basis))) {
           x = cic_sel3,
           ideal = l,
           window = wind,
-          mv = mv_sel3
+          mv = mv_sel3,
+          strict_upper = strict_upper
         )
         sel3 <- occam_sel3$name
         sel3 <- ifelse(
@@ -375,7 +381,8 @@ for (ell in seq_len(nrow(res_basis))) {
           x = cc,
           ideal = l,
           window = wind,
-          mv = mv
+          mv = mv,
+          strict_upper = strict_upper
         )
         sel4 <- occam_sel4$name
         sel4 <- ifelse(
@@ -423,5 +430,5 @@ res <- dplyr::bind_rows(res)
 # Exporting simulation results ####
 saveRDS(
   object = res,
-  file = paste0(sub_dir, "norm_modified_cic_occam_sim.rds")
+  file = paste0(sub_dir, "norm_modified_cic_occam_min_sim.rds")
 )

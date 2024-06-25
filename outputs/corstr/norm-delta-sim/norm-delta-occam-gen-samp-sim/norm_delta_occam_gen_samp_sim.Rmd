@@ -1,5 +1,6 @@
 ---
-title: "Simulations investigating the correlation structure selection properties for mCIC(R)"
+title: "Simulations investigating the correlation structure selection properties for $\\delta$ based on Occam's window"
+subtitle: "given a randomly generated sampling distribution"
 author: "D. Erik Boonstra, MS"
 output:
   html_document:
@@ -20,16 +21,27 @@ knitr::opts_chunk$set(
 ```
 
 # Purpose of simulations
-The results of these simulations are to investigate the correlation structure selection properties of modified CIC(R), or known as mCIC(R).
+The results of these simulations are to investigate the correlation structure selection properties of a new measure called $\delta$ based on Occam's window. The name of this measure might evolve if the results are promising.
 
-# Definition of mCIC(R)
-Let $R(\alpha) = R$ be the working correlation structure, $\hat{\boldsymbol{\beta}}(R)$ be mean parameter estimator given $R$. Furthermore, let the model-based estimated covariance matrix of $\hat{\boldsymbol{\beta}}$ be $\hat{\boldsymbol{\Sigma}}$ and the robust or sandwich estimated covariance matrix of $\hat{\boldsymbol{\beta}}$ be $\hat{\mathbf{V}}_{r}$. Then, following from Hardin and Hilbe, we have
+# Definition of $\delta$
+Given two square matrices, $\mathbf{A}$ and $\mathbf{B}$, of the same dimension, $d$, let $\delta$ be define as the following:
+$$
+\delta(\mathbf{A}, \mathbf{B}) = \sum_{i = 1}^{d} max\left(\frac{b_{ii}}{a_{ii}}, \frac{a_{ii}}{b_{ii}}\right),
+$$
+
+where $a_{ii}$ and $b_{ii}$ are the diagonal elements of the matrices $\mathbf{A}$ and $\mathbf{B}$. The minimum value for $\delta$ will be the dimension of the matrices $d$. This minimum will be achieved if $a_{ii} \approx b_{ii}$ for all $i$. By the definition of $\delta$, this measure is a symmetric discrepancy.
+
+## $\delta$ for GEEs
+Let $R(\alpha) = R$ be the working correlation structure and $\hat{\boldsymbol{\beta}}(R)$ be mean parameter estimator given $R$. Furthermore, let the model-based estimated covariance matrix of $\hat{\boldsymbol{\beta}}$ be $\hat{\boldsymbol{\Sigma}}$ and the robust or sandwich estimated covariance matrix of $\hat{\boldsymbol{\beta}}$ be $\hat{\mathbf{V}}_{r}$. Then, in the generalized estimating equations (GEEs) setting, we hope $\delta$ will be able to select the proper correlation structure by comparing the model-based covariance matrix, $\hat{\boldsymbol{\Sigma}}$, given $\hat{\boldsymbol{\beta}}(R)$ to the robust covariance matrix, $\hat{\mathbf{V}}_{r}$, given $\hat{\boldsymbol{\beta}}(R)$. 
 
 $$
-mCIC(R) = trace\left(\hat{\boldsymbol{\Omega}}_{R\mid \hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\beta}}(R)}\hat{\mathbf{V}}_{r\mid \hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\beta}}(R)}\right),
+\delta = \delta\left(\hat{\boldsymbol{\Sigma}}, \hat{\mathbf{V}}_{r}\right)
 $$
 
-where $\hat{\boldsymbol{\Omega}} = \hat{\boldsymbol{\Sigma}}^{-1}$.
+The robust covariance matrix $\hat{\mathbf{V}}_{r}$ protects against misspecification of the working correlation structure while the variance estimates for the model-based covariance matrix $\hat{\boldsymbol{\Sigma}}$ could vary drastically based on the working correlation structure. If $\delta \approx k$, where $k$ is the dimension of the parameter vector $\boldsymbol{\beta}$, then one would be able to assume that $\boldsymbol{\Sigma} \approx \mathbf{V}_{r}$ and the working correlation structure is appropriate given the mean structure is specified properly. The use of $\delta$ in the GEEs setting is reasonable because the mean structure estimates are protected against misspecification of the correlation structure and proper selection of correlation structure provides gains in efficiency not accuracy of statistical inference.
+
+# Occam's window
+The correlation structure that produced a value within Occam's window and has the minimum number of correlation parameters estimated is the correlation structured selected.
 
 # Simulation setup
 
@@ -64,7 +76,6 @@ legend_work_corstr <- ifelse(
   no = legend_work_corstr
 )
 ```
-
 Following Wang *et al.* (2012) with one-thousand replications, the correlated normal responses are generated from the model $$y_{ij} = \mathbf{X}_{ij}^{\top}\boldsymbol{\beta} + \varepsilon_{ij},$$ where $i = 1, \ldots, N,$ $j = 1, \ldots, n,$ $\mathbf{X}_{ij} = (x_{ij, 1}, \ldots, x_{ij, 6})^{\top},$ and $\boldsymbol{\beta} = (2.0, 3.0, 0.5, 0.0, 0.0, 0.0)^{\top}$, where the combinations of $N$ and $n$ are listed below.
 
 ```{r, echo = FALSE}
@@ -102,16 +113,27 @@ In these simulations, there are four sets of comparisons being made between the 
 3. exchangeable versus AR(1) versus independence versus AR(3), and
 4. exchangeable versus AR(1) versus independence versus AR(3) versus unstructured.
 
-We are making these comparisons because previous research usually only focuses on exchangeable and AR(1). As these simulations are meant to investigate the selection properties of mCIC(R), for each comparison, the correlation structure that resulted in the minimum mCIC(R) value was selected as the best performing correlation structure.
+We are making these comparisons because previous research usually only focuses on exchangeable and AR(1). As these simulations are meant to investigate the selection properties of $\delta$, for each comparison, the correlation structure that resulted in the minimum number of correlation parameters estimated that has a $\delta$ value within Occam's window was selected as the best performing correlation structure. Occam's window was defined by calculating the 90th percentile of the sampling distribution of $\delta$. Additionally, Occam's window was implemented for each comparison outline above. Considering the exchangeable and AR(1) correlation structures have identical number of correlation parameters estimated, the correlation structure that has the minimum $\hat{\delta}$ value will be selected.
+
+- Additionally, if there are no criterion values that fall within Occam's window, then the correlation structure associated with the minimum $\hat{\delta}$ is selected.
+
+### Sampling distribution of $\delta$
+In defining Occam's window for each of the model selection comparisons, the sampling distribution of $\delta$ was used. In these simulations, prior to peforming any model selection procedure the sampling distribution of $\delta$ was approximated by randomly generating 1,000 data sets assuming within-subject independence and obtaining $\hat{\delta}$ for the largest correlation structure under consideration.
+
+- For the first comparison, a sampling distribution was not generated, as exchangeable and AR(1) correlation structures have the same number of correlation parameters. So, Occam's window does not need to be implemented.
+- However, for the second comparison, the inclusion of the independence correlation structure requires the implementation of Occam's window. Thus, the sampling distribution is generated by obtaining the $\hat{\delta}$ for the generating correlation structure. This does provide an optimistic representation of this method, as the sampling distribution is based on unknown practical information. A justification for this method would be the within-subject sample correlation matrices can be obtained prior to any model estimation, and there is a drastic difference in appearance between the exchangeable and AR(1) correlation structures.
+- For the third and fourth model selection comparisons, the sampling distributions are based on the AR(3) and unstructured correlation structures, respectively, as those are the largest correlation structures under consideration. 
+- Currently, the randomly generated data is based on the same data generation mechanism that the simulations are based on, except there is no within-subject correlation. This provides another optimistic representation of this method, but is a good starting place.
+  - For these simulations, $\mathbf{X}$ and $\mathbf{y}$ are generated by the same data generation mechanism outlined above, where the appropriate $\boldsymbol{\beta}$ was used to generate $\mathbf{y}$
+  - In the future, we can use a method that completely generates random data, where only the $N$, $n$, and $p$ are provided.
 
 # Presentation of results
 
 ## Import results
 The simulation results are stored in:
 ```{r, echo = TRUE}
-res <- readRDS(
-  file = "./outputs/corstr/norm-modified-cic-sim/norm_modified_cic_sim.rds"
-)
+sub_dir <- "./outputs/corstr/norm-delta-sim/norm-delta-occam-gen-samp-sim/"
+res <- readRDS(file = paste0(sub_dir, "norm_delta_occam_gen_samp_sim.rds"))
 ```
 
 ```{r, include = FALSE}
@@ -134,7 +156,7 @@ plot_all <- function(data, index, min_val) {
     ordered = TRUE
   )
 
-  # plotting mCIC values
+  # plotting delta values
 
   ## Independence
   independence_plot <- ggplot2::ggplot(
@@ -147,7 +169,7 @@ plot_all <- function(data, index, min_val) {
       linewidth = 1
     ) +
     ggplot2::labs(
-      x = "mCIC(R)",
+      x = expression(delta),
       y = "Density",
       title = "Working correlation: Independence"
     ) +
@@ -166,7 +188,7 @@ plot_all <- function(data, index, min_val) {
       linewidth = 1
     ) +
     ggplot2::labs(
-      x = "mCIC(R)",
+      x = expression(delta),
       y = "Density",
       title = "Working correlation: Exchangeable"
     ) +
@@ -185,7 +207,7 @@ plot_all <- function(data, index, min_val) {
       linewidth = 1
     ) +
     ggplot2::labs(
-      x = "mCIC(R)",
+      x = expression(delta),
       y = "Density",
       title = "Working correlation: AR(1)"
     ) +
@@ -204,7 +226,7 @@ plot_all <- function(data, index, min_val) {
       linewidth = 1
     ) +
     ggplot2::labs(
-      x = "mCIC(R)",
+      x = expression(delta),
       y = "Density",
       title = "Working correlation: AR(3)"
     ) +
@@ -223,7 +245,7 @@ plot_all <- function(data, index, min_val) {
       linewidth = 1
     ) +
     ggplot2::labs(
-      x = "mCIC(R)",
+      x = expression(delta),
       y = "Density",
       title = "Working correlation: Unstructured"
     ) +
@@ -262,11 +284,11 @@ mean_all <- function(data, index) {
     ar1 = mean(ar1),
     ar3 = mean(ar3),
     unstructured = mean(unstructured),
-    mcic0 = mean(mcic0)
+    delta0 = mean(delta0)
   )
   mean_tab <- knitr::kable(
     x = mean_tab, format = "html", digits = 3,
-    col.names = c("N =, n =", legend_work_corstr, "$mCIC(R)_{0}$"),
+    col.names = c("N =, n =", legend_work_corstr, "$\\delta_{0}$"),
     caption = "Mean of values"
   )
   kableExtra::kable_styling(kable_input = mean_tab, full_width = FALSE)
@@ -293,11 +315,11 @@ variance_all <- function(data, index) {
     ar1 = stats::var(ar1),
     ar3 = stats::var(ar3),
     unstructured = stats::var(unstructured),
-    mcic0 = stats::var(mcic0)
+    delta0 = stats::var(delta0)
   )
   var_tab <- knitr::kable(
     x = var_tab, format = "html", digits = 3,
-    col.names = c("N =, n =", legend_work_corstr, "$mCIC(R)_{0}$"),
+    col.names = c("N =, n =", legend_work_corstr, "$\\delta_{0}$"),
     caption = "Variance of values"
   )
   kableExtra::kable_styling(kable_input = var_tab, full_width = FALSE)
@@ -306,22 +328,22 @@ variance_all <- function(data, index) {
 
 and are dependent on the data generation mechanism (`corstr`).
 
-## Distribution of mCIC(R) {.tabset .tabset-fade}
-The first set of results being presented are the values of mCIC(R) for each working correlation structure across the one-thousand replications given the data generation mechanism. The results are presented based on the data simulation process (i.e., *Fixed N* or *Fixed total number of observations*).
+## Distribution of $\delta$ {.tabset .tabset-fade}
+The first set of results being presented are the values of $\delta$ for each working correlation structure across the one-thousand replications given the data generation mechanism. The results are presented based on the data simulation process (i.e., *Fixed N* or *Fixed total number of observations*).
 
-The averages and variances of the oracle values of mCIC(R), $mCIC(R)_{0}$ is presented along side the averages and variances of statistics. The $mCIC(R)_{0}$ is defined as
+The averages and variances of the oracle values of $\delta$, $\delta_{0}$ is presented along side the averages and variances of statistics. The $\delta_{0}$ is defined as
 
 $$
-mCIC(R)_{0} = trace\left(\hat{\boldsymbol{\Omega}}_{min\mid \hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\beta}}(R)}\boldsymbol{\Sigma}_{0}\right),
+\delta_{0} = \delta\left(\hat{\boldsymbol{\Sigma}}_{min}, \boldsymbol{\Sigma}_{0}\right),
 $$
 
-where $\hat{\boldsymbol{\Omega}}_{min}$ is the inverse of the model-based covariance matrix associated with the working correlation matrix that produced the minimum mCIC(R) statistic and $\boldsymbol{\Sigma}_{0}$ is the estimated true covariance matrix.
+where $\hat{\boldsymbol{\Sigma}}_{min}$ is the model-based covariance matrix associated with the working correlation matrix that produced the minimum $\delta$ statistic and $\boldsymbol{\Sigma}_{0}$ is the estimated true covariance matrix.
 
 ### Generating correlation structure: Exchangeable
-The distributions of the mCIC(R) presented below are based on the data generation process that used an *exchangeable* correlation structure.
+The distributions of the $\delta$ presented below are based on the data generation process that used an *exchangeable* correlation structure.
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # Subsetting the results to only include generating correlation structure
-res_mCIC <- subset(
+res_delta <- subset(
   x = res,
   subset = corstr == "exchangeable"
 )
@@ -330,38 +352,38 @@ res_mCIC <- subset(
 #### Fixed N
 In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
-# plotting mCIC values
-plot_all(data = res_mCIC, index = fixed_n, min_val = l + 1)
+# plotting delta values
+plot_all(data = res_delta, index = fixed_n, min_val = l + 1)
 
-# table summarizing mCIC values
+# table summarizing delta values
 ## Mean
-mean_all(data = res_mCIC, index = fixed_n)
+mean_all(data = res_delta, index = fixed_n)
 
 ## Variance
-variance_all(data = res_mCIC, index = fixed_n)
+variance_all(data = res_delta, index = fixed_n)
 ```
 
 
 #### Fixed total number of observations
 In these results, the total number of observations does **NOT** change and stays fixed at `r N[fixed_obs[1]] * n[fixed_obs[1]]`. However, the number of subjects and the number of observations for each subject changes. The numbers of subjects are N: `r N[fixed_obs]` while the number of observations for each subjects are n: `r n[fixed_obs]`.
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
-# plotting mCIC values
-plot_all(data = res_mCIC, index = fixed_obs, min_val = l + 1)
+# plotting delta values
+plot_all(data = res_delta, index = fixed_obs, min_val = l + 1)
 
-# table summarizing mCIC values
+# table summarizing delta values
 ## Mean
-mean_all(data = res_mCIC, index = fixed_obs)
+mean_all(data = res_delta, index = fixed_obs)
 
 ## Variance
-variance_all(data = res_mCIC, index = fixed_obs)
+variance_all(data = res_delta, index = fixed_obs)
 ```
 
 
 ### Generating correlation structure: AR(1)
-The distributions of the mCIC(R) presented below are based on the data generation process that used an *AR(1)* correlation structure.
+The distributions of the $\delta$ presented below are based on the data generation process that used an *AR(1)* correlation structure.
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # Subsetting the results to only include generating correlation structure
-res_mCIC <- subset(
+res_delta <- subset(
   x = res,
   subset = corstr == "ar1"
 )
@@ -370,41 +392,41 @@ res_mCIC <- subset(
 #### Fixed N
 In these results, the number of subjects does **NOT** change and stays fixed at `r N[1]`. However, the number of observations for each subject has increases from `r n[fixed_n[1]]` to `r n[fixed_n[length(fixed_n)]]` by 1. Thus, the overall number observations is also increasing.
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
-# plotting mCIC values
-plot_all(data = res_mCIC, index = fixed_n, min_val = l + 1)
+# plotting delta values
+plot_all(data = res_delta, index = fixed_n, min_val = l + 1)
 
-# table summarizing mCIC values
+# table summarizing delta values
 ## Mean
-mean_all(data = res_mCIC, index = fixed_n)
+mean_all(data = res_delta, index = fixed_n)
 
 ## Variance
-variance_all(data = res_mCIC, index = fixed_n)
+variance_all(data = res_delta, index = fixed_n)
 ```
 
 
 #### Fixed total number of observations
 In these results, the total number of observations does **NOT** change and stays fixed at `r N[fixed_obs[1]] * n[fixed_obs[1]]`. However, the number of subjects and the number of observations for each subject changes. The numbers of subjects are N: `r N[fixed_obs]` while the number of observations for each subjects are n: `r n[fixed_obs]`.
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
-# plotting mCIC values
-plot_all(data = res_mCIC, index = fixed_obs, min_val = l + 1)
+# plotting delta values
+plot_all(data = res_delta, index = fixed_obs, min_val = l + 1)
 
-# table summarizing mCIC values
+# table summarizing delta values
 ## Mean
-mean_all(data = res_mCIC, index = fixed_obs)
+mean_all(data = res_delta, index = fixed_obs)
 
 ## Variance
-variance_all(data = res_mCIC, index = fixed_obs)
+variance_all(data = res_delta, index = fixed_obs)
 ```
 
 ## Correlation structure selection {.tabset .tabset-fade}
-Now we will examine the selection properties of mCIC(R) given the generating correlation structure and working correlation structures being compared. The comparisons are:
+Now we will examine the selection properties of $\delta$ given the generating correlation structure and working correlation structures being compared. The comparisons are:
 
 1. exchangeable versus AR(1),
 2. exchangeable versus AR(1) versus independence, and
 3. exchangeable versus AR(1) versus independence versus AR(3), and
 4. exchangeable versus AR(1) versus independence versus AR(3) versus unstructured.
 
-and the results are presented based on the defined numbering system of these comparisons. For each comparison, the hope is the working correlation structure selected by the minimum mCIC(R) value is the generating correlation structure the majority of the time.
+and the results are presented based on the defined numbering system of these comparisons. For each comparison, the hope is the working correlation structure selected by the Occam's window is the generating correlation structure the majority of the time.
 ```{r, echo = FALSE}
 corstr_count <- function(x) {
   count_indp <- 0
@@ -412,28 +434,34 @@ corstr_count <- function(x) {
   count_ar1 <- 0
   count_ar3 <- 0
   count_un <- 0
+  count_na <- 0
   for (i in seq_along(x)) {
-    count_indp <- count_indp + (x[i] == "independence")
-    count_cs <- count_cs + (x[i] == "exchangeable")
-    count_ar1 <- count_ar1 + (x[i] == "ar1")
-    count_ar3 <- count_ar3 + (x[i] == "ar3")
-    count_un <- count_un + (x[i] == "unstructured")
+    if (!is.na(x[i])) {
+      count_indp <- count_indp + (x[i] == "independence")
+      count_cs <- count_cs + (x[i] == "exchangeable")
+      count_ar1 <- count_ar1 + (x[i] == "ar1")
+      count_ar3 <- count_ar3 + (x[i] == "ar3")
+      count_un <- count_un + (x[i] == "unstructured")
+    } else {
+      count_na <- count_na + is.na(x[i])
+    }
   }
   temp <- data.frame(
     independence = count_indp, exchangeable = count_cs,
-    ar1 = count_ar1, ar3 = count_ar3, un = count_un
+    ar1 = count_ar1, ar3 = count_ar3, un = count_un,
+    count_na = count_na
   )
   return(temp)
 }
 ```
 
 ### Generating correlation structure: Exchangeable {.tabset .tabset-fade .tabset-pills}
-The selection properties of the mCIC(R) presented below are based on the data generation process that used an *exchangeable* correlation structure.
+The selection properties of the $\delta$ presented below are based on the data generation process that used an *exchangeable* correlation structure.
 
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # Subsetting the results to only include generating correlation structure
 # and covariance estimator of interest
-res_mCIC <- subset(
+res_delta <- subset(
   x = res,
   subset = corstr == "exchangeable"
 )
@@ -448,7 +476,7 @@ In these results, the number of subjects does **NOT** change and stays fixed at 
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # Subsetting the results to only include the results focused on fixed N
 # simulations
-res_sel <- res_mCIC
+res_sel <- res_delta
 res_sel$group <- paste0("N = ", res_sel$N, ", n = ", res_sel$n)
 group_id <- paste0("N = ", N[fixed_n], ", n = ", n[fixed_n])
 res_sel <- subset(x = res_sel, subset = group %in% group_id)
@@ -467,7 +495,7 @@ sel <- lapply(
 sel <- dplyr::bind_rows(sel)
 sel_tab <- knitr::kable(
   x = sel, format = "html",
-  col.names = c("N = 200, n =", legend_work_corstr),
+  col.names = c("N = 200, n =", legend_work_corstr, "Missing"),
   caption = "Selection properties for Fixed N"
 )
 kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
@@ -479,7 +507,7 @@ In these results, the total number of observations does **NOT** change and stays
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%", warning = FALSE}
 # Subsetting the results to only include the results focused on fixed total
 # number of observations simulations
-res_sel <- res_mCIC
+res_sel <- res_delta
 res_sel$group <- paste0("N = ", res_sel$N, ", n = ", res_sel$n)
 group_id <- paste0("N = ", N[fixed_obs], ", n = ", n[fixed_obs])
 res_sel <- subset(x = res_sel, subset = group %in% group_id)
@@ -498,7 +526,7 @@ sel <- lapply(
 sel <- dplyr::bind_rows(sel)
 sel_tab <- knitr::kable(
   x = sel, format = "html",
-  col.names = c("N = , n =", legend_work_corstr),
+  col.names = c("N = , n =", legend_work_corstr, "Missing"),
   caption = "Selection properties for Fixed total number of observations"
 )
 kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
@@ -513,7 +541,7 @@ In these results, the number of subjects does **NOT** change and stays fixed at 
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # Subsetting the results to only include the results focused on fixed N
 # simulations
-res_sel <- res_mCIC
+res_sel <- res_delta
 res_sel$group <- paste0("N = ", res_sel$N, ", n = ", res_sel$n)
 group_id <- paste0("N = ", N[fixed_n], ", n = ", n[fixed_n])
 res_sel <- subset(x = res_sel, subset = group %in% group_id)
@@ -532,7 +560,7 @@ sel <- lapply(
 sel <- dplyr::bind_rows(sel)
 sel_tab <- knitr::kable(
   x = sel, format = "html",
-  col.names = c("N = 200, n =", legend_work_corstr),
+  col.names = c("N = 200, n =", legend_work_corstr, "Missing"),
   caption = "Selection properties for Fixed N"
 )
 kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
@@ -544,7 +572,7 @@ In these results, the total number of observations does **NOT** change and stays
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%", warning = FALSE}
 # Subsetting the results to only include the results focused on fixed total
 # number of observations simulations
-res_sel <- res_mCIC
+res_sel <- res_delta
 res_sel$group <- paste0("N = ", res_sel$N, ", n = ", res_sel$n)
 group_id <- paste0("N = ", N[fixed_obs], ", n = ", n[fixed_obs])
 res_sel <- subset(x = res_sel, subset = group %in% group_id)
@@ -563,7 +591,7 @@ sel <- lapply(
 sel <- dplyr::bind_rows(sel)
 sel_tab <- knitr::kable(
   x = sel, format = "html",
-  col.names = c("N = , n =", legend_work_corstr),
+  col.names = c("N = , n =", legend_work_corstr, "Missing"),
   caption = "Selection properties for Fixed total number of observations"
 )
 kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
@@ -578,7 +606,7 @@ In these results, the number of subjects does **NOT** change and stays fixed at 
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # Subsetting the results to only include the results focused on fixed N
 # simulations
-res_sel <- res_mCIC
+res_sel <- res_delta
 res_sel$group <- paste0("N = ", res_sel$N, ", n = ", res_sel$n)
 group_id <- paste0("N = ", N[fixed_n], ", n = ", n[fixed_n])
 res_sel <- subset(x = res_sel, subset = group %in% group_id)
@@ -597,7 +625,7 @@ sel <- lapply(
 sel <- dplyr::bind_rows(sel)
 sel_tab <- knitr::kable(
   x = sel, format = "html",
-  col.names = c("N = 200, n =", legend_work_corstr),
+  col.names = c("N = 200, n =", legend_work_corstr, "Missing"),
   caption = "Selection properties for Fixed N"
 )
 kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
@@ -609,7 +637,7 @@ In these results, the total number of observations does **NOT** change and stays
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%", warning = FALSE}
 # Subsetting the results to only include the results focused on fixed total
 # number of observations simulations
-res_sel <- res_mCIC
+res_sel <- res_delta
 res_sel$group <- paste0("N = ", res_sel$N, ", n = ", res_sel$n)
 group_id <- paste0("N = ", N[fixed_obs], ", n = ", n[fixed_obs])
 res_sel <- subset(x = res_sel, subset = group %in% group_id)
@@ -628,7 +656,7 @@ sel <- lapply(
 sel <- dplyr::bind_rows(sel)
 sel_tab <- knitr::kable(
   x = sel, format = "html",
-  col.names = c("N = , n =", legend_work_corstr),
+  col.names = c("N = , n =", legend_work_corstr, "Missing"),
   caption = "Selection properties for Fixed total number of observations"
 )
 kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
@@ -643,7 +671,7 @@ In these results, the number of subjects does **NOT** change and stays fixed at 
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # Subsetting the results to only include the results focused on fixed N
 # simulations
-res_sel <- res_mCIC
+res_sel <- res_delta
 res_sel$group <- paste0("N = ", res_sel$N, ", n = ", res_sel$n)
 group_id <- paste0("N = ", N[fixed_n], ", n = ", n[fixed_n])
 res_sel <- subset(x = res_sel, subset = group %in% group_id)
@@ -662,7 +690,7 @@ sel <- lapply(
 sel <- dplyr::bind_rows(sel)
 sel_tab <- knitr::kable(
   x = sel, format = "html",
-  col.names = c("N = 200, n =", legend_work_corstr),
+  col.names = c("N = 200, n =", legend_work_corstr, "Missing"),
   caption = "Selection properties for Fixed N"
 )
 kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
@@ -673,7 +701,7 @@ In these results, the total number of observations does **NOT** change and stays
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%", warning = FALSE}
 # Subsetting the results to only include the results focused on fixed total
 # number of observations simulations
-res_sel <- res_mCIC
+res_sel <- res_delta
 res_sel$group <- paste0("N = ", res_sel$N, ", n = ", res_sel$n)
 group_id <- paste0("N = ", N[fixed_obs], ", n = ", n[fixed_obs])
 res_sel <- subset(x = res_sel, subset = group %in% group_id)
@@ -692,19 +720,19 @@ sel <- lapply(
 sel <- dplyr::bind_rows(sel)
 sel_tab <- knitr::kable(
   x = sel, format = "html",
-  col.names = c("N = , n =", legend_work_corstr),
+  col.names = c("N = , n =", legend_work_corstr, "Missing"),
   caption = "Selection properties for Fixed total number of observations"
 )
 kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
 ```
 
 ### Generating correlation structure: AR(1) {.tabset .tabset-fade .tabset-pills}
-The selection properties of the mCIC(R) presented below are based on the data generation process that used an *AR(1)* correlation structure.
+The selection properties of the $\delta$ presented below are based on the data generation process that used an *AR(1)* correlation structure.
 
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # Subsetting the results to only include generating correlation structure
 # and covariance estimator of interest
-res_mCIC <- subset(
+res_delta <- subset(
   x = res,
   subset = corstr == "ar1"
 )
@@ -719,7 +747,7 @@ In these results, the number of subjects does **NOT** change and stays fixed at 
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # Subsetting the results to only include the results focused on fixed N
 # simulations
-res_sel <- res_mCIC
+res_sel <- res_delta
 res_sel$group <- paste0("N = ", res_sel$N, ", n = ", res_sel$n)
 group_id <- paste0("N = ", N[fixed_n], ", n = ", n[fixed_n])
 res_sel <- subset(x = res_sel, subset = group %in% group_id)
@@ -738,7 +766,7 @@ sel <- lapply(
 sel <- dplyr::bind_rows(sel)
 sel_tab <- knitr::kable(
   x = sel, format = "html",
-  col.names = c("N = 200, n =", legend_work_corstr),
+  col.names = c("N = 200, n =", legend_work_corstr, "Missing"),
   caption = "Selection properties for Fixed N"
 )
 kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
@@ -750,7 +778,7 @@ In these results, the total number of observations does **NOT** change and stays
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%", warning = FALSE}
 # Subsetting the results to only include the results focused on fixed total
 # number of observations simulations
-res_sel <- res_mCIC
+res_sel <- res_delta
 res_sel$group <- paste0("N = ", res_sel$N, ", n = ", res_sel$n)
 group_id <- paste0("N = ", N[fixed_obs], ", n = ", n[fixed_obs])
 res_sel <- subset(x = res_sel, subset = group %in% group_id)
@@ -769,7 +797,7 @@ sel <- lapply(
 sel <- dplyr::bind_rows(sel)
 sel_tab <- knitr::kable(
   x = sel, format = "html",
-  col.names = c("N = , n =", legend_work_corstr),
+  col.names = c("N = , n =", legend_work_corstr, "Missing"),
   caption = "Selection properties for Fixed total number of observations"
 )
 kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
@@ -784,7 +812,7 @@ In these results, the number of subjects does **NOT** change and stays fixed at 
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # Subsetting the results to only include the results focused on fixed N
 # simulations
-res_sel <- res_mCIC
+res_sel <- res_delta
 res_sel$group <- paste0("N = ", res_sel$N, ", n = ", res_sel$n)
 group_id <- paste0("N = ", N[fixed_n], ", n = ", n[fixed_n])
 res_sel <- subset(x = res_sel, subset = group %in% group_id)
@@ -803,7 +831,7 @@ sel <- lapply(
 sel <- dplyr::bind_rows(sel)
 sel_tab <- knitr::kable(
   x = sel, format = "html",
-  col.names = c("N = 200, n =", legend_work_corstr),
+  col.names = c("N = 200, n =", legend_work_corstr, "Missing"),
   caption = "Selection properties for Fixed N"
 )
 kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
@@ -815,7 +843,7 @@ In these results, the total number of observations does **NOT** change and stays
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%", warning = FALSE}
 # Subsetting the results to only include the results focused on fixed total
 # number of observations simulations
-res_sel <- res_mCIC
+res_sel <- res_delta
 res_sel$group <- paste0("N = ", res_sel$N, ", n = ", res_sel$n)
 group_id <- paste0("N = ", N[fixed_obs], ", n = ", n[fixed_obs])
 res_sel <- subset(x = res_sel, subset = group %in% group_id)
@@ -834,7 +862,7 @@ sel <- lapply(
 sel <- dplyr::bind_rows(sel)
 sel_tab <- knitr::kable(
   x = sel, format = "html",
-  col.names = c("N = , n =", legend_work_corstr),
+  col.names = c("N = , n =", legend_work_corstr, "Missing"),
   caption = "Selection properties for Fixed total number of observations"
 )
 kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
@@ -849,7 +877,7 @@ In these results, the number of subjects does **NOT** change and stays fixed at 
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # Subsetting the results to only include the results focused on fixed N
 # simulations
-res_sel <- res_mCIC
+res_sel <- res_delta
 res_sel$group <- paste0("N = ", res_sel$N, ", n = ", res_sel$n)
 group_id <- paste0("N = ", N[fixed_n], ", n = ", n[fixed_n])
 res_sel <- subset(x = res_sel, subset = group %in% group_id)
@@ -868,7 +896,7 @@ sel <- lapply(
 sel <- dplyr::bind_rows(sel)
 sel_tab <- knitr::kable(
   x = sel, format = "html",
-  col.names = c("N = 200, n =", legend_work_corstr),
+  col.names = c("N = 200, n =", legend_work_corstr, "Missing"),
   caption = "Selection properties for Fixed N"
 )
 kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
@@ -880,7 +908,7 @@ In these results, the total number of observations does **NOT** change and stays
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%", warning = FALSE}
 # Subsetting the results to only include the results focused on fixed total
 # number of observations simulations
-res_sel <- res_mCIC
+res_sel <- res_delta
 res_sel$group <- paste0("N = ", res_sel$N, ", n = ", res_sel$n)
 group_id <- paste0("N = ", N[fixed_obs], ", n = ", n[fixed_obs])
 res_sel <- subset(x = res_sel, subset = group %in% group_id)
@@ -899,7 +927,7 @@ sel <- lapply(
 sel <- dplyr::bind_rows(sel)
 sel_tab <- knitr::kable(
   x = sel, format = "html",
-  col.names = c("N = , n =", legend_work_corstr),
+  col.names = c("N = , n =", legend_work_corstr, "Missing"),
   caption = "Selection properties for Fixed total number of observations"
 )
 kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
@@ -914,7 +942,7 @@ In these results, the number of subjects does **NOT** change and stays fixed at 
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%"}
 # Subsetting the results to only include the results focused on fixed N
 # simulations
-res_sel <- res_mCIC
+res_sel <- res_delta
 res_sel$group <- paste0("N = ", res_sel$N, ", n = ", res_sel$n)
 group_id <- paste0("N = ", N[fixed_n], ", n = ", n[fixed_n])
 res_sel <- subset(x = res_sel, subset = group %in% group_id)
@@ -933,7 +961,7 @@ sel <- lapply(
 sel <- dplyr::bind_rows(sel)
 sel_tab <- knitr::kable(
   x = sel, format = "html",
-  col.names = c("N = 200, n =", legend_work_corstr),
+  col.names = c("N = 200, n =", legend_work_corstr, "Missing"),
   caption = "Selection properties for Fixed N"
 )
 kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
@@ -944,7 +972,7 @@ In these results, the total number of observations does **NOT** change and stays
 ```{r, echo = FALSE, fig.align = "center", out.width = "100%", warning = FALSE}
 # Subsetting the results to only include the results focused on fixed total
 # number of observations simulations
-res_sel <- res_mCIC
+res_sel <- res_delta
 res_sel$group <- paste0("N = ", res_sel$N, ", n = ", res_sel$n)
 group_id <- paste0("N = ", N[fixed_obs], ", n = ", n[fixed_obs])
 res_sel <- subset(x = res_sel, subset = group %in% group_id)
@@ -963,7 +991,7 @@ sel <- lapply(
 sel <- dplyr::bind_rows(sel)
 sel_tab <- knitr::kable(
   x = sel, format = "html",
-  col.names = c("N = , n =", legend_work_corstr),
+  col.names = c("N = , n =", legend_work_corstr, "Missing"),
   caption = "Selection properties for Fixed total number of observations"
 )
 kableExtra::kable_styling(kable_input = sel_tab, full_width = FALSE)
