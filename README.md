@@ -17,9 +17,9 @@ All directories and sub-directories are either one phrase or a combination of ph
 - `scripts` contains all the script files used to execute certain tasks.
 - `R` contains all `R` script files used by other scripts. To load all the scripts:
 
-```r
-R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
-sapply(R, source, .GlobalEnv)
-```
+  ```r
+  R <- list.files(path = "./R", pattern = "*.R", full.names = TRUE)
+  sapply(R, source, .GlobalEnv)
+  ```
 
 All scripts and markdown files execute assuming the current working directory is set to the main `dissertation` directory.
