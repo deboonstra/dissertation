@@ -166,14 +166,6 @@ un_mcic <- vector(mode = "list", length = nrow(res_basis))
 names(un_mcic) <- paste0(
   "N", res_basis$N, "n", res_basis$n, "corstr_", res_basis$corstr
 )
-ar3_mcic <- vector(mode = "list", length = nrow(res_basis))
-names(ar3_mcic) <- paste0(
-  "N", res_basis$N, "n", res_basis$n, "corstr_", res_basis$corstr
-)
-sel2_mcic <- vector(mode = "list", length = nrow(res_basis))
-names(sel2_mcic) <- paste0(
-  "N", res_basis$N, "n", res_basis$n, "corstr_", res_basis$corstr
-)
 for (ell in seq_len(nrow(res_basis))) {
   cat(
     paste0(
@@ -192,9 +184,8 @@ for (ell in seq_len(nrow(res_basis))) {
     X = seq_len(nsims),
     FUN = function(j) {
       # Simulating data ####
-      dat <- sim_data(
-        N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
-        corstr = "independence"
+      dat <- occam_data(
+        N = res_basis$N[ell], n = res_basis$n[ell], p = l
       )
       ## Converting to data.frame ####
       dat <- data.frame(y = dat$y, dat$X, id = dat$id)
@@ -215,9 +206,8 @@ for (ell in seq_len(nrow(res_basis))) {
       iter <- 0
       while ((is.na(cc) || cc < 0 || cc > l * 10) && iter <= 100) {
         # Simulating data ####
-        dat <- sim_data(
-          N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
-          corstr = "independence"
+        dat <- occam_data(
+          N = res_basis$N[ell], n = res_basis$n[ell], p = l
         )
         ## Converting to data.frame ####
         dat <- data.frame(y = dat$y, dat$X, id = dat$id)
@@ -228,132 +218,6 @@ for (ell in seq_len(nrow(res_basis))) {
           data = dat,
           corstr = "unstructured",
           Mv = 1
-        )
-
-        ## Pulling covariance matrices ####
-        mb <- fit$naive.variance
-        vr <- fit$robust.variance
-
-        # Getting mcic ####
-        cc <- mcic(object = fit)
-
-        # Updating iteration count ####
-        iter <- iter + 1
-      }
-      if ((is.na(cc) || cc < 0 || cc > l * 10) && iter == 100) {
-        cc <- NA
-      } else {
-        cc <- cc
-      }
-      # Returning output ####
-      return(cc)
-    }
-  )
-  ar3_mcic[[ell]] <- parallel::parSapply(
-    cl = cl,
-    X = seq_len(nsims),
-    FUN = function(j) {
-      # Simulating data ####
-      dat <- sim_data(
-        N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
-        corstr = "independence"
-      )
-      ## Converting to data.frame ####
-      dat <- data.frame(y = dat$y, dat$X, id = dat$id)
-      # Fitting models and getting mcic values ####
-
-      ## Fitting model ####
-      fit <- gee::gee(
-        formula = form, id = id,
-        data = dat,
-        corstr = "AR-M",
-        Mv = 3
-      )
-
-      ### Getting initial mcic values ####
-      cc <- mcic(object = fit)
-
-      ##### Obtaining new mcic values if mcic < l and mcic > l * 10
-      iter <- 0
-      while ((is.na(cc) || cc < 0 || cc > l * 10) && iter <= 100) {
-        # Simulating data ####
-        dat <- sim_data(
-          N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
-          corstr = "independence"
-        )
-        ## Converting to data.frame ####
-        dat <- data.frame(y = dat$y, dat$X, id = dat$id)
-
-        # Fitting model ####
-        fit <- gee::gee(
-          formula = form, id = id,
-          data = dat,
-          corstr = "AR-M",
-          Mv = 3
-        )
-
-        # Getting mcic ####
-        cc <- mcic(object = fit)
-
-        # Updating iteration count ####
-        iter <- iter + 1
-      }
-      if ((is.na(cc) || cc < 0 || cc > l * 10) && iter == 100) {
-        cc <- NA
-      } else {
-        cc <- cc
-      }
-      # Returning output ####
-      return(cc)
-    }
-  )
-  sel2_mcic[[ell]] <- parallel::parSapply(
-    cl = cl,
-    X = seq_len(nsims),
-    FUN = function(j) {
-      # Simulating data ####
-      dat <- sim_data(
-        N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
-        corstr = "independence"
-      )
-      ## Converting to data.frame ####
-      dat <- data.frame(y = dat$y, dat$X, id = dat$id)
-      # Fitting models and getting mcic values ####
-
-      ## Fitting model ####
-      fit <- gee::gee(
-        formula = form, id = id,
-        data = dat,
-        corstr = ifelse(
-          test = res_basis$corstr[ell] == "ar1",
-          yes = "AR-M",
-          no = res_basis$corstr[ell]
-        )
-      )
-
-      ### Getting initial mcic values ####
-      cc <- mcic(object = fit)
-
-      ##### Obtaining new mcic values if mcic < l and mcic > l * 10
-      iter <- 0
-      while ((is.na(cc) || cc < 0 || cc > l * 10) && iter <= 100) {
-        # Simulating data ####
-        dat <- sim_data(
-          N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
-          corstr = "independence"
-        )
-        ## Converting to data.frame ####
-        dat <- data.frame(y = dat$y, dat$X, id = dat$id)
-
-        # Fitting model ####
-        fit <- gee::gee(
-          formula = form, id = id,
-          data = dat,
-          corstr = ifelse(
-            test = res_basis$corstr[ell] == "ar1",
-            yes = "AR-M",
-            no = res_basis$corstr[ell]
-          )
         )
 
         # Getting mcic ####
@@ -509,7 +373,7 @@ for (ell in seq_len(nrow(res_basis))) {
         occam_sel2 <- occam(
           x = cic_sel2,
           ideal = l,
-          window = unname(quantile(x = sel2_mcic[[ell]], probs = 0.9)) - l,
+          window = unname(quantile(x = un_mcic[[ell]], probs = 0.9)) - l,
           mv = mv_sel2,
           strict_upper = strict_upper
         )
@@ -531,7 +395,7 @@ for (ell in seq_len(nrow(res_basis))) {
         occam_sel3 <- occam(
           x = cic_sel3,
           ideal = l,
-          window = unname(quantile(x = ar3_mcic[[ell]], probs = 0.9)) - l,
+          window = unname(quantile(x = un_mcic[[ell]], probs = 0.9)) - l,
           mv = mv_sel3,
           strict_upper = strict_upper
         )

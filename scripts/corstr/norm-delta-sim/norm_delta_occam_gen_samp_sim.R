@@ -165,14 +165,6 @@ un_delta <- vector(mode = "list", length = nrow(res_basis))
 names(un_delta) <- paste0(
   "N", res_basis$N, "n", res_basis$n, "corstr_", res_basis$corstr
 )
-ar3_delta <- vector(mode = "list", length = nrow(res_basis))
-names(ar3_delta) <- paste0(
-  "N", res_basis$N, "n", res_basis$n, "corstr_", res_basis$corstr
-)
-sel2_delta <- vector(mode = "list", length = nrow(res_basis))
-names(sel2_delta) <- paste0(
-  "N", res_basis$N, "n", res_basis$n, "corstr_", res_basis$corstr
-)
 for (ell in seq_len(nrow(res_basis))) {
   cat(
     paste0(
@@ -191,9 +183,8 @@ for (ell in seq_len(nrow(res_basis))) {
     X = seq_len(nsims),
     FUN = function(j) {
       # Simulating data ####
-      dat <- sim_data(
-        N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
-        corstr = "independence"
+      dat <- occam_data(
+        N = res_basis$N[ell], n = res_basis$n[ell], p = l
       )
       ## Converting to data.frame ####
       dat <- data.frame(y = dat$y, dat$X, id = dat$id)
@@ -217,9 +208,8 @@ for (ell in seq_len(nrow(res_basis))) {
       iter <- 0
       while ((is.na(dd) || dd < l || dd > l * 10) && iter <= 100) {
         # Simulating data ####
-        dat <- sim_data(
-          N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
-          corstr = "independence"
+        dat <- occam_data(
+          N = res_basis$N[ell], n = res_basis$n[ell], p = l
         )
         ## Converting to data.frame ####
         dat <- data.frame(y = dat$y, dat$X, id = dat$id)
@@ -237,143 +227,6 @@ for (ell in seq_len(nrow(res_basis))) {
         vr <- fit$robust.variance
 
         # Getting delta ####
-        dd <- delta(a = mb, b = vr)
-
-        # Updating iteration count ####
-        iter <- iter + 1
-      }
-      if ((is.na(dd) || dd < l || dd > l * 10) && iter == 100) {
-        dd <- NA
-      } else {
-        dd <- dd
-      }
-      # Returning output ####
-      return(dd)
-    }
-  )
-  ar3_delta[[ell]] <- parallel::parSapply(
-    cl = cl,
-    X = seq_len(nsims),
-    FUN = function(j) {
-      # Simulating data ####
-      dat <- sim_data(
-        N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
-        corstr = "independence"
-      )
-      ## Converting to data.frame ####
-      dat <- data.frame(y = dat$y, dat$X, id = dat$id)
-      # Fitting models and getting delta values ####
-
-      ## Fitting model ####
-      fit <- gee::gee(
-        formula = form, id = id,
-        data = dat,
-        corstr = "AR-M",
-        Mv = 3
-      )
-      ### Pulling covariance matrices ####
-      mb <- fit$naive.variance
-      vr <- fit$robust.variance
-
-      ### Getting initial delta values ####
-      dd <- delta(a = mb, b = vr)
-
-      ##### Obtaining new delta values if delta < l and delta > l * 10
-      iter <- 0
-      while ((is.na(dd) || dd < l || dd > l * 10) && iter <= 100) {
-        # Simulating data ####
-        dat <- sim_data(
-          N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
-          corstr = "independence"
-        )
-        ## Converting to data.frame ####
-        dat <- data.frame(y = dat$y, dat$X, id = dat$id)
-
-        # Fitting model ####
-        fit <- gee::gee(
-          formula = form, id = id,
-          data = dat,
-          corstr = "AR-M",
-          Mv = 3
-        )
-
-        ## Pulling covariance matrices ####
-        mb <- fit$naive.variance
-        vr <- fit$robust.variance
-
-        # Getting delta ####
-        dd <- delta(a = mb, b = vr)
-
-        # Updating iteration count ####
-        iter <- iter + 1
-      }
-      if ((is.na(dd) || dd < l || dd > l * 10) && iter == 100) {
-        dd <- NA
-      } else {
-        dd <- dd
-      }
-      # Returning output ####
-      return(dd)
-    }
-  )
-  sel2_delta[[ell]] <- parallel::parSapply(
-    cl = cl,
-    X = seq_len(nsims),
-    FUN = function(j) {
-      # Simulating data ####
-      dat <- sim_data(
-        N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
-        corstr = "independence"
-      )
-      ## Converting to data.frame ####
-      dat <- data.frame(y = dat$y, dat$X, id = dat$id)
-      # Fitting models and getting delta values ####
-
-      ## Fitting model ####
-      fit <- gee::gee(
-        formula = form, id = id,
-        data = dat,
-        corstr = ifelse(
-          test = res_basis$corstr[ell] == "ar1",
-          yes = "AR-M",
-          no = res_basis$corstr[ell]
-        )
-      )
-
-      ### Pulling covariance matrices ####
-      mb <- fit$naive.variance
-      vr <- fit$robust.variance
-
-      ### Getting initial delta values ####
-      dd <- delta(a = mb, b = vr)
-
-      ##### Obtaining new delta values if delta < l and delta > l * 10
-      iter <- 0
-      while ((is.na(dd) || dd < l || dd > l * 10) && iter <= 100) {
-        # Simulating data ####
-        dat <- sim_data(
-          N = res_basis$N[ell], n = res_basis$n[ell], beta = beta, rho = 0,
-          corstr = "independence"
-        )
-        ## Converting to data.frame ####
-        dat <- data.frame(y = dat$y, dat$X, id = dat$id)
-
-        # Fitting model ####
-        fit <- gee::gee(
-          formula = form, id = id,
-          data = dat,
-          corstr = ifelse(
-            test = res_basis$corstr[ell] == "ar1",
-            yes = "AR-M",
-            no = res_basis$corstr[ell]
-          )
-        )
-
-        ### Pulling covariance matrices ####
-        mb <- fit$naive.variance
-        vr <- fit$robust.variance
-
-        ### Getting delta values ####
         dd <- delta(a = mb, b = vr)
 
         # Updating iteration count ####
@@ -532,7 +385,7 @@ for (ell in seq_len(nrow(res_basis))) {
         occam_sel2 <- occam(
           x = delta_sel2,
           ideal = l,
-          window = unname(quantile(x = sel2_delta[[ell]], probs = 0.9)) - l,
+          window = unname(quantile(x = un_delta[[ell]], probs = 0.9)) - l,
           mv = mv_sel2,
           strict_upper = strict_upper
         )
@@ -554,7 +407,7 @@ for (ell in seq_len(nrow(res_basis))) {
         occam_sel3 <- occam(
           x = delta_sel3,
           ideal = l,
-          window = unname(quantile(x = ar3_delta[[ell]], probs = 0.9)) - l,
+          window = unname(quantile(x = un_delta[[ell]], probs = 0.9)) - l,
           mv = mv_sel3,
           strict_upper = strict_upper
         )
