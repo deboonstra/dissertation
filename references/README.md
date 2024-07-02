@@ -60,6 +60,11 @@ ziegler_2000.pdf
 - *Authors:* Andreas Ziegler, Christian Kastner, Daniel Bruner, and Maria Blettner
 - *DOI:* https://doi.org/10.1002/1097-0258(20001230)19:24%3C3345::AID-SIM829%3E3.0.CO;2-5
 
+efron_2004.pdf
+- *Title:* The Estimation of Prediction Error Covariance Penalties and Cross-Validation
+- *Authors:* Bradley Efron
+- *DOI:* https://doi.org/10.1198/016214504000000692
+
 # Papers to be reviewed
 
 gosho_2011.pdf
